@@ -24,10 +24,10 @@ const Index = () => {
             <h1 className="text-2xl font-bold text-foreground">TypeMaster</h1>
           </div>
           <nav className="hidden md:flex gap-6">
-            <Button variant="ghost">Dashboard</Button>
-            <Button variant="ghost">Lessons</Button>
-            <Button variant="ghost">Games</Button>
-            <Button variant="ghost">Progress</Button>
+            <Button variant="ghost" onClick={() => navigate("/")}>Dashboard</Button>
+            <Button variant="ghost" onClick={() => navigate("/lessons")}>Lessons</Button>
+            <Button variant="ghost" onClick={() => navigate("/games")}>Games</Button>
+            <Button variant="ghost" onClick={() => navigate("/progress")}>Progress</Button>
           </nav>
         </div>
       </header>
@@ -70,7 +70,7 @@ const Index = () => {
         </div>
 
         {/* Quick Start Options */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/typing-test?duration=60")}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -107,6 +107,61 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">Test your endurance</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer bg-accent/5" onClick={() => navigate("/practice?mode=custom")}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Keyboard className="h-5 w-5 text-accent" />
+                Custom Text
+              </CardTitle>
+              <CardDescription>अपना text paste करें</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">Practice with your own text</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Feature Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/lessons")}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                📚 Typing Lessons
+              </CardTitle>
+              <CardDescription>Structured lessons for all levels</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">Home row, top row, bottom row, numbers, symbols - सब कुछ सीखें</p>
+              <Button variant="outline" className="w-full">Start Learning</Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/games")}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                🎮 Typing Games
+              </CardTitle>
+              <CardDescription>Fun games to improve speed</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">Falling words, speed race और भी बहुत कुछ</p>
+              <Button variant="outline" className="w-full">Play Games</Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/progress")}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                📊 Progress Report
+              </CardTitle>
+              <CardDescription>Track your improvement</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">Stats, graphs, achievements और certificates</p>
+              <Button variant="outline" className="w-full">View Progress</Button>
             </CardContent>
           </Card>
         </div>
