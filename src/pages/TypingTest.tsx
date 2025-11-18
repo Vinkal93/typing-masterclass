@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { RotateCcw, Home } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import TestResult from "@/components/TestResult";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const sampleTexts = [
   "The quick brown fox jumps over the lazy dog. Programming is the art of telling another human what one wants the computer to do. Practice makes perfect when it comes to typing speed and accuracy.",
@@ -128,18 +130,10 @@ const TypingTest = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">Typing Test</h1>
-          <Button variant="ghost" onClick={() => navigate("/")}>
-            <Home className="h-5 w-5 mr-2" />
-            Home
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <Card className="p-4 text-center">
@@ -207,6 +201,8 @@ const TypingTest = () => {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

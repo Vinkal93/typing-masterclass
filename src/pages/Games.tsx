@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Play, RotateCcw } from "lucide-react";
+import { Play, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 interface FallingWord {
   id: number;
@@ -116,18 +118,10 @@ const Games = () => {
 
   if (selectedGame === "falling-words") {
     return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">Falling Words Game</h1>
-            <Button variant="ghost" onClick={() => setSelectedGame(null)}>
-              <Home className="h-5 w-5 mr-2" />
-              Back
-            </Button>
-          </div>
-        </header>
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 flex-1">
           <div className="max-w-3xl mx-auto">
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 mb-6">
@@ -214,23 +208,17 @@ const Games = () => {
             )}
           </div>
         </main>
+
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">Typing Games</h1>
-          <Button variant="ghost" onClick={() => navigate("/")}>
-            <Home className="h-5 w-5 mr-2" />
-            Home
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-foreground mb-4">
@@ -324,6 +312,8 @@ const Games = () => {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

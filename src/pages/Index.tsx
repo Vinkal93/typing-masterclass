@@ -1,46 +1,35 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Keyboard, Clock, Target, TrendingUp, Play, BarChart3 } from "lucide-react";
+import { Clock, Target, TrendingUp, Play, BarChart3, Keyboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const stats = [
-    { label: "Today's Tests", value: "0", icon: Clock, color: "text-primary" },
-    { label: "Avg WPM", value: "0", icon: TrendingUp, color: "text-secondary" },
-    { label: "Accuracy", value: "0%", icon: Target, color: "text-success" },
-    { label: "Total Tests", value: "0", icon: BarChart3, color: "text-accent" },
+    { label: t('todaysTests'), value: "0", icon: Clock, color: "text-primary" },
+    { label: t('avgWPM'), value: "0", icon: TrendingUp, color: "text-secondary" },
+    { label: t('accuracy'), value: "0%", icon: Target, color: "text-success" },
+    { label: t('totalTests'), value: "0", icon: BarChart3, color: "text-accent" },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Keyboard className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">TypeMaster</h1>
-          </div>
-          <nav className="hidden md:flex gap-6">
-            <Button variant="ghost" onClick={() => navigate("/")}>Dashboard</Button>
-            <Button variant="ghost" onClick={() => navigate("/lessons")}>Lessons</Button>
-            <Button variant="ghost" onClick={() => navigate("/games")}>Games</Button>
-            <Button variant="ghost" onClick={() => navigate("/progress")}>Progress</Button>
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 py-12 flex-1">
         {/* Hero Section */}
         <div className="text-center mb-12 animate-fade-in">
           <h2 className="text-5xl font-bold text-foreground mb-4">
-            Master Touch Typing
+            {t('masterTouchTyping')}
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Improve your typing speed and accuracy with interactive lessons and real-time feedback
+            {t('improveTyping')}
           </p>
           <Button 
             size="lg" 
@@ -48,7 +37,7 @@ const Index = () => {
             onClick={() => navigate("/typing-test")}
           >
             <Play className="h-5 w-5" />
-            Start Typing Test
+            {t('startTypingTest')}
           </Button>
         </div>
 
@@ -75,12 +64,12 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
-                1 Minute Test
+                1 {t('minuteTest')}
               </CardTitle>
-              <CardDescription>Quick typing speed test</CardDescription>
+              <CardDescription>{t('quickTest')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Perfect for a quick warm-up</p>
+              <p className="text-muted-foreground">{t('perfectWarmup')}</p>
             </CardContent>
           </Card>
 
@@ -88,12 +77,12 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-secondary" />
-                2 Minute Test
+                2 {t('minuteTest')}
               </CardTitle>
-              <CardDescription>Standard typing test</CardDescription>
+              <CardDescription>{t('standardTest')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Most popular test duration</p>
+              <p className="text-muted-foreground">{t('popularDuration')}</p>
             </CardContent>
           </Card>
 
@@ -101,12 +90,12 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-success" />
-                5 Minute Test
+                5 {t('minuteTest')}
               </CardTitle>
-              <CardDescription>Extended typing challenge</CardDescription>
+              <CardDescription>{t('extendedTest')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Test your endurance</p>
+              <p className="text-muted-foreground">{t('testEndurance')}</p>
             </CardContent>
           </Card>
 
@@ -114,12 +103,12 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Keyboard className="h-5 w-5 text-accent" />
-                Custom Text
+                {t('customText')}
               </CardTitle>
-              <CardDescription>अपना text paste करें</CardDescription>
+              <CardDescription>{t('pasteYourText')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Practice with your own text</p>
+              <p className="text-muted-foreground">{t('practiceWithOwn')}</p>
             </CardContent>
           </Card>
         </div>
@@ -129,43 +118,45 @@ const Index = () => {
           <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/lessons")}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
-                📚 Typing Lessons
+                📚 {t('typingLessons')}
               </CardTitle>
-              <CardDescription>Structured lessons for all levels</CardDescription>
+              <CardDescription>{t('structuredLessons')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-3">Home row, top row, bottom row, numbers, symbols - सब कुछ सीखें</p>
-              <Button variant="outline" className="w-full">Start Learning</Button>
+              <p className="text-muted-foreground mb-3">{t('learnEverything')}</p>
+              <Button variant="outline" className="w-full">{t('startLearning')}</Button>
             </CardContent>
           </Card>
 
           <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/games")}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
-                🎮 Typing Games
+                🎮 {t('typingGames')}
               </CardTitle>
-              <CardDescription>Fun games to improve speed</CardDescription>
+              <CardDescription>{t('funGames')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-3">Falling words, speed race और भी बहुत कुछ</p>
-              <Button variant="outline" className="w-full">Play Games</Button>
+              <p className="text-muted-foreground mb-3">{t('gamesDescription')}</p>
+              <Button variant="outline" className="w-full">{t('playGames')}</Button>
             </CardContent>
           </Card>
 
           <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/progress")}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
-                📊 Progress Report
+                📊 {t('progressReport')}
               </CardTitle>
-              <CardDescription>Track your improvement</CardDescription>
+              <CardDescription>{t('trackImprovement')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-3">Stats, graphs, achievements और certificates</p>
-              <Button variant="outline" className="w-full">View Progress</Button>
+              <p className="text-muted-foreground mb-3">{t('statsGraphs')}</p>
+              <Button variant="outline" className="w-full">{t('viewProgress')}</Button>
             </CardContent>
           </Card>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };
