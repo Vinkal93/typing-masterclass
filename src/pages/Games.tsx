@@ -15,6 +15,15 @@ interface FallingWord {
   speed: number;
 }
 
+interface Bubble {
+  id: number;
+  word: string;
+  x: number;
+  y: number;
+  color: string;
+  exploding: boolean;
+}
+
 const Games = () => {
   const navigate = useNavigate();
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -28,6 +37,16 @@ const Games = () => {
   const [level, setLevel] = useState(1);
   const gameRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Word Shooter Game State
+  const [shooterGameStarted, setShooterGameStarted] = useState(false);
+  const [shooterScore, setShooterScore] = useState(0);
+  const [shooterGameOver, setShooterGameOver] = useState(false);
+  const [bubbles, setBubbles] = useState<Bubble[]>([]);
+  const [shooterInput, setShooterInput] = useState("");
+  const [shooterLevel, setShooterLevel] = useState(1);
+  const [lives, setLives] = useState(3);
+  const shooterInputRef = useRef<HTMLInputElement>(null);
 
   const wordsList = [
     "cat", "dog", "run", "jump", "fast", "slow", "blue", "red", "green", "happy",
@@ -114,6 +133,92 @@ const Games = () => {
     setWords([]);
     setCurrentInput("");
     setLevel(1);
+  };
+
+  // Word Shooter Game Functions
+  const bubbleColors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E2"];
+
+  const startShooterGame = () => {
+    setShooterGameStarted(true);
+    setShooterGameOver(false);
+    setShooterScore(0);
+    setBubbles([]);
+    setShooterInput("");
+    setShooterLevel(1);
+    setLives(3);
+    setTimeout(() => shooterInputRef.current?.focus(), 100);
+  };
+
+  useEffect(() => {
+    if (shooterGameStarted && !shooterGameOver && lives > 0) {
+      const spawnInterval = setInterval(
+        () => {
+          const newBubble: Bubble = {
+            id: Date.now() + Math.random(),
+            word: wordsList[Math.floor(Math.random() * wordsList.length)],
+            x: Math.random() * 70 + 10,
+            y: Math.random() * 60 + 10,
+            color: bubbleColors[Math.floor(Math.random() * bubbleColors.length)],
+            exploding: false,
+          };
+          setBubbles((prev) => {
+            if (prev.length < 8) {
+              return [...prev, newBubble];
+            }
+            return prev;
+          });
+        },
+        Math.max(3000 - shooterLevel * 300, 1500)
+      );
+
+      return () => clearInterval(spawnInterval);
+    }
+  }, [shooterGameStarted, shooterLevel, shooterGameOver, lives]);
+
+  useEffect(() => {
+    if (shooterGameStarted && !shooterGameOver && bubbles.length > 10) {
+      setLives((prev) => {
+        const newLives = prev - 1;
+        if (newLives <= 0) {
+          setShooterGameOver(true);
+        }
+        return newLives;
+      });
+      setBubbles((prev) => prev.slice(0, 8));
+    }
+  }, [bubbles.length, shooterGameStarted, shooterGameOver]);
+
+  const handleShooterInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setShooterInput(value);
+
+    const matchedBubble = bubbles.find((bubble) => !bubble.exploding && bubble.word === value.trim());
+    if (matchedBubble) {
+      setBubbles((prev) =>
+        prev.map((b) => (b.id === matchedBubble.id ? { ...b, exploding: true } : b))
+      );
+      
+      setTimeout(() => {
+        setBubbles((prev) => prev.filter((b) => b.id !== matchedBubble.id));
+      }, 500);
+
+      setShooterScore((prev) => prev + value.length * 15);
+      setShooterInput("");
+
+      if ((shooterScore + value.length * 15) % 100 === 0) {
+        setShooterLevel((prev) => prev + 1);
+      }
+    }
+  };
+
+  const resetShooterGame = () => {
+    setShooterGameStarted(false);
+    setShooterGameOver(false);
+    setShooterScore(0);
+    setBubbles([]);
+    setShooterInput("");
+    setShooterLevel(1);
+    setLives(3);
   };
 
   if (selectedGame === "falling-words") {
@@ -214,6 +319,138 @@ const Games = () => {
     );
   }
 
+  if (selectedGame === "word-shooter") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+
+        <main className="container mx-auto px-4 py-8 flex-1">
+          <div className="max-w-4xl mx-auto">
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">Score</p>
+                <p className="text-3xl font-bold text-primary">{shooterScore}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">Level</p>
+                <p className="text-3xl font-bold text-secondary">{shooterLevel}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">Bubbles</p>
+                <p className="text-3xl font-bold text-success">{bubbles.length}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">Lives</p>
+                <p className="text-3xl font-bold text-destructive">{"❤️".repeat(lives)}</p>
+              </Card>
+            </div>
+
+            {/* Game Area */}
+            <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950" style={{ height: "500px" }}>
+              <div className="relative w-full h-full p-4">
+                {!shooterGameStarted && !shooterGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-3xl font-bold mb-4 text-foreground">Word Shooter</h3>
+                      <p className="text-muted-foreground mb-6 max-w-md">
+                        Bubbles will appear with words. Type the words to shoot them! Don't let too many bubbles fill the screen!
+                      </p>
+                      <Button onClick={startShooterGame} size="lg" className="gap-2">
+                        <Play className="h-5 w-5" />
+                        Start Game
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {shooterGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-4xl font-bold mb-4 text-foreground">Game Over!</h3>
+                      <p className="text-2xl mb-2 text-primary">Final Score: {shooterScore}</p>
+                      <p className="text-lg mb-6 text-muted-foreground">Level Reached: {shooterLevel}</p>
+                      <div className="flex gap-4 justify-center">
+                        <Button onClick={resetShooterGame} size="lg" className="gap-2">
+                          <RotateCcw className="h-5 w-5" />
+                          Play Again
+                        </Button>
+                        <Button onClick={() => setSelectedGame(null)} variant="outline" size="lg">
+                          Back to Games
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bubbles */}
+                {shooterGameStarted && (
+                  <>
+                    {bubbles.map((bubble) => (
+                      <div
+                        key={bubble.id}
+                        className={`absolute transition-all duration-500 ${
+                          bubble.exploding ? "scale-150 opacity-0" : "scale-100 opacity-100"
+                        }`}
+                        style={{
+                          left: `${bubble.x}%`,
+                          top: `${bubble.y}%`,
+                          transform: "translate(-50%, -50%)",
+                        }}
+                      >
+                        <div
+                          className={`relative ${
+                            bubble.exploding ? "animate-ping" : ""
+                          }`}
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "50%",
+                            backgroundColor: bubble.color,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
+                            border: "3px solid rgba(255,255,255,0.3)",
+                          }}
+                        >
+                          <span className="text-white font-bold text-lg">
+                            {bubble.word}
+                          </span>
+                          {bubble.exploding && (
+                            <div className="absolute inset-0 flex items-center justify-center text-4xl">
+                              💥
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            </Card>
+
+            {/* Input Area */}
+            {shooterGameStarted && !shooterGameOver && (
+              <Card className="mt-6 p-6">
+                <Input
+                  ref={shooterInputRef}
+                  value={shooterInput}
+                  onChange={handleShooterInputChange}
+                  placeholder="Type to shoot the bubbles..."
+                  className="text-2xl text-center font-mono"
+                  autoFocus
+                />
+              </Card>
+            )}
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -272,7 +509,10 @@ const Games = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-border opacity-60">
+            <Card
+              className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
+              onClick={() => setSelectedGame("word-shooter")}
+            >
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
                   💥 Word Shooter
@@ -285,8 +525,9 @@ const Games = () => {
                 <p className="text-muted-foreground mb-4">
                   Words appear in bubbles. Type to shoot them down!
                 </p>
-                <Button className="w-full" disabled>
-                  Coming Soon
+                <Button className="w-full gap-2">
+                  <Play className="h-5 w-5" />
+                  Play Now
                 </Button>
               </CardContent>
             </Card>
