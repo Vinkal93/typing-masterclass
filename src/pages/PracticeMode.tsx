@@ -123,20 +123,10 @@ const PracticeMode = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">
-            {lessonTitle || (mode === "custom" ? "Custom Text Practice" : "Practice Mode")}
-          </h1>
-          <Button variant="ghost" onClick={() => navigate("/")}>
-            <Home className="h-5 w-5 mr-2" />
-            Home
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         {/* Custom Text Input */}
         {mode === "custom" && !text && (
           <Card className="max-w-3xl mx-auto p-8 mb-8">
@@ -222,6 +212,8 @@ const PracticeMode = () => {
           </>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 };
