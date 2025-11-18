@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { RotateCcw, Home } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import TestResult from "@/components/TestResult";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 interface TestStats {
   wpm: number;
