@@ -5,68 +5,186 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+interface KeyData {
+  char: string;
+  hindiChar?: string;
+  finger: string;
+  width?: string;
+}
+
 const KeyboardGuide = () => {
-  const { isHindi } = useLanguage();
+  const { isHindi, t } = useLanguage();
   const [activeKey, setActiveKey] = useState<string>("");
 
-  const fingerColors = {
+  const fingerColors: Record<string, string> = {
     leftPinky: "bg-red-500",
     leftRing: "bg-orange-500",
-    leftMiddle: "bg-yellow-500",
+    leftMiddle: "bg-yellow-400",
     leftIndex: "bg-green-500",
     rightIndex: "bg-blue-500",
     rightMiddle: "bg-indigo-500",
     rightRing: "bg-purple-500",
-    rightPinky: "bg-pink-500",
-    thumb: "bg-gray-500",
+    rightPinky: "bg-pink-400",
+    thumb: "bg-gray-400",
   };
 
-  const keyMapping = {
-    // Numbers row
-    '1': 'leftPinky', '2': 'leftRing', '3': 'leftMiddle', '4': 'leftIndex', '5': 'leftIndex',
-    '6': 'rightIndex', '7': 'rightIndex', '8': 'rightMiddle', '9': 'rightRing', '0': 'rightPinky',
-    // Top row (QWERTY)
-    'q': 'leftPinky', 'w': 'leftRing', 'e': 'leftMiddle', 'r': 'leftIndex', 't': 'leftIndex',
-    'y': 'rightIndex', 'u': 'rightIndex', 'i': 'rightMiddle', 'o': 'rightRing', 'p': 'rightPinky',
-    // Home row (ASDF)
-    'a': 'leftPinky', 's': 'leftRing', 'd': 'leftMiddle', 'f': 'leftIndex', 'g': 'leftIndex',
-    'h': 'rightIndex', 'j': 'rightIndex', 'k': 'rightMiddle', 'l': 'rightRing', ';': 'rightPinky',
-    // Bottom row (ZXCV)
-    'z': 'leftPinky', 'x': 'leftRing', 'c': 'leftMiddle', 'v': 'leftIndex', 'b': 'leftIndex',
-    'n': 'rightIndex', 'm': 'rightIndex', ',': 'rightMiddle', '.': 'rightRing', '/': 'rightPinky',
-    ' ': 'thumb'
+  const fingerColorsBorder: Record<string, string> = {
+    leftPinky: "border-red-600",
+    leftRing: "border-orange-600",
+    leftMiddle: "border-yellow-500",
+    leftIndex: "border-green-600",
+    rightIndex: "border-blue-600",
+    rightMiddle: "border-indigo-600",
+    rightRing: "border-purple-600",
+    rightPinky: "border-pink-500",
+    thumb: "border-gray-500",
   };
 
-  const hindiKeys = [
-    { en: 'a', hi: 'ा', finger: 'leftPinky' },
-    { en: 's', hi: 'े', finger: 'leftRing' },
-    { en: 'd', hi: '्', finger: 'leftMiddle' },
-    { en: 'f', hi: 'ि', finger: 'leftIndex' },
-    { en: 'g', hi: 'ु', finger: 'leftIndex' },
-    { en: 'h', hi: 'प', finger: 'rightIndex' },
-    { en: 'j', hi: 'र', finger: 'rightIndex' },
-    { en: 'k', hi: 'क', finger: 'rightMiddle' },
-    { en: 'l', hi: 'त', finger: 'rightRing' },
-    { en: 'q', hi: 'औ', finger: 'leftPinky' },
-    { en: 'w', hi: 'ै', finger: 'leftRing' },
-    { en: 'e', hi: 'ा', finger: 'leftMiddle' },
-    { en: 'r', hi: 'ी', finger: 'leftIndex' },
-    { en: 't', hi: 'ू', finger: 'leftIndex' },
-    { en: 'y', hi: 'ब', finger: 'rightIndex' },
-    { en: 'u', hi: 'ह', finger: 'rightIndex' },
-    { en: 'i', hi: 'ग', finger: 'rightMiddle' },
-    { en: 'o', hi: 'द', finger: 'rightRing' },
-    { en: 'p', hi: 'ज', finger: 'rightPinky' },
+  // Keyboard layout with rows
+  const keyboardRows: KeyData[][] = [
+    // Number row
+    [
+      { char: '`', finger: 'leftPinky' },
+      { char: '1', finger: 'leftPinky' },
+      { char: '2', finger: 'leftRing' },
+      { char: '3', finger: 'leftMiddle' },
+      { char: '4', finger: 'leftIndex' },
+      { char: '5', finger: 'leftIndex' },
+      { char: '6', finger: 'rightIndex' },
+      { char: '7', finger: 'rightIndex' },
+      { char: '8', finger: 'rightMiddle' },
+      { char: '9', finger: 'rightRing' },
+      { char: '0', finger: 'rightPinky' },
+      { char: '-', finger: 'rightPinky' },
+      { char: '=', finger: 'rightPinky' },
+      { char: 'Delete', finger: 'rightPinky', width: 'w-20' },
+    ],
+    // QWERTY row
+    [
+      { char: 'Tab', finger: 'leftPinky', width: 'w-16' },
+      { char: 'Q', hindiChar: 'औ', finger: 'leftPinky' },
+      { char: 'W', hindiChar: 'ै', finger: 'leftRing' },
+      { char: 'E', hindiChar: 'ा', finger: 'leftMiddle' },
+      { char: 'R', hindiChar: 'ी', finger: 'leftIndex' },
+      { char: 'T', hindiChar: 'ू', finger: 'leftIndex' },
+      { char: 'Y', hindiChar: 'ब', finger: 'rightIndex' },
+      { char: 'U', hindiChar: 'ह', finger: 'rightIndex' },
+      { char: 'I', hindiChar: 'ग', finger: 'rightMiddle' },
+      { char: 'O', hindiChar: 'द', finger: 'rightRing' },
+      { char: 'P', hindiChar: 'ज', finger: 'rightPinky' },
+      { char: '[', finger: 'rightPinky' },
+      { char: ']', finger: 'rightPinky' },
+      { char: '\\', finger: 'rightPinky' },
+    ],
+    // ASDF row (Home row)
+    [
+      { char: 'Caps', finger: 'leftPinky', width: 'w-20' },
+      { char: 'A', hindiChar: 'ो', finger: 'leftPinky' },
+      { char: 'S', hindiChar: 'े', finger: 'leftRing' },
+      { char: 'D', hindiChar: '्', finger: 'leftMiddle' },
+      { char: 'F', hindiChar: 'ि', finger: 'leftIndex' },
+      { char: 'G', hindiChar: 'ु', finger: 'leftIndex' },
+      { char: 'H', hindiChar: 'प', finger: 'rightIndex' },
+      { char: 'J', hindiChar: 'र', finger: 'rightIndex' },
+      { char: 'K', hindiChar: 'क', finger: 'rightMiddle' },
+      { char: 'L', hindiChar: 'त', finger: 'rightRing' },
+      { char: ';', hindiChar: 'च', finger: 'rightPinky' },
+      { char: "'", finger: 'rightPinky' },
+      { char: 'Return', finger: 'rightPinky', width: 'w-24' },
+    ],
+    // ZXCV row
+    [
+      { char: 'Shift', finger: 'leftPinky', width: 'w-28' },
+      { char: 'Z', hindiChar: 'ं', finger: 'leftPinky' },
+      { char: 'X', hindiChar: 'ँ', finger: 'leftRing' },
+      { char: 'C', hindiChar: 'म', finger: 'leftMiddle' },
+      { char: 'V', hindiChar: 'न', finger: 'leftIndex' },
+      { char: 'B', hindiChar: 'व', finger: 'leftIndex' },
+      { char: 'N', hindiChar: 'ल', finger: 'rightIndex' },
+      { char: 'M', hindiChar: 'स', finger: 'rightIndex' },
+      { char: ',', hindiChar: ',', finger: 'rightMiddle' },
+      { char: '.', hindiChar: '.', finger: 'rightRing' },
+      { char: '/', hindiChar: 'य', finger: 'rightPinky' },
+      { char: 'Shift', finger: 'rightPinky', width: 'w-28' },
+    ],
+    // Space row
+    [
+      { char: 'Control', finger: 'leftPinky', width: 'w-20' },
+      { char: 'Alt', finger: 'leftPinky', width: 'w-16' },
+      { char: 'Cmd', finger: 'leftPinky', width: 'w-16' },
+      { char: 'Space', finger: 'thumb', width: 'flex-1' },
+      { char: 'Alt', finger: 'rightPinky', width: 'w-16' },
+      { char: 'Fn', finger: 'rightPinky', width: 'w-16' },
+      { char: 'Control', finger: 'rightPinky', width: 'w-20' },
+    ],
   ];
 
-  const KeyButton = ({ keyChar, finger }: { keyChar: string; finger: keyof typeof fingerColors }) => (
-    <button
-      className={`w-12 h-12 m-1 rounded ${fingerColors[finger]} text-white font-bold hover:opacity-80 transition-opacity`}
-      onMouseEnter={() => setActiveKey(keyChar)}
-      onMouseLeave={() => setActiveKey("")}
-    >
-      {keyChar.toUpperCase()}
-    </button>
+  const KeyCap = ({ keyData, showHindi }: { keyData: KeyData; showHindi: boolean }) => {
+    const displayChar = showHindi && keyData.hindiChar ? keyData.hindiChar : keyData.char;
+    const baseWidth = keyData.width || 'w-12';
+    
+    return (
+      <div
+        className={`${baseWidth} h-12 m-0.5 rounded border-2 ${fingerColors[keyData.finger]} ${fingerColorsBorder[keyData.finger]} 
+        flex items-center justify-center text-xs font-bold text-white shadow-md hover:scale-105 transition-transform cursor-pointer`}
+        onMouseEnter={() => setActiveKey(keyData.char)}
+        onMouseLeave={() => setActiveKey("")}
+      >
+        <span className="text-center">{displayChar}</span>
+      </div>
+    );
+  };
+
+  const HandDiagram = () => (
+    <div className="flex justify-center items-center gap-8 mt-8">
+      {/* Left Hand */}
+      <div className="relative">
+        <div className="text-center mb-4">
+          <h3 className="text-xl font-bold">{isHindi ? "बायां हाथ" : "Left Hand"}</h3>
+          <p className="text-sm text-muted-foreground">{isHindi ? "कुंजियाँ" : "Keys"}</p>
+        </div>
+        <svg width="200" height="250" viewBox="0 0 200 250" className="mx-auto">
+          {/* Palm */}
+          <ellipse cx="100" cy="180" rx="60" ry="70" fill="#f0f0f0" stroke="#333" strokeWidth="2"/>
+          
+          {/* Fingers */}
+          {/* Pinky - Red */}
+          <ellipse cx="40" cy="80" rx="12" ry="40" fill="#ef4444" stroke="#333" strokeWidth="2" transform="rotate(-15 40 80)"/>
+          {/* Ring - Orange */}
+          <ellipse cx="65" cy="50" rx="12" ry="45" fill="#f97316" stroke="#333" strokeWidth="2" transform="rotate(-5 65 50)"/>
+          {/* Middle - Yellow */}
+          <ellipse cx="90" cy="40" rx="12" ry="50" fill="#facc15" stroke="#333" strokeWidth="2"/>
+          {/* Index - Green */}
+          <ellipse cx="115" cy="50" rx="12" ry="45" fill="#22c55e" stroke="#333" strokeWidth="2" transform="rotate(5 115 50)"/>
+          {/* Thumb - Gray */}
+          <ellipse cx="150" cy="160" rx="15" ry="35" fill="#9ca3af" stroke="#333" strokeWidth="2" transform="rotate(45 150 160)"/>
+        </svg>
+      </div>
+
+      {/* Right Hand */}
+      <div className="relative">
+        <div className="text-center mb-4">
+          <h3 className="text-xl font-bold">{isHindi ? "दायां हाथ" : "Right Hand"}</h3>
+          <p className="text-sm text-muted-foreground">{isHindi ? "कुंजियाँ" : "Keys"}</p>
+        </div>
+        <svg width="200" height="250" viewBox="0 0 200 250" className="mx-auto">
+          {/* Palm */}
+          <ellipse cx="100" cy="180" rx="60" ry="70" fill="#f0f0f0" stroke="#333" strokeWidth="2"/>
+          
+          {/* Fingers */}
+          {/* Index - Blue */}
+          <ellipse cx="85" cy="50" rx="12" ry="45" fill="#3b82f6" stroke="#333" strokeWidth="2" transform="rotate(-5 85 50)"/>
+          {/* Middle - Indigo */}
+          <ellipse cx="110" cy="40" rx="12" ry="50" fill="#6366f1" stroke="#333" strokeWidth="2"/>
+          {/* Ring - Purple */}
+          <ellipse cx="135" cy="50" rx="12" ry="45" fill="#a855f7" stroke="#333" strokeWidth="2" transform="rotate(5 135 50)"/>
+          {/* Pinky - Pink */}
+          <ellipse cx="160" cy="80" rx="12" ry="40" fill="#ec4899" stroke="#333" strokeWidth="2" transform="rotate(15 160 80)"/>
+          {/* Thumb - Gray */}
+          <ellipse cx="50" cy="160" rx="15" ry="35" fill="#9ca3af" stroke="#333" strokeWidth="2" transform="rotate(-45 50 160)"/>
+        </svg>
+      </div>
+    </div>
   );
 
   return (
@@ -78,137 +196,126 @@ const KeyboardGuide = () => {
           {isHindi ? "कीबोर्ड गाइड" : "Keyboard Guide"}
         </h1>
 
-        <Tabs defaultValue="english" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
-            <TabsTrigger value="english">English Keys</TabsTrigger>
-            <TabsTrigger value="hindi">Hindi Keys</TabsTrigger>
-            <TabsTrigger value="fingers">Finger Guide</TabsTrigger>
+        <Tabs defaultValue="visual" className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+            <TabsTrigger value="visual">{isHindi ? "विज़ुअल गाइड" : "Visual Guide"}</TabsTrigger>
+            <TabsTrigger value="practice">{isHindi ? "अभ्यास" : "Practice"}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="english" className="mt-8">
+          <TabsContent value="visual" className="mt-8">
             <Card>
               <CardHeader>
-                <CardTitle>English Keyboard Layout</CardTitle>
-                <CardDescription>Hover over keys to see which finger to use</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center">
-                {/* Number Row */}
-                <div className="flex mb-2">
-                  {['1','2','3','4','5','6','7','8','9','0'].map(key => (
-                    <KeyButton key={key} keyChar={key} finger={keyMapping[key] as keyof typeof fingerColors} />
-                  ))}
-                </div>
-                {/* Top Row */}
-                <div className="flex mb-2">
-                  {['q','w','e','r','t','y','u','i','o','p'].map(key => (
-                    <KeyButton key={key} keyChar={key} finger={keyMapping[key] as keyof typeof fingerColors} />
-                  ))}
-                </div>
-                {/* Home Row */}
-                <div className="flex mb-2">
-                  {['a','s','d','f','g','h','j','k','l',';'].map(key => (
-                    <KeyButton key={key} keyChar={key} finger={keyMapping[key] as keyof typeof fingerColors} />
-                  ))}
-                </div>
-                {/* Bottom Row */}
-                <div className="flex mb-2">
-                  {['z','x','c','v','b','n','m',',','.','/'].map(key => (
-                    <KeyButton key={key} keyChar={key} finger={keyMapping[key] as keyof typeof fingerColors} />
-                  ))}
-                </div>
-                {/* Spacebar */}
-                <div className="flex mt-4">
-                  <button className={`w-96 h-12 m-1 rounded ${fingerColors.thumb} text-white font-bold`}>
-                    SPACE
-                  </button>
-                </div>
-                {activeKey && (
-                  <p className="mt-4 text-lg text-muted-foreground">
-                    Active Key: <span className="text-primary font-bold">{activeKey.toUpperCase()}</span>
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="hindi" className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Hindi Keyboard Mapping</CardTitle>
-                <CardDescription>Learn Hindi character positions on English keyboard</CardDescription>
+                <CardTitle className="text-center">
+                  {isHindi ? "कीबोर्ड लेआउट - रंग-कोडित फिंगर गाइड" : "Keyboard Layout - Color-Coded Finger Guide"}
+                </CardTitle>
+                <CardDescription className="text-center">
+                  {isHindi 
+                    ? "प्रत्येक रंग दिखाता है कि किस उंगली से कुंजी दबानी है"
+                    : "Each color shows which finger to use for that key"}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {hindiKeys.map((key) => (
-                    <div key={key.en} className="p-4 border border-border rounded-lg">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-primary mb-2">{key.en.toUpperCase()}</p>
-                        <p className="text-3xl mb-2">{key.hi}</p>
-                        <div className={`w-8 h-8 rounded-full mx-auto ${fingerColors[key.finger as keyof typeof fingerColors]}`}></div>
-                      </div>
+                {/* Language Toggle */}
+                <div className="flex justify-center mb-6">
+                  <div className="inline-flex rounded-lg border border-border p-1">
+                    <button
+                      onClick={() => setActiveKey("")}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        !isHindi ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      English
+                    </button>
+                    <button
+                      onClick={() => setActiveKey("")}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        isHindi ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      हिंदी
+                    </button>
+                  </div>
+                </div>
+
+                {/* Keyboard Layout */}
+                <div className="bg-muted/30 p-6 rounded-xl border-2 border-border max-w-4xl mx-auto">
+                  {keyboardRows.map((row, rowIndex) => (
+                    <div key={rowIndex} className="flex justify-center mb-1">
+                      {row.map((keyData, keyIndex) => (
+                        <KeyCap key={`${rowIndex}-${keyIndex}`} keyData={keyData} showHindi={isHindi} />
+                      ))}
                     </div>
                   ))}
                 </div>
+
+                {/* Color Legend */}
+                <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-red-500 border-2 border-red-600"></div>
+                    <span className="text-sm">{isHindi ? "बायीं छोटी उंगली" : "Left Pinky"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-orange-500 border-2 border-orange-600"></div>
+                    <span className="text-sm">{isHindi ? "बायीं अनामिका" : "Left Ring"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-yellow-400 border-2 border-yellow-500"></div>
+                    <span className="text-sm">{isHindi ? "बायीं मध्य उंगली" : "Left Middle"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-green-500 border-2 border-green-600"></div>
+                    <span className="text-sm">{isHindi ? "बायीं तर्जनी" : "Left Index"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-blue-500 border-2 border-blue-600"></div>
+                    <span className="text-sm">{isHindi ? "दायीं तर्जनी" : "Right Index"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-indigo-500 border-2 border-indigo-600"></div>
+                    <span className="text-sm">{isHindi ? "दायीं मध्य उंगली" : "Right Middle"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-purple-500 border-2 border-purple-600"></div>
+                    <span className="text-sm">{isHindi ? "दायीं अनामिका" : "Right Ring"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-pink-400 border-2 border-pink-500"></div>
+                    <span className="text-sm">{isHindi ? "दायीं छोटी उंगली" : "Right Pinky"}</span>
+                  </div>
+                </div>
+
+                {/* Hand Diagrams */}
+                <HandDiagram />
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="fingers" className="mt-8">
+          <TabsContent value="practice" className="mt-8">
             <Card>
               <CardHeader>
-                <CardTitle>Finger Placement Guide</CardTitle>
-                <CardDescription>Proper finger positioning for touch typing</CardDescription>
+                <CardTitle className="text-center">
+                  {isHindi ? "टाइपिंग अभ्यास" : "Typing Practice"}
+                </CardTitle>
+                <CardDescription className="text-center">
+                  {isHindi 
+                    ? "कुंजी दबाएं और देखें कि कौन सी उंगली उपयोग करनी है"
+                    : "Press keys to see which finger to use"}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-xl font-bold mb-4">Left Hand</h3>
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded ${fingerColors.leftPinky}`}></div>
-                        <span><strong>Pinky:</strong> Q, A, Z, 1</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded ${fingerColors.leftRing}`}></div>
-                        <span><strong>Ring:</strong> W, S, X, 2</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded ${fingerColors.leftMiddle}`}></div>
-                        <span><strong>Middle:</strong> E, D, C, 3</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded ${fingerColors.leftIndex}`}></div>
-                        <span><strong>Index:</strong> R, F, V, T, G, B, 4, 5</span>
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-4">Right Hand</h3>
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded ${fingerColors.rightIndex}`}></div>
-                        <span><strong>Index:</strong> Y, H, N, U, J, M, 6, 7</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded ${fingerColors.rightMiddle}`}></div>
-                        <span><strong>Middle:</strong> I, K, comma, 8</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded ${fingerColors.rightRing}`}></div>
-                        <span><strong>Ring:</strong> O, L, period, 9</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded ${fingerColors.rightPinky}`}></div>
-                        <span><strong>Pinky:</strong> P, semicolon, slash, 0</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="mt-6 p-4 bg-accent/10 rounded-lg">
-                  <p className="text-center"><strong>Thumbs:</strong> Spacebar</p>
-                  <p className="text-center text-sm text-muted-foreground mt-2">
-                    Keep your fingers on the home row (ASDF JKL;) and return after each keystroke
+                <div className="text-center py-12">
+                  <p className="text-lg text-muted-foreground mb-4">
+                    {isHindi 
+                      ? "टाइपिंग शुरू करें और रंग-कोडित फीडबैक देखें"
+                      : "Start typing to see color-coded feedback"}
                   </p>
+                  <div className="max-w-2xl mx-auto p-8 bg-muted/30 rounded-lg border-2 border-border">
+                    <p className="text-xl font-mono">
+                      {isHindi 
+                        ? "अभ्यास मोड जल्द आ रहा है..."
+                        : "Practice mode coming soon..."}
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
