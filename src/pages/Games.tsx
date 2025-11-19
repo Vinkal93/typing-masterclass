@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface FallingWord {
   id: number;
@@ -26,6 +27,7 @@ interface Bubble {
 
 const Games = () => {
   const navigate = useNavigate();
+  const { isHindi, t } = useLanguage();
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
 
   // Falling Words Game State
@@ -48,11 +50,49 @@ const Games = () => {
   const [lives, setLives] = useState(3);
   const shooterInputRef = useRef<HTMLInputElement>(null);
 
-  const wordsList = [
+  // Speed Race Game State
+  const [raceGameStarted, setRaceGameStarted] = useState(false);
+  const [raceScore, setRaceScore] = useState(0);
+  const [raceGameOver, setRaceGameOver] = useState(false);
+  const [currentSentence, setCurrentSentence] = useState("");
+  const [raceInput, setRaceInput] = useState("");
+  const [raceLevel, setRaceLevel] = useState(1);
+  const [carPosition, setCarPosition] = useState(0);
+  const [lapTimes, setLapTimes] = useState<number[]>([]);
+  const [raceStartTime, setRaceStartTime] = useState<number>(0);
+  const [currentLapStartTime, setCurrentLapStartTime] = useState<number>(0);
+  const raceInputRef = useRef<HTMLInputElement>(null);
+
+  const englishWords = [
     "cat", "dog", "run", "jump", "fast", "slow", "blue", "red", "green", "happy",
     "type", "word", "game", "play", "quick", "speed", "time", "moon", "star", "sun",
-    "code", "learn", "skill", "power", "focus", "think", "smart", "brain", "idea",
+    "code", "learn", "skill", "power", "focus", "think", "smart", "brain", "idea", "love"
   ];
+
+  const hindiWords = [
+    "कल", "आज", "खेल", "दौड़", "तेज", "धीमा", "नीला", "लाल", "हरा", "खुश",
+    "टाइप", "शब्द", "गेम", "खेलो", "जल्दी", "स्पीड", "समय", "चांद", "तारा", "सूरज",
+    "कोड", "सीखो", "कौशल", "शक्ति", "ध्यान", "सोचो", "स्मार्ट", "दिमाग", "विचार", "प्यार"
+  ];
+
+  const englishSentences = [
+    "The quick brown fox jumps over the lazy dog",
+    "Practice makes perfect in everything you do",
+    "Typing fast requires focus and dedication",
+    "Speed and accuracy go hand in hand",
+    "Keep practicing to improve your skills"
+  ];
+
+  const hindiSentences = [
+    "अभ्यास से ही सब कुछ संभव है",
+    "तेज टाइपिंग के लिए फोकस जरूरी है",
+    "स्पीड और सटीकता दोनों महत्वपूर्ण हैं",
+    "हर दिन अभ्यास करने से सुधार होता है",
+    "मेहनत और लगन से सब कुछ हासिल होता है"
+  ];
+
+  const wordsList = isHindi ? hindiWords : englishWords;
+  const sentencesList = isHindi ? hindiSentences : englishSentences;
 
   useEffect(() => {
     if (gameStarted && !gameOver) {
@@ -221,6 +261,207 @@ const Games = () => {
     setLives(3);
   };
 
+  // Speed Race Game Functions
+  const startRaceGame = () => {
+    setRaceGameStarted(true);
+    setRaceGameOver(false);
+    setRaceScore(0);
+    setRaceInput("");
+    setRaceLevel(1);
+    setCarPosition(0);
+    setLapTimes([]);
+    const now = Date.now();
+    setRaceStartTime(now);
+    setCurrentLapStartTime(now);
+    setCurrentSentence(sentencesList[Math.floor(Math.random() * sentencesList.length)]);
+    setTimeout(() => raceInputRef.current?.focus(), 100);
+  };
+
+  const handleRaceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setRaceInput(value);
+
+    if (value === currentSentence) {
+      const progress = 100 / 3; // 3 laps to complete
+      const newPosition = carPosition + progress;
+      setCarPosition(newPosition);
+      setRaceScore((prev) => prev + currentSentence.length * 5);
+      setRaceInput("");
+
+      // Check if lap completed
+      if (Math.floor(newPosition / 33.33) > lapTimes.length) {
+        const lapTime = (Date.now() - currentLapStartTime) / 1000;
+        setLapTimes((prev) => [...prev, lapTime]);
+        setCurrentLapStartTime(Date.now());
+      }
+
+      // Check if race finished (3 laps)
+      if (newPosition >= 100) {
+        setRaceGameOver(true);
+        return;
+      }
+
+      setCurrentSentence(sentencesList[Math.floor(Math.random() * sentencesList.length)]);
+
+      if (raceScore % 500 === 0) {
+        setRaceLevel((prev) => prev + 1);
+      }
+    }
+  };
+
+  const resetRaceGame = () => {
+    setRaceGameStarted(false);
+    setRaceGameOver(false);
+    setRaceScore(0);
+    setRaceInput("");
+    setRaceLevel(1);
+    setCarPosition(0);
+    setLapTimes([]);
+  };
+
+  if (selectedGame === "speed-race") {
+    const totalTime = lapTimes.reduce((a, b) => a + b, 0);
+    
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+
+        <main className="container mx-auto px-4 py-8 flex-1">
+          <div className="max-w-4xl mx-auto">
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{t('score')}</p>
+                <p className="text-3xl font-bold text-primary">{raceScore}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{t('currentLap')}</p>
+                <p className="text-3xl font-bold text-secondary">{Math.min(lapTimes.length + 1, 3)}/3</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{t('speed')}</p>
+                <p className="text-3xl font-bold text-success">{Math.floor(carPosition)}%</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{t('time')}</p>
+                <p className="text-3xl font-bold text-warning">
+                  {raceGameStarted && !raceGameOver ? Math.floor((Date.now() - raceStartTime) / 1000) : totalTime.toFixed(1)}s
+                </p>
+              </Card>
+            </div>
+
+            {/* Race Track */}
+            <Card className="relative overflow-hidden bg-gradient-to-b from-green-100 to-gray-200 dark:from-green-900 dark:to-gray-800" style={{ height: "400px" }}>
+              <div className="relative w-full h-full p-4">
+                {!raceGameStarted && !raceGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-3xl font-bold mb-4 text-foreground">{t('speedRaceGame')}</h3>
+                      <p className="text-muted-foreground mb-6 max-w-md">
+                        {t('speedRaceInstruction')}
+                      </p>
+                      <Button onClick={startRaceGame} size="lg" className="gap-2">
+                        <Play className="h-5 w-5" />
+                        {t('startGame')}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {raceGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-4xl font-bold mb-4 text-foreground">{t('raceFinished')}</h3>
+                      <p className="text-2xl mb-2 text-primary">{t('finalScore')}: {raceScore}</p>
+                      <p className="text-lg mb-2 text-muted-foreground">{t('totalTime')}: {totalTime.toFixed(2)}s</p>
+                      <div className="mb-6">
+                        {lapTimes.map((time, index) => (
+                          <p key={index} className="text-sm text-muted-foreground">
+                            {t('lap')} {index + 1}: {time.toFixed(2)}s
+                          </p>
+                        ))}
+                      </div>
+                      <div className="flex gap-4 justify-center">
+                        <Button onClick={resetRaceGame} size="lg" className="gap-2">
+                          <RotateCcw className="h-5 w-5" />
+                          {t('playAgain')}
+                        </Button>
+                        <Button onClick={() => setSelectedGame(null)} variant="outline" size="lg">
+                          {t('backToGames')}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Race Track Visualization */}
+                {raceGameStarted && (
+                  <div className="relative h-full">
+                    {/* Track lanes */}
+                    <div className="absolute top-1/3 left-0 right-0 h-px bg-border" />
+                    <div className="absolute top-1/2 left-0 right-0 h-1 bg-border" />
+                    <div className="absolute top-2/3 left-0 right-0 h-px bg-border" />
+                    
+                    {/* Lap markers */}
+                    <div className="absolute top-0 left-1/3 bottom-0 w-px bg-yellow-500 opacity-30" />
+                    <div className="absolute top-0 left-2/3 bottom-0 w-px bg-yellow-500 opacity-30" />
+                    <div className="absolute top-0 right-0 bottom-0 w-1 bg-red-500 opacity-50" />
+                    
+                    {/* Car */}
+                    <div
+                      className="absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 text-4xl"
+                      style={{ left: `${carPosition}%` }}
+                    >
+                      🏎️
+                    </div>
+
+                    {/* Current sentence display */}
+                    <div className="absolute bottom-8 left-0 right-0 text-center">
+                      <div className="inline-block bg-background/90 px-6 py-3 rounded-lg border border-border">
+                        <p className="text-lg font-mono">
+                          {currentSentence.split('').map((char, idx) => (
+                            <span
+                              key={idx}
+                              className={
+                                idx < raceInput.length
+                                  ? raceInput[idx] === char
+                                    ? 'text-green-500'
+                                    : 'text-red-500'
+                                  : 'text-foreground'
+                              }
+                            >
+                              {char}
+                            </span>
+                          ))}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Input Area */}
+            {raceGameStarted && !raceGameOver && (
+              <Card className="mt-6 p-6">
+                <Input
+                  ref={raceInputRef}
+                  value={raceInput}
+                  onChange={handleRaceInputChange}
+                  placeholder={t('typeToRace')}
+                  className="text-2xl text-center font-mono"
+                  autoFocus
+                />
+              </Card>
+            )}
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
+
   if (selectedGame === "falling-words") {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -231,15 +472,15 @@ const Games = () => {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 mb-6">
               <Card className="p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Score</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('score')}</p>
                 <p className="text-3xl font-bold text-primary">{score}</p>
               </Card>
               <Card className="p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Level</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('level')}</p>
                 <p className="text-3xl font-bold text-secondary">{level}</p>
               </Card>
               <Card className="p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Words</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('words')}</p>
                 <p className="text-3xl font-bold text-success">{Math.floor(score / 50)}</p>
               </Card>
             </div>
@@ -253,28 +494,28 @@ const Games = () => {
                 {!gameStarted && !gameOver && (
                   <div className="flex flex-col items-center justify-center h-full">
                     <h2 className="text-3xl font-bold text-foreground mb-4">
-                      Falling Words Game
+                      {t('fallingWordsGame')}
                     </h2>
                     <p className="text-muted-foreground mb-8 text-center max-w-md">
-                      Type the falling words before they reach the bottom!
+                      {t('fallingWordsInstruction')}
                     </p>
                     <Button onClick={startGame} size="lg" className="gap-2">
                       <Play className="h-5 w-5" />
-                      Start Game
+                      {t('startGame')}
                     </Button>
                   </div>
                 )}
 
                 {gameOver && (
                   <div className="flex flex-col items-center justify-center h-full">
-                    <h2 className="text-3xl font-bold text-destructive mb-4">Game Over!</h2>
-                    <p className="text-2xl text-foreground mb-2">Final Score: {score}</p>
+                    <h2 className="text-3xl font-bold text-destructive mb-4">{t('gameOver')}</h2>
+                    <p className="text-2xl text-foreground mb-2">{t('finalScore')}: {score}</p>
                     <p className="text-lg text-muted-foreground mb-8">
-                      Level Reached: {level}
+                      {t('levelReached')}: {level}
                     </p>
                     <Button onClick={resetGame} size="lg" className="gap-2">
                       <RotateCcw className="h-5 w-5" />
-                      Play Again
+                      {t('playAgain')}
                     </Button>
                   </div>
                 )}
@@ -305,7 +546,7 @@ const Games = () => {
                   ref={inputRef}
                   value={currentInput}
                   onChange={handleInputChange}
-                  placeholder="Type the falling words..."
+                  placeholder={t('typeFallingWords')}
                   className="text-2xl text-center font-mono"
                   autoFocus
                 />
@@ -329,19 +570,19 @@ const Games = () => {
             {/* Stats */}
             <div className="grid grid-cols-4 gap-4 mb-6">
               <Card className="p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Score</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('score')}</p>
                 <p className="text-3xl font-bold text-primary">{shooterScore}</p>
               </Card>
               <Card className="p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Level</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('level')}</p>
                 <p className="text-3xl font-bold text-secondary">{shooterLevel}</p>
               </Card>
               <Card className="p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Bubbles</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('bubbles')}</p>
                 <p className="text-3xl font-bold text-success">{bubbles.length}</p>
               </Card>
               <Card className="p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Lives</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('lives')}</p>
                 <p className="text-3xl font-bold text-destructive">{"❤️".repeat(lives)}</p>
               </Card>
             </div>
@@ -352,13 +593,13 @@ const Games = () => {
                 {!shooterGameStarted && !shooterGameOver && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
                     <div className="text-center">
-                      <h3 className="text-3xl font-bold mb-4 text-foreground">Word Shooter</h3>
+                      <h3 className="text-3xl font-bold mb-4 text-foreground">{t('wordShooterGame')}</h3>
                       <p className="text-muted-foreground mb-6 max-w-md">
-                        Bubbles will appear with words. Type the words to shoot them! Don't let too many bubbles fill the screen!
+                        {t('wordShooterInstruction')}
                       </p>
                       <Button onClick={startShooterGame} size="lg" className="gap-2">
                         <Play className="h-5 w-5" />
-                        Start Game
+                        {t('startGame')}
                       </Button>
                     </div>
                   </div>
@@ -367,16 +608,16 @@ const Games = () => {
                 {shooterGameOver && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-10">
                     <div className="text-center">
-                      <h3 className="text-4xl font-bold mb-4 text-foreground">Game Over!</h3>
-                      <p className="text-2xl mb-2 text-primary">Final Score: {shooterScore}</p>
-                      <p className="text-lg mb-6 text-muted-foreground">Level Reached: {shooterLevel}</p>
+                      <h3 className="text-4xl font-bold mb-4 text-foreground">{t('gameOver')}</h3>
+                      <p className="text-2xl mb-2 text-primary">{t('finalScore')}: {shooterScore}</p>
+                      <p className="text-lg mb-6 text-muted-foreground">{t('levelReached')}: {shooterLevel}</p>
                       <div className="flex gap-4 justify-center">
                         <Button onClick={resetShooterGame} size="lg" className="gap-2">
                           <RotateCcw className="h-5 w-5" />
-                          Play Again
+                          {t('playAgain')}
                         </Button>
                         <Button onClick={() => setSelectedGame(null)} variant="outline" size="lg">
-                          Back to Games
+                          {t('backToGames')}
                         </Button>
                       </div>
                     </div>
@@ -437,7 +678,7 @@ const Games = () => {
                   ref={shooterInputRef}
                   value={shooterInput}
                   onChange={handleShooterInputChange}
-                  placeholder="Type to shoot the bubbles..."
+                  placeholder={t('typeToShoot')}
                   className="text-2xl text-center font-mono"
                   autoFocus
                 />
@@ -459,10 +700,10 @@ const Games = () => {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-foreground mb-4">
-              Fun Typing Games
+              {t('funTypingGames')}
             </h2>
             <p className="text-xl text-muted-foreground">
-              खेल खेल में typing सीखें - मज़े के साथ speed बढ़ाएं
+              {t('gameTagline')}
             </p>
           </div>
 
@@ -473,38 +714,42 @@ const Games = () => {
             >
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
-                  🎯 Falling Words
+                  🎯 {t('fallingWords')}
                 </CardTitle>
                 <CardDescription className="text-base">
-                  शब्द ऊपर से गिरते हैं - जल्दी type करें!
+                  {t('fallingWordsDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Words fall from the top. Type them before they reach the bottom. Speed increases with each level!
+                  {t('fallingWordsInfo')}
                 </p>
                 <Button className="w-full gap-2">
                   <Play className="h-5 w-5" />
-                  Play Now
+                  {t('playNow')}
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="border-border opacity-60">
+            <Card
+              className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
+              onClick={() => setSelectedGame("speed-race")}
+            >
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
-                  🚀 Speed Race
+                  🚀 {t('speedRace')}
                 </CardTitle>
                 <CardDescription className="text-base">
-                  तेज़ी से type करके race जीतें
+                  {t('speedRaceDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Type fast to move your car forward. Race against the clock!
+                  {t('speedRaceInfo')}
                 </p>
-                <Button className="w-full" disabled>
-                  Coming Soon
+                <Button className="w-full gap-2">
+                  <Play className="h-5 w-5" />
+                  {t('playNow')}
                 </Button>
               </CardContent>
             </Card>
@@ -515,19 +760,19 @@ const Games = () => {
             >
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
-                  💥 Word Shooter
+                  💥 {t('wordShooter')}
                 </CardTitle>
                 <CardDescription className="text-base">
-                  शब्दों को type करके shoot करें
+                  {t('wordShooterDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Words appear in bubbles. Type to shoot them down!
+                  {t('wordShooterInfo')}
                 </p>
                 <Button className="w-full gap-2">
                   <Play className="h-5 w-5" />
-                  Play Now
+                  {t('playNow')}
                 </Button>
               </CardContent>
             </Card>
@@ -535,18 +780,18 @@ const Games = () => {
             <Card className="border-border opacity-60">
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
-                  👾 Space Typing
+                  👾 {t('spaceTyping')}
                 </CardTitle>
                 <CardDescription className="text-base">
-                  Alien ships पर words - defend करें!
+                  {t('spaceTypingDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Defend Earth by typing words on alien ships before they attack!
+                  {t('spaceTypingInfo')}
                 </p>
                 <Button className="w-full" disabled>
-                  Coming Soon
+                  {t('comingSoon')}
                 </Button>
               </CardContent>
             </Card>
