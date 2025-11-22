@@ -7,6 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import TestResult from "@/components/TestResult";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { saveTestRecord, markLessonComplete } from "@/lib/progressTracker";
 
 interface TestStats {
   wpm: number;
@@ -23,6 +24,7 @@ const PracticeMode = () => {
   const mode = searchParams.get("mode") || "custom";
   const urlText = searchParams.get("text");
   const lessonTitle = searchParams.get("title");
+  const lessonId = searchParams.get("lessonId");
   
   const [text, setText] = useState(urlText || "");
   const [customInput, setCustomInput] = useState("");
@@ -88,6 +90,21 @@ const PracticeMode = () => {
 
   const handleFinish = () => {
     setIsFinished(true);
+    // Save progress
+    saveTestRecord({
+      type: 'lesson',
+      wpm: stats.wpm,
+      cpm: stats.cpm,
+      accuracy: stats.accuracy,
+      errors: stats.errors,
+      timeSpent: stats.timeSpent,
+      title: lessonTitle || 'Practice'
+    });
+    
+    // Mark lesson as complete if it's a lesson
+    if (lessonId) {
+      markLessonComplete(lessonId);
+    }
   };
 
   const handleRestart = () => {
