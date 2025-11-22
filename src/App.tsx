@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import TypingTest from "./pages/TypingTest";
 import Lessons from "./pages/Lessons";
 import PracticeMode from "./pages/PracticeMode";
+import ExamMode from "./pages/ExamMode";
 import Games from "./pages/Games";
 import Progress from "./pages/Progress";
 import KeyboardGuide from "./pages/KeyboardGuide";
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/typing-test" element={<TypingTest />} />
               <Route path="/lessons" element={<Lessons />} />
               <Route path="/practice" element={<PracticeMode />} />
+              <Route path="/exam" element={<ExamMode />} />
               <Route path="/games" element={<Games />} />
               <Route path="/progress" element={<Progress />} />
               <Route path="/keyboard-guide" element={<KeyboardGuide />} />
