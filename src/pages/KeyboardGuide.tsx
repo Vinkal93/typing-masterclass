@@ -6,7 +6,11 @@ import { Progress } from "@/components/ui/progress";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { RotateCcw } from "lucide-react";
+import { useFont, hindiKeyboardFonts } from "@/contexts/FontContext";
+import { RotateCcw, Download } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface KeyData {
   char: string;
@@ -29,7 +33,9 @@ interface DrillExercise {
 
 const KeyboardGuide = () => {
   const { isHindi, t } = useLanguage();
+  const { hindiKeyboardFont, setHindiKeyboardFont } = useFont();
   const [activeKey, setActiveKey] = useState<string>("");
+  const keyboardRef = useRef<HTMLDivElement>(null);
   
   // Practice mode states
   const [selectedDrill, setSelectedDrill] = useState<DrillExercise | null>(null);
@@ -688,16 +694,45 @@ const KeyboardGuide = () => {
           <TabsContent value="visual" className="mt-8">
             <Card>
               <CardHeader>
-                <CardTitle className="text-center">
-                  {isHindi ? "कीबोर्ड लेआउट - रंग-कोडित फिंगर गाइड" : "Keyboard Layout - Color-Coded Finger Guide"}
-                </CardTitle>
-                <CardDescription className="text-center">
-                  {isHindi 
-                    ? "प्रत्येक रंग दिखाता है कि किस उंगली से कुंजी दबानी है"
-                    : "Each color shows which finger to use for that key"}
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-center">
+                      {isHindi ? "कीबोर्ड लेआउट - रंग-कोडित फिंगर गाइड" : "Keyboard Layout - Color-Coded Finger Guide"}
+                    </CardTitle>
+                    <CardDescription className="text-center">
+                      {isHindi 
+                        ? "प्रत्येक रंग दिखाता है कि किस उंगली से कुंजी दबानी है"
+                        : "Each color shows which finger to use for that key"}
+                    </CardDescription>
+                  </div>
+                  <Button onClick={handleDownloadPDF} variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    {isHindi ? "PDF डाउनलोड करें" : "Download PDF"}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
+                {/* Hindi Keyboard Font Selector */}
+                {isHindi && (
+                  <div className="flex items-center gap-4 mb-6 justify-center">
+                    <label className="text-sm font-medium">
+                      {isHindi ? "हिंदी फ़ॉन्ट:" : "Hindi Font:"}
+                    </label>
+                    <Select value={hindiKeyboardFont} onValueChange={setHindiKeyboardFont}>
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {hindiKeyboardFonts.map((font) => (
+                          <SelectItem key={font.value} value={font.value}>
+                            {font.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 {/* Language Toggle */}
                 <div className="flex justify-center mb-6">
                   <div className="inline-flex rounded-lg border border-border p-1">
@@ -721,7 +756,7 @@ const KeyboardGuide = () => {
                 </div>
 
                 {/* Keyboard Layout */}
-                <div className="bg-muted/30 p-6 rounded-xl border-2 border-border max-w-4xl mx-auto">
+                <div ref={keyboardRef} className="bg-muted/30 p-6 rounded-xl border-2 border-border max-w-4xl mx-auto" style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined }}>
                   {keyboardRows.map((row, rowIndex) => (
                     <div key={rowIndex} className="flex justify-center mb-1">
                       {row.map((keyData, keyIndex) => (

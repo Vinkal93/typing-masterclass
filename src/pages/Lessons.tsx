@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Lock, CheckCircle2, Keyboard, FileText, Target } from "lucide-react";
+import { Lock, CheckCircle2, Keyboard, FileText, Target, Trophy, Clock, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
@@ -233,7 +233,7 @@ const Lessons = () => {
           </div>
 
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
+            <TabsList className="grid w-full grid-cols-5 mb-8">
               <TabsTrigger value="all">{isHindi ? "सभी" : "All"}</TabsTrigger>
               <TabsTrigger value="key">
                 <Keyboard className="h-4 w-4 mr-2" />
@@ -246,6 +246,10 @@ const Lessons = () => {
               <TabsTrigger value="paragraph">
                 <Target className="h-4 w-4 mr-2" />
                 {isHindi ? "पैराग्राफ" : "Paragraphs"}
+              </TabsTrigger>
+              <TabsTrigger value="exam">
+                <Trophy className="h-4 w-4 mr-2" />
+                {isHindi ? "परीक्षा" : "Exams"}
               </TabsTrigger>
             </TabsList>
 
@@ -338,6 +342,129 @@ const Lessons = () => {
                 </div>
               </TabsContent>
             ))}
+            
+            <TabsContent value="exam">
+              <div className="mb-8">
+                <div className="bg-primary/10 border border-primary/20 p-6 rounded-lg mb-6">
+                  <div className="flex items-start gap-4">
+                    <AlertCircle className="h-6 w-6 text-primary mt-1" />
+                    <div>
+                      <h3 className="font-bold text-lg mb-2">
+                        {isHindi ? "परीक्षा मोड के बारे में" : "About Exam Mode"}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {isHindi 
+                          ? "वास्तविक सरकारी टाइपिंग परीक्षाओं के नियमों के साथ अभ्यास करें। प्रत्येक परीक्षा में न्यूनतम WPM, सटीकता की आवश्यकताएं और समय सीमा है। कुछ परीक्षाओं में बैकस्पेस अक्षम है!"
+                          : "Practice with real government typing exam rules. Each exam has minimum WPM, accuracy requirements, and time limits. Some exams disable backspace!"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    name: "SSC Stenographer",
+                    nameHindi: "SSC आशुलिपिक",
+                    wpm: 100,
+                    accuracy: 95,
+                    time: "10 मिनट",
+                    timeEng: "10 mins",
+                    backspace: false,
+                    difficulty: "advanced"
+                  },
+                  {
+                    name: "CRPF Constable",
+                    nameHindi: "CRPF कांस्टेबल",
+                    wpm: 30,
+                    accuracy: 90,
+                    time: "15 मिनट",
+                    timeEng: "15 mins",
+                    backspace: false,
+                    difficulty: "beginner"
+                  },
+                  {
+                    name: "RRB Clerk",
+                    nameHindi: "RRB क्लर्क",
+                    wpm: 30,
+                    accuracy: 92,
+                    time: "10 मिनट",
+                    timeEng: "10 mins",
+                    backspace: false,
+                    difficulty: "beginner"
+                  },
+                  {
+                    name: "Court Clerk",
+                    nameHindi: "कोर्ट क्लर्क",
+                    wpm: 40,
+                    accuracy: 95,
+                    time: "10 मिनट",
+                    timeEng: "10 mins",
+                    backspace: false,
+                    difficulty: "intermediate"
+                  },
+                  {
+                    name: "Data Entry Operator",
+                    nameHindi: "डेटा एंट्री ऑपरेटर",
+                    wpm: 35,
+                    accuracy: 95,
+                    time: "5 मिनट",
+                    timeEng: "5 mins",
+                    backspace: true,
+                    difficulty: "intermediate"
+                  }
+                ].map((exam) => (
+                  <Card
+                    key={exam.name}
+                    className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
+                    onClick={() => navigate(`/exam?examId=${exam.name}`)}
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between mb-2">
+                        <Badge className={getLevelColor(exam.difficulty)}>
+                          {getLevelTitle(exam.difficulty)}
+                        </Badge>
+                        <Trophy className="h-5 w-5 text-primary" />
+                      </div>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {isHindi ? exam.nameHindi : exam.name}
+                      </CardTitle>
+                      <CardDescription className="space-y-2 mt-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="h-4 w-4" />
+                          <span>{isHindi ? exam.time : exam.timeEng}</span>
+                        </div>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">{isHindi ? "न्यूनतम WPM:" : "Min WPM:"}</span>
+                          <span className="font-semibold">{exam.wpm}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">{isHindi ? "न्यूनतम सटीकता:" : "Min Accuracy:"}</span>
+                          <span className="font-semibold">{exam.accuracy}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">{isHindi ? "बैकस्पेस:" : "Backspace:"}</span>
+                          <span className={`font-semibold ${exam.backspace ? 'text-success' : 'text-destructive'}`}>
+                            {exam.backspace 
+                              ? (isHindi ? "अनुमत ✓" : "Allowed ✓")
+                              : (isHindi ? "अनुमति नहीं ✗" : "Not Allowed ✗")}
+                          </span>
+                        </div>
+                      </div>
+                      <Button className="w-full mt-4" variant="default">
+                        <Trophy className="h-4 w-4 mr-2" />
+                        {isHindi ? "परीक्षा शुरू करें" : "Start Exam"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </main>
