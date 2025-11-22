@@ -42,6 +42,52 @@ const KeyboardGuide = () => {
   
   // Drill exercises
   const drillExercises: DrillExercise[] = [
+    // Combined Row Drills
+    {
+      id: "combined-all-rows",
+      name: "All Rows Combined",
+      nameHindi: "सभी रो एक साथ",
+      description: "Practice mixing all keyboard rows together",
+      descriptionHindi: "सभी कीबोर्ड रो को एक साथ मिलाकर अभ्यास करें",
+      text: "the quick brown fox jumps over the lazy dog pack my box with five dozen liquor jugs",
+      textHindi: "एक चालाक भूरी लोमड़ी आलसी कुत्ते के ऊपर कूद गई सभी अक्षर अभ्यास करें यह वाक्य सब कुछ है",
+      category: "combined",
+      finger: "All Fingers"
+    },
+    {
+      id: "combined-words",
+      name: "Mixed Row Words",
+      nameHindi: "मिश्रित रो शब्द",
+      description: "Common words using all keyboard rows",
+      descriptionHindi: "सभी कीबोर्ड रो का उपयोग करके सामान्य शब्द",
+      text: "amazing computer keyboard practice typing skills improve everyday learning fast accurate",
+      textHindi: "अद्भुत कंप्यूटर कीबोर्ड अभ्यास टाइपिंग कौशल सुधार रोज सीखना तेज सटीक बेहतर",
+      category: "combined",
+      finger: "All Fingers"
+    },
+    {
+      id: "combined-sentences",
+      name: "Full Sentences Practice",
+      nameHindi: "पूरे वाक्य अभ्यास",
+      description: "Complete sentences mixing all rows",
+      descriptionHindi: "सभी रो को मिलाते हुए पूरे वाक्य",
+      text: "Practice makes perfect. Speed comes with time. Accuracy is key. Keep typing daily.",
+      textHindi: "अभ्यास से सिद्धि मिलती है। समय के साथ गति आती है। सटीकता जरूरी है। रोज टाइप करें।",
+      category: "combined",
+      finger: "All Fingers"
+    },
+    {
+      id: "combined-advanced",
+      name: "Advanced Pangrams",
+      nameHindi: "उन्नत पंगराम",
+      description: "Complex sentences using all letters",
+      descriptionHindi: "सभी अक्षरों का उपयोग करते हुए जटिल वाक्य",
+      text: "The job requires extra pluck and zeal from every young wage earner. Crazy Fredrick bought many very exquisite opal jewels.",
+      textHindi: "यह काम हर युवा वेतनभोगी से अतिरिक्त साहस और उत्साह की मांग करता है। पागल फ्रेडरिक ने कई बहुत ही सुंदर ओपल आभूषण खरीदे।",
+      category: "combined",
+      finger: "All Fingers"
+    },
+    
     // Home Row - Left Hand
     {
       id: "home-left-pinky",
@@ -440,6 +486,7 @@ const KeyboardGuide = () => {
 
   const getCategoryName = (category: string) => {
     const names: Record<string, { en: string; hi: string }> = {
+      combined: { en: "Combined Rows", hi: "मिश्रित रो" },
       homeRow: { en: "Home Row", hi: "होम रो" },
       topRow: { en: "Top Row", hi: "टॉप रो" },
       bottomRow: { en: "Bottom Row", hi: "बॉटम रो" },
