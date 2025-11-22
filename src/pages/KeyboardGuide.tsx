@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Download } from "lucide-react";
 
 interface KeyData {
   char: string;
@@ -30,7 +30,8 @@ interface DrillExercise {
 const KeyboardGuide = () => {
   const { isHindi, t } = useLanguage();
   const [activeKey, setActiveKey] = useState<string>("");
-  
+  const [pressedKey, setPressedKey] = useState<string>("");
+
   // Practice mode states
   const [selectedDrill, setSelectedDrill] = useState<DrillExercise | null>(null);
   const [userInput, setUserInput] = useState("");
@@ -415,7 +416,80 @@ const KeyboardGuide = () => {
       finger: "rightPinky"
     }
   ];
-  
+
+  // Keyboard event listeners for interactive keyboard
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key.toUpperCase();
+      setPressedKey(key === ' ' ? 'SPACE' : key);
+    };
+
+    const handleKeyUp = () => {
+      setPressedKey("");
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  // PDF generation function
+  const generatePDF = () => {
+    const content = `
+TYPEMASTER - KEYBOARD GUIDE
+${isHindi ? 'कीबोर्ड गाइड' : 'Keyboard Guide'}
+====================================
+
+${isHindi ? 'उंगली मार्गदर्शिका' : 'FINGER GUIDE'}
+---------------------------------
+
+${isHindi ? 'बाएं हाथ:' : 'LEFT HAND:'}
+${isHindi ? '• छोटी उंगली (लाल): `, 1, Q, A, Z, Tab, Shift, Caps Lock' : '• Pinky (Red): \`, 1, Q, A, Z, Tab, Shift, Caps Lock'}
+${isHindi ? '• अनामिका (नारंगी): 2, W, S, X' : '• Ring (Orange): 2, W, S, X'}
+${isHindi ? '• मध्य उंगली (पीला): 3, E, D, C' : '• Middle (Yellow): 3, E, D, C'}
+${isHindi ? '• तर्जनी (हरा): 4, 5, R, T, F, G, V, B' : '• Index (Green): 4, 5, R, T, F, G, V, B'}
+
+${isHindi ? 'दाएं हाथ:' : 'RIGHT HAND:'}
+${isHindi ? '• तर्जनी (नीला): 6, 7, Y, U, H, J, N, M' : '• Index (Blue): 6, 7, Y, U, H, J, N, M'}
+${isHindi ? '• मध्य उंगली (इंडिगो): 8, I, K, ,' : '• Middle (Indigo): 8, I, K, ,'}
+${isHindi ? '• अनामिका (बैंगनी): 9, O, L, .' : '• Ring (Purple): 9, O, L, .'}
+${isHindi ? '• छोटी उंगली (गुलाबी): 0, -, =, P, [, ], ;, \', /, Delete, Return, Shift' : '• Pinky (Pink): 0, -, =, P, [, ], ;, \', /, Delete, Return, Shift'}
+
+${isHindi ? 'दोनों अंगूठे (ग्रे): Space' : 'Both Thumbs (Gray): Space'}
+
+${isHindi ? 'होम रो पोजीशन' : 'HOME ROW POSITION'}
+---------------------------------
+${isHindi ? 'होम रो वह आधार पंक्ति है जहां आपकी उंगलियां आराम करती हैं:' : 'The home row is the base row where your fingers rest:'}
+${isHindi ? '• बाएं हाथ: A, S, D, F' : '• Left Hand: A, S, D, F'}
+${isHindi ? '• दाएं हाथ: J, K, L, ;' : '• Right Hand: J, K, L, ;'}
+
+${isHindi ? 'टच टाइपिंग के लिए सुझाव' : 'TOUCH TYPING TIPS'}
+---------------------------------
+1. ${isHindi ? 'हमेशा होम रो पोजीशन से शुरू करें' : 'Always start from the home row position'}
+2. ${isHindi ? 'स्क्रीन को देखें, कीबोर्ड को नहीं' : 'Look at the screen, not the keyboard'}
+3. ${isHindi ? 'प्रत्येक कुंजी के लिए सही उंगली का उपयोग करें' : 'Use the correct finger for each key'}
+4. ${isHindi ? 'टाइपिंग करते समय अपनी कलाई को स्थिर रखें' : 'Keep your wrists steady while typing'}
+5. ${isHindi ? 'दैनिक अभ्यास करें सुधार के लिए' : 'Practice daily for improvement'}
+
+${isHindi ? 'सभी उंगली अभ्यास के लिए TypeMaster पर जाएं!' : 'Visit TypeMaster for all finger drills!'}
+${isHindi ? 'ईमेल: vinkal93041@gmail.com' : 'Email: vinkal93041@gmail.com'}
+    `;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'TypeMaster-Keyboard-Guide.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     if (userInput.length > 0 && !startTime) {
       setStartTime(Date.now());
@@ -605,11 +679,17 @@ const KeyboardGuide = () => {
   const KeyCap = ({ keyData, showHindi }: { keyData: KeyData; showHindi: boolean }) => {
     const displayChar = showHindi && keyData.hindiChar ? keyData.hindiChar : keyData.char;
     const baseWidth = keyData.width || 'w-12';
-    
+    const isPressed = pressedKey === keyData.char.toUpperCase() ||
+                     (keyData.char === 'Space' && pressedKey === 'SPACE') ||
+                     (keyData.char === 'Return' && pressedKey === 'ENTER');
+    const isActive = activeKey === keyData.char;
+
     return (
       <div
-        className={`${baseWidth} h-12 m-0.5 rounded border-2 ${fingerColors[keyData.finger]} ${fingerColorsBorder[keyData.finger]} 
-        flex items-center justify-center text-xs font-bold text-white shadow-md hover:scale-105 transition-transform cursor-pointer`}
+        className={`${baseWidth} h-12 m-0.5 rounded border-2 ${fingerColors[keyData.finger]} ${fingerColorsBorder[keyData.finger]}
+        flex items-center justify-center text-xs font-bold text-white shadow-md transition-all cursor-pointer
+        ${isPressed ? 'scale-95 brightness-75 shadow-inner' : 'hover:scale-105'}
+        ${isActive ? 'ring-2 ring-white ring-offset-2' : ''}`}
         onMouseEnter={() => setActiveKey(keyData.char)}
         onMouseLeave={() => setActiveKey("")}
       >
@@ -688,14 +768,22 @@ const KeyboardGuide = () => {
           <TabsContent value="visual" className="mt-8">
             <Card>
               <CardHeader>
-                <CardTitle className="text-center">
-                  {isHindi ? "कीबोर्ड लेआउट - रंग-कोडित फिंगर गाइड" : "Keyboard Layout - Color-Coded Finger Guide"}
-                </CardTitle>
-                <CardDescription className="text-center">
-                  {isHindi 
-                    ? "प्रत्येक रंग दिखाता है कि किस उंगली से कुंजी दबानी है"
-                    : "Each color shows which finger to use for that key"}
-                </CardDescription>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="text-center md:text-left flex-1">
+                    <CardTitle className="text-center">
+                      {isHindi ? "कीबोर्ड लेआउट - रंग-कोडित फिंगर गाइड" : "Keyboard Layout - Color-Coded Finger Guide"}
+                    </CardTitle>
+                    <CardDescription className="text-center">
+                      {isHindi
+                        ? "प्रत्येक रंग दिखाता है कि किस उंगली से कुंजी दबानी है। कीबोर्ड पर टाइप करके इंटरैक्टिव अनुभव लें!"
+                        : "Each color shows which finger to use for that key. Type on your keyboard for interactive experience!"}
+                    </CardDescription>
+                  </div>
+                  <Button onClick={generatePDF} className="flex items-center gap-2 shrink-0">
+                    <Download className="h-4 w-4" />
+                    {isHindi ? "गाइड डाउनलोड करें" : "Download Guide"}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {/* Language Toggle */}

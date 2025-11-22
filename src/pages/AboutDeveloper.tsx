@@ -1,8 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Globe, Code2, Lightbulb, Target, Award } from "lucide-react";
+import { Mail, Globe, Code2, Lightbulb, Target, Award, Github, Linkedin, Twitter, ExternalLink } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
 
 const AboutDeveloper = () => {
   const { isHindi } = useLanguage();
@@ -18,36 +19,64 @@ const AboutDeveloper = () => {
           </h1>
 
           {/* Profile Card */}
-          <Card className="mb-8">
-            <CardHeader className="text-center">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center">
+          <Card className="mb-8 overflow-hidden">
+            <div className="h-32 bg-gradient-to-r from-primary via-secondary to-accent"></div>
+            <CardHeader className="text-center -mt-16 relative">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center border-4 border-background shadow-xl">
                 <Code2 className="h-16 w-16 text-white" />
               </div>
               <CardTitle className="text-3xl">Vinkal Prajapati</CardTitle>
-              <CardDescription className="text-lg">Web Developer & Android App Developer</CardDescription>
+              <CardDescription className="text-lg">
+                {isHindi ? "वेब डेवलपर और एंड्रॉइड ऐप डेवलपर" : "Web Developer & Android App Developer"}
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <div className="flex items-center gap-2">
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a href="mailto:vinkal93041@gmail.com" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                   <Mail className="h-5 w-5 text-primary" />
-                  <a href="mailto:vinkal93041@gmail.com" className="text-primary hover:underline">
-                    vinkal93041@gmail.com
-                  </a>
-                </div>
-                <div className="flex items-center gap-2">
+                  <span className="text-sm truncate">vinkal93041@gmail.com</span>
+                </a>
+                <a href="https://quantuminstitute.framer.website" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                   <Globe className="h-5 w-5 text-primary" />
-                  <a href="https://quantuminstitute.framer.website" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                    quantuminstitute.framer.website
-                  </a>
-                </div>
+                  <span className="text-sm truncate">Quantum Institute</span>
+                  <ExternalLink className="h-4 w-4 ml-auto" />
+                </a>
+                <a href="https://dev.to/vinkalprajapati" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                  <Code2 className="h-5 w-5 text-primary" />
+                  <span className="text-sm truncate">Dev Profile</span>
+                  <ExternalLink className="h-4 w-4 ml-auto" />
+                </a>
               </div>
-              
-              <p className="text-muted-foreground leading-relaxed">
-                {isHindi 
-                  ? "मैं विंकल प्रजापति हूं, एक passionate Web और Android Developer जो आधुनिक, responsive और intelligent डिजिटल solutions बनाने के लिए प्रतिबद्ध हूं। मेरा काम सादगी, दक्षता और उच्च गुणवत्ता वाले user experience पर केंद्रित है, यह सुनिश्चित करते हुए कि मेरे द्वारा विकसित प्रत्येक tool वास्तव में users को सीखने, बढ़ने और बेहतर प्रदर्शन करने में मदद करता है।"
-                  : "I am Vinkal Prajapati, a passionate Web and Android Developer committed to creating modern, responsive, and intelligent digital solutions. My work focuses on simplicity, efficiency, and high-quality user experience, ensuring that every tool I develop genuinely helps users learn, grow, and perform better."
-                }
-              </p>
+
+              <div className="bg-accent/20 p-6 rounded-lg border">
+                <p className="text-muted-foreground leading-relaxed text-justify">
+                  {isHindi
+                    ? "मैं विंकल प्रजापति हूं, एक passionate Web और Android Developer जो आधुनिक, responsive और intelligent डिजिटल solutions बनाने के लिए प्रतिबद्ध हूं। मेरा काम सादगी, दक्षता और उच्च गुणवत्ता वाले user experience पर केंद्रित है, यह सुनिश्चित करते हुए कि मेरे द्वारा विकसित प्रत्येक tool वास्तव में users को सीखने, बढ़ने और बेहतर प्रदर्शन करने में मदद करता है।"
+                    : "I am Vinkal Prajapati, a passionate Web and Android Developer committed to creating modern, responsive, and intelligent digital solutions. My work focuses on simplicity, efficiency, and high-quality user experience, ensuring that every tool I develop genuinely helps users learn, grow, and perform better."
+                  }
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Button variant="outline" size="sm" className="gap-2" asChild>
+                  <a href="https://github.com/vinkalprajapati" target="_blank" rel="noopener noreferrer">
+                    <Github className="h-4 w-4" />
+                    GitHub
+                  </a>
+                </Button>
+                <Button variant="outline" size="sm" className="gap-2" asChild>
+                  <a href="https://linkedin.com/in/vinkalprajapati" target="_blank" rel="noopener noreferrer">
+                    <Linkedin className="h-4 w-4" />
+                    LinkedIn
+                  </a>
+                </Button>
+                <Button variant="outline" size="sm" className="gap-2" asChild>
+                  <a href="https://twitter.com/vinkalprajapati" target="_blank" rel="noopener noreferrer">
+                    <Twitter className="h-4 w-4" />
+                    Twitter
+                  </a>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -103,43 +132,53 @@ const AboutDeveloper = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-2 gap-4">
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    Android Development (Java/Kotlin)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    Web Development (HTML, CSS, JavaScript, PHP)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    AI Integration using Google Gemini API
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    Excel Automation & Data Dashboards
-                  </li>
-                </ul>
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                    WordPress Development
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                    UI/UX Designing
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                    Educational Software Development
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                    Typing Tools Development
-                  </li>
-                </ul>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-lg mb-3 text-primary">
+                    {isHindi ? "तकनीकी कौशल" : "Technical Skills"}
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent/50 transition-colors">
+                      <span className="w-2 h-2 bg-primary rounded-full"></span>
+                      <span className="text-sm">Android Development (Java/Kotlin)</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent/50 transition-colors">
+                      <span className="w-2 h-2 bg-primary rounded-full"></span>
+                      <span className="text-sm">Web Development (HTML, CSS, JavaScript, PHP)</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent/50 transition-colors">
+                      <span className="w-2 h-2 bg-primary rounded-full"></span>
+                      <span className="text-sm">AI Integration using Google Gemini API</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent/50 transition-colors">
+                      <span className="w-2 h-2 bg-primary rounded-full"></span>
+                      <span className="text-sm">Excel Automation & Data Dashboards</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-lg mb-3 text-secondary">
+                    {isHindi ? "विशेषज्ञता क्षेत्र" : "Specialization Areas"}
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent/50 transition-colors">
+                      <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                      <span className="text-sm">WordPress Development</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent/50 transition-colors">
+                      <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                      <span className="text-sm">UI/UX Designing</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent/50 transition-colors">
+                      <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                      <span className="text-sm">Educational Software Development</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent/50 transition-colors">
+                      <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                      <span className="text-sm">Typing Tools Development</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

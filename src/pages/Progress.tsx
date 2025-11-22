@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Target, Clock, Award, Trophy, Zap } from "lucide-react";
+import { TrendingUp, Target, Clock, Award, Trophy, Zap, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProgressData, getAverageWpm, getAverageAccuracy, getRecentTests } from "@/lib/progressTracker";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 
 const Progress = () => {
   const navigate = useNavigate();
@@ -15,60 +16,92 @@ const Progress = () => {
   const avgAccuracy = getAverageAccuracy();
   const recentTests = getRecentTests(5);
 
+  // Prepare chart data for the last 10 tests
+  const chartData = progress.tests.slice(-10).map((test, index) => ({
+    test: `#${index + 1}`,
+    wpm: test.wpm,
+    accuracy: test.accuracy,
+    date: new Date(test.timestamp).toLocaleDateString(isHindi ? 'hi-IN' : 'en-US', { month: 'short', day: 'numeric' })
+  }));
+
+  // Prepare activity calendar data (last 30 days)
+  const activityData = (() => {
+    const days = [];
+    const today = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+
+      const testsOnDay = progress.tests.filter(test => {
+        const testDate = new Date(test.timestamp);
+        testDate.setHours(0, 0, 0, 0);
+        return testDate.getTime() === date.getTime();
+      }).length;
+
+      days.push({
+        day: date.toLocaleDateString(isHindi ? 'hi-IN' : 'en-US', { weekday: 'short' }),
+        date: date.toLocaleDateString(isHindi ? 'hi-IN' : 'en-US', { month: 'short', day: 'numeric' }),
+        tests: testsOnDay,
+      });
+    }
+    return days;
+  })();
+
   const badges = [
-    { 
+    {
       id: "first_test",
-      name: isHindi ? "पहला टेस्ट" : "First Test", 
-      desc: isHindi ? "1 टेस्ट पूरा करें" : "Complete 1st test", 
+      name: isHindi ? "पहला टेस्ट" : "First Test",
+      desc: isHindi ? "1 टेस्ट पूरा करें" : "Complete 1st test",
       icon: "🎯",
       unlocked: progress.achievements.includes('first_test')
     },
-    { 
+    {
       id: "speed_demon",
-      name: isHindi ? "स्पीड डेमन" : "Speed Demon", 
-      desc: isHindi ? "40 WPM तक पहुंचें" : "Reach 40 WPM", 
+      name: isHindi ? "स्पीड डेमन" : "Speed Demon",
+      desc: isHindi ? "40 WPM तक पहुंचें" : "Reach 40 WPM",
       icon: "⚡",
       unlocked: progress.achievements.includes('speed_demon')
     },
-    { 
+    {
       id: "accuracy_king",
-      name: isHindi ? "सटीकता राजा" : "Accuracy King", 
-      desc: isHindi ? "95% सटीकता" : "95% accuracy", 
+      name: isHindi ? "सटीकता राजा" : "Accuracy King",
+      desc: isHindi ? "95% सटीकता" : "95% accuracy",
       icon: "🎪",
       unlocked: progress.achievements.includes('accuracy_king')
     },
-    { 
+    {
       id: "practice_master",
-      name: isHindi ? "अभ्यास मास्टर" : "Practice Master", 
-      desc: isHindi ? "10 पाठ पूरे करें" : "10 lessons done", 
+      name: isHindi ? "अभ्यास मास्टर" : "Practice Master",
+      desc: isHindi ? "10 पाठ पूरे करें" : "10 lessons done",
       icon: "📚",
       unlocked: progress.achievements.includes('practice_master')
     },
-    { 
+    {
       id: "game_champion",
-      name: isHindi ? "गेम चैंपियन" : "Game Champion", 
-      desc: isHindi ? "5 गेम जीतें" : "Win 5 games", 
+      name: isHindi ? "गेम चैंपियन" : "Game Champion",
+      desc: isHindi ? "5 गेम जीतें" : "Win 5 games",
       icon: "🏆",
       unlocked: false // Not tracking game wins yet
     },
-    { 
+    {
       id: "streak_legend",
-      name: isHindi ? "स्ट्रीक लीजेंड" : "Streak Legend", 
-      desc: isHindi ? "7 दिन की स्ट्रीक" : "7 day streak", 
+      name: isHindi ? "स्ट्रीक लीजेंड" : "Streak Legend",
+      desc: isHindi ? "7 दिन की स्ट्रीक" : "7 day streak",
       icon: "🔥",
-      unlocked: false // Not tracking streaks yet
+      unlocked: progress.achievements.includes('streak_legend')
     },
-    { 
+    {
       id: "fast_fingers",
-      name: isHindi ? "तेज़ उंगलियां" : "Fast Fingers", 
-      desc: isHindi ? "60 WPM तक पहुंचें" : "Reach 60 WPM", 
+      name: isHindi ? "तेज़ उंगलियां" : "Fast Fingers",
+      desc: isHindi ? "60 WPM तक पहुंचें" : "Reach 60 WPM",
       icon: "💨",
       unlocked: progress.achievements.includes('fast_fingers')
     },
-    { 
+    {
       id: "perfect_score",
-      name: isHindi ? "परफेक्ट स्कोर" : "Perfect Score", 
-      desc: isHindi ? "100% सटीकता" : "100% accuracy", 
+      name: isHindi ? "परफेक्ट स्कोर" : "Perfect Score",
+      desc: isHindi ? "100% सटीकता" : "100% accuracy",
       icon: "💯",
       unlocked: progress.achievements.includes('perfect_score')
     },
@@ -214,6 +247,103 @@ const Progress = () => {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Progress Charts */}
+          {chartData.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* WPM Progress Chart */}
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-secondary" />
+                    {isHindi ? "WPM प्रगति" : "WPM Progress"}
+                  </CardTitle>
+                  <CardDescription>
+                    {isHindi ? "पिछले 10 टेस्ट" : "Last 10 tests"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="wpm"
+                        stroke="hsl(var(--secondary))"
+                        strokeWidth={2}
+                        dot={{ fill: "hsl(var(--secondary))" }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Accuracy Progress Chart */}
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-success" />
+                    {isHindi ? "सटीकता प्रगति" : "Accuracy Progress"}
+                  </CardTitle>
+                  <CardDescription>
+                    {isHindi ? "पिछले 10 टेस्ट" : "Last 10 tests"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis domain={[0, 100]} />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="accuracy"
+                        stroke="hsl(var(--success))"
+                        strokeWidth={2}
+                        dot={{ fill: "hsl(var(--success))" }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Activity Calendar */}
+          {activityData.length > 0 && (
+            <Card className="border-border mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  {isHindi ? "30 दिन की गतिविधि" : "30-Day Activity"}
+                </CardTitle>
+                <CardDescription>
+                  {isHindi ? "आपके दैनिक टेस्ट" : "Your daily test activity"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={activityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="tests" fill="hsl(var(--primary))" />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           )}
