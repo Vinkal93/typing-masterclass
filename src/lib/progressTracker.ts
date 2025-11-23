@@ -1,13 +1,16 @@
 export interface TestRecord {
   id: string;
-  type: 'test' | 'lesson' | 'game' | 'drill';
+  type: 'test' | 'lesson' | 'game' | 'drill' | 'exam';
   wpm: number;
-  cpm: number;
+  cpm?: number;
   accuracy: number;
-  errors: number;
-  timeSpent: number;
+  errors?: number;
+  timeSpent?: number;
+  duration?: number;
   timestamp: number;
   title?: string;
+  testType?: string;
+  testName?: string;
 }
 
 export interface ProgressData {

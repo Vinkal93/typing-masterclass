@@ -166,11 +166,11 @@ const ExamMode = () => {
     if (value.length === targetText.length) {
       setFinished(true);
       saveTestRecord({
+        type: 'exam',
         wpm,
         accuracy,
         duration: exam.duration - timeRemaining,
-        testType: 'exam',
-        testName: exam.name
+        title: exam.name
       });
     }
   };
