@@ -45,6 +45,30 @@ const KeyboardGuide = () => {
   const [errors, setErrors] = useState(0);
   const [wpm, setWpm] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // PDF Download Handler
+  const handleDownloadPDF = async () => {
+    if (!keyboardRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(keyboardRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`${isHindi ? 'hindi' : 'english'}-keyboard-guide.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
   
   // Drill exercises
   const drillExercises: DrillExercise[] = [
