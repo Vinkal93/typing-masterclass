@@ -375,6 +375,36 @@ const Lessons = () => {
                     difficulty: "advanced"
                   },
                   {
+                    name: "High Court Stenographer",
+                    nameHindi: "उच्च न्यायालय आशुलिपिक",
+                    wpm: 80,
+                    accuracy: 98,
+                    time: "15 मिनट",
+                    timeEng: "15 mins",
+                    backspace: false,
+                    difficulty: "advanced"
+                  },
+                  {
+                    name: "IBPS Clerk",
+                    nameHindi: "IBPS क्लर्क",
+                    wpm: 35,
+                    accuracy: 93,
+                    time: "15 मिनट",
+                    timeEng: "15 mins",
+                    backspace: false,
+                    difficulty: "intermediate"
+                  },
+                  {
+                    name: "State PSC Data Entry",
+                    nameHindi: "राज्य PSC डेटा एंट्री",
+                    wpm: 40,
+                    accuracy: 96,
+                    time: "10 मिनट",
+                    timeEng: "10 mins",
+                    backspace: true,
+                    difficulty: "intermediate"
+                  },
+                  {
                     name: "CRPF Constable",
                     nameHindi: "CRPF कांस्टेबल",
                     wpm: 30,

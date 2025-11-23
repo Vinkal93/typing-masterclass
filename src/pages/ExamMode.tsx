@@ -8,7 +8,11 @@ import { useFont } from "@/contexts/FontContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { saveTestRecord } from "@/lib/progressTracker";
-import { Trophy, AlertCircle, Clock } from "lucide-react";
+import { Trophy, AlertCircle, Clock, Award } from "lucide-react";
+import Certificate from "@/components/Certificate";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ExamConfig {
   name: string;
@@ -31,6 +35,36 @@ const examConfigs: ExamConfig[] = [
     minimumAccuracy: 95,
     text: "The quick brown fox jumps over the lazy dog. This sentence contains all the letters of the alphabet and is commonly used for typing practice. Speed and accuracy are both important in typing tests. Professional typists can achieve speeds of over 100 words per minute with high accuracy.",
     textHindi: "तेज भूरी लोमड़ी आलसी कुत्ते के ऊपर कूदती है। यह वाक्य वर्णमाला के सभी अक्षरों को शामिल करता है और आम तौर पर टाइपिंग अभ्यास के लिए उपयोग किया जाता है। टाइपिंग परीक्षणों में गति और सटीकता दोनों महत्वपूर्ण हैं। पेशेवर टाइपिस्ट उच्च सटीकता के साथ प्रति मिनट 100 से अधिक शब्दों की गति प्राप्त कर सकते हैं।"
+  },
+  {
+    name: "High Court Stenographer",
+    nameHindi: "उच्च न्यायालय आशुलिपिक",
+    duration: 900, // 15 minutes
+    allowBackspace: false,
+    minimumWPM: 80,
+    minimumAccuracy: 98,
+    text: "High Court stenographers must maintain exceptional accuracy when transcribing legal proceedings and judgments. The legal system depends on precise documentation of court proceedings. Every word matters in legal contexts where misinterpretation can have significant consequences. Professional stenographers combine speed with meticulous attention to detail.",
+    textHindi: "उच्च न्यायालय आशुलिपिक को कानूनी कार्यवाही और निर्णयों को प्रतिलेखन करते समय असाधारण सटीकता बनाए रखनी चाहिए। कानूनी प्रणाली अदालती कार्यवाही के सटीक दस्तावेजीकरण पर निर्भर करती है। कानूनी संदर्भों में प्रत्येक शब्द मायने रखता है जहां गलत व्याख्या के महत्वपूर्ण परिणाम हो सकते हैं।"
+  },
+  {
+    name: "IBPS Clerk",
+    nameHindi: "IBPS क्लर्क",
+    duration: 900, // 15 minutes
+    allowBackspace: false,
+    minimumWPM: 35,
+    minimumAccuracy: 93,
+    text: "Banking sector clerks process customer transactions and maintain accurate financial records daily. Attention to detail and consistent typing speed are essential for efficient banking operations. The banking industry requires professionals who can handle large volumes of data entry work with precision and reliability.",
+    textHindi: "बैंकिंग क्षेत्र के क्लर्क दैनिक रूप से ग्राहक लेनदेन को संसाधित करते हैं और सटीक वित्तीय रिकॉर्ड बनाए रखते हैं। कुशल बैंकिंग संचालन के लिए विस्तार पर ध्यान और सुसंगत टाइपिंग गति आवश्यक है। बैंकिंग उद्योग को ऐसे पेशेवरों की आवश्यकता है जो सटीकता और विश्वसनीयता के साथ बड़ी मात्रा में डेटा प्रविष्टि कार्य को संभाल सकें।"
+  },
+  {
+    name: "State PSC Data Entry",
+    nameHindi: "राज्य PSC डेटा एंट्री",
+    duration: 600, // 10 minutes
+    allowBackspace: true,
+    minimumWPM: 40,
+    minimumAccuracy: 96,
+    text: "State Public Service Commission data entry operators maintain government databases and records. Accuracy is paramount when handling sensitive government data and citizen information. Operators must demonstrate both speed and precision in their typing skills while maintaining data confidentiality and security standards.",
+    textHindi: "राज्य लोक सेवा आयोग डेटा एंट्री ऑपरेटर सरकारी डेटाबेस और रिकॉर्ड बनाए रखते हैं। संवेदनशील सरकारी डेटा और नागरिक जानकारी को संभालते समय सटीकता सर्वोपरि है। ऑपरेटरों को डेटा गोपनीयता और सुरक्षा मानकों को बनाए रखते हुए अपने टाइपिंग कौशल में गति और सटीकता दोनों का प्रदर्शन करना चाहिए।"
   },
   {
     name: "CRPF Constable",
@@ -90,6 +124,9 @@ const ExamMode = () => {
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
   const [errors, setErrors] = useState(0);
+  const [showCertificate, setShowCertificate] = useState(false);
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [userName, setUserName] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -165,13 +202,19 @@ const ExamMode = () => {
     // Auto-finish when completed
     if (value.length === targetText.length) {
       setFinished(true);
-      saveTestRecord({
-        type: 'exam',
+      const record = {
+        type: 'exam' as const,
         wpm,
         accuracy,
         duration: exam.duration - timeRemaining,
         title: exam.name
-      });
+      };
+      saveTestRecord(record);
+      
+      // Show certificate dialog if passed
+      if (isPassed) {
+        setShowNameDialog(true);
+      }
     }
   };
 
@@ -189,6 +232,11 @@ const ExamMode = () => {
 
   const isPassed = wpm >= exam.minimumWPM && accuracy >= exam.minimumAccuracy;
   const progress = (userInput.length / targetText.length) * 100;
+
+  const handleGenerateCertificate = () => {
+    setShowNameDialog(false);
+    setShowCertificate(true);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -352,6 +400,12 @@ const ExamMode = () => {
                 </div>
 
                 <div className="flex gap-4 justify-center">
+                  {isPassed && (
+                    <Button onClick={() => setShowNameDialog(true)} className="mr-2">
+                      <Award className="h-4 w-4 mr-2" />
+                      {isHindi ? "प्रमाणपत्र प्राप्त करें" : "Get Certificate"}
+                    </Button>
+                  )}
                   <Button onClick={() => window.location.reload()}>
                     {isHindi ? "फिर से प्रयास करें" : "Try Again"}
                   </Button>
@@ -366,6 +420,57 @@ const ExamMode = () => {
       </main>
 
       <Footer />
+
+      {/* Name Dialog for Certificate */}
+      <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
+        <DialogContent>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">
+                {isHindi ? "प्रमाणपत्र के लिए अपना नाम दर्ज करें" : "Enter Your Name for Certificate"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {isHindi 
+                  ? "यह नाम आपके प्रमाणपत्र पर दिखाई देगा"
+                  : "This name will appear on your certificate"}
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="userName">
+                {isHindi ? "आपका नाम" : "Your Name"}
+              </Label>
+              <Input
+                id="userName"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                placeholder={isHindi ? "अपना नाम दर्ज करें" : "Enter your name"}
+                className="mt-2"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowNameDialog(false)}>
+                {isHindi ? "रद्द करें" : "Cancel"}
+              </Button>
+              <Button onClick={handleGenerateCertificate} disabled={!userName.trim()}>
+                {isHindi ? "प्रमाणपत्र बनाएं" : "Generate Certificate"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Certificate Display */}
+      {showCertificate && (
+        <Certificate
+          userName={userName}
+          examName={isHindi ? exam.nameHindi : exam.name}
+          wpm={wpm}
+          accuracy={accuracy}
+          date={new Date().toISOString()}
+          duration={exam.duration - timeRemaining}
+          onClose={() => setShowCertificate(false)}
+        />
+      )}
     </div>
   );
 };
