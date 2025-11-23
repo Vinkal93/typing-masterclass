@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Play, RotateCcw } from "lucide-react";
+import { Play, RotateCcw, Heart, Zap, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { saveTestRecord } from "@/lib/progressTracker";
 
 interface FallingWord {
   id: number;
@@ -23,6 +24,22 @@ interface Bubble {
   y: number;
   color: string;
   exploding: boolean;
+}
+
+interface Alien {
+  id: number;
+  word: string;
+  x: number;
+  y: number;
+  destroyed: boolean;
+}
+
+interface Zombie {
+  id: number;
+  word: string;
+  x: number;
+  distance: number;
+  speed: number;
 }
 
 const Games = () => {
@@ -63,16 +80,49 @@ const Games = () => {
   const [currentLapStartTime, setCurrentLapStartTime] = useState<number>(0);
   const raceInputRef = useRef<HTMLInputElement>(null);
 
+  // Space Typing Game State
+  const [spaceGameStarted, setSpaceGameStarted] = useState(false);
+  const [spaceScore, setSpaceScore] = useState(0);
+  const [spaceGameOver, setSpaceGameOver] = useState(false);
+  const [aliens, setAliens] = useState<Alien[]>([]);
+  const [spaceInput, setSpaceInput] = useState("");
+  const [spaceLevel, setSpaceLevel] = useState(1);
+  const [spaceLives, setSpaceLives] = useState(5);
+  const spaceInputRef = useRef<HTMLInputElement>(null);
+
+  // Zombie Typing Game State
+  const [zombieGameStarted, setZombieGameStarted] = useState(false);
+  const [zombieScore, setZombieScore] = useState(0);
+  const [zombieGameOver, setZombieGameOver] = useState(false);
+  const [zombies, setZombies] = useState<Zombie[]>([]);
+  const [zombieInput, setZombieInput] = useState("");
+  const [zombieLevel, setZombieLevel] = useState(1);
+  const [zombieLives, setZombieLives] = useState(3);
+  const zombieInputRef = useRef<HTMLInputElement>(null);
+
+  // Marathon Game State
+  const [marathonGameStarted, setMarathonGameStarted] = useState(false);
+  const [marathonScore, setMarathonScore] = useState(0);
+  const [marathonGameOver, setMarathonGameOver] = useState(false);
+  const [marathonWords, setMarathonWords] = useState<string[]>([]);
+  const [marathonInput, setMarathonInput] = useState("");
+  const [marathonTime, setMarathonTime] = useState(60);
+  const [marathonWPM, setMarathonWPM] = useState(0);
+  const [correctWords, setCorrectWords] = useState(0);
+  const marathonInputRef = useRef<HTMLInputElement>(null);
+
   const englishWords = [
     "cat", "dog", "run", "jump", "fast", "slow", "blue", "red", "green", "happy",
     "type", "word", "game", "play", "quick", "speed", "time", "moon", "star", "sun",
-    "code", "learn", "skill", "power", "focus", "think", "smart", "brain", "idea", "love"
+    "code", "learn", "skill", "power", "focus", "think", "smart", "brain", "idea", "love",
+    "book", "pen", "desk", "chair", "door", "window", "light", "dark", "day", "night"
   ];
 
   const hindiWords = [
     "कल", "आज", "खेल", "दौड़", "तेज", "धीमा", "नीला", "लाल", "हरा", "खुश",
     "टाइप", "शब्द", "गेम", "खेलो", "जल्दी", "स्पीड", "समय", "चांद", "तारा", "सूरज",
-    "कोड", "सीखो", "कौशल", "शक्ति", "ध्यान", "सोचो", "स्मार्ट", "दिमाग", "विचार", "प्यार"
+    "कोड", "सीखो", "कौशल", "शक्ति", "ध्यान", "सोचो", "स्मार्ट", "दिमाग", "विचार", "प्यार",
+    "किताब", "कलम", "मेज", "कुर्सी", "दरवाजा", "खिड़की", "रोशनी", "अंधेरा", "दिन", "रात"
   ];
 
   const englishSentences = [
@@ -94,6 +144,7 @@ const Games = () => {
   const wordsList = isHindi ? hindiWords : englishWords;
   const sentencesList = isHindi ? hindiSentences : englishSentences;
 
+  // Falling Words Game Logic
   useEffect(() => {
     if (gameStarted && !gameOver) {
       const gameLoop = setInterval(() => {
@@ -103,10 +154,10 @@ const Games = () => {
             y: word.y + word.speed,
           }));
 
-          // Check if any word reached bottom
           const reachedBottom = updatedWords.some((word) => word.y > 400);
           if (reachedBottom) {
             setGameOver(true);
+            saveTestRecord({ type: 'game', wpm: Math.round(score / 5), accuracy: 95, title: 'Falling Words' });
             return updatedWords;
           }
 
@@ -116,7 +167,7 @@ const Games = () => {
 
       return () => clearInterval(gameLoop);
     }
-  }, [gameStarted, gameOver]);
+  }, [gameStarted, gameOver, score]);
 
   useEffect(() => {
     if (gameStarted && !gameOver) {
@@ -136,7 +187,7 @@ const Games = () => {
 
       return () => clearInterval(spawnInterval);
     }
-  }, [gameStarted, level, gameOver]);
+  }, [gameStarted, level, gameOver, wordsList]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -152,14 +203,12 @@ const Games = () => {
     const value = e.target.value;
     setCurrentInput(value);
 
-    // Check if typed word matches any falling word
     const matchedWord = words.find((word) => word.word === value.trim());
     if (matchedWord) {
       setWords((prev) => prev.filter((w) => w.id !== matchedWord.id));
       setScore((prev) => prev + value.length * 10);
       setCurrentInput("");
       
-      // Level up every 5 words
       if ((score + value.length * 10) % 50 === 0) {
         setLevel((prev) => prev + 1);
       }
@@ -175,7 +224,7 @@ const Games = () => {
     setLevel(1);
   };
 
-  // Word Shooter Game Functions
+  // Word Shooter Game Logic
   const bubbleColors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E2"];
 
   const startShooterGame = () => {
@@ -213,7 +262,7 @@ const Games = () => {
 
       return () => clearInterval(spawnInterval);
     }
-  }, [shooterGameStarted, shooterLevel, shooterGameOver, lives]);
+  }, [shooterGameStarted, shooterLevel, shooterGameOver, lives, wordsList]);
 
   useEffect(() => {
     if (shooterGameStarted && !shooterGameOver && bubbles.length > 10) {
@@ -221,12 +270,13 @@ const Games = () => {
         const newLives = prev - 1;
         if (newLives <= 0) {
           setShooterGameOver(true);
+          saveTestRecord({ type: 'game', wpm: Math.round(shooterScore / 7), accuracy: 92, title: 'Word Shooter' });
         }
         return newLives;
       });
       setBubbles((prev) => prev.slice(0, 8));
     }
-  }, [bubbles.length, shooterGameStarted, shooterGameOver]);
+  }, [bubbles.length, shooterGameStarted, shooterGameOver, shooterScore]);
 
   const handleShooterInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -261,7 +311,7 @@ const Games = () => {
     setLives(3);
   };
 
-  // Speed Race Game Functions
+  // Speed Race Game Logic
   const startRaceGame = () => {
     setRaceGameStarted(true);
     setRaceGameOver(false);
@@ -282,22 +332,23 @@ const Games = () => {
     setRaceInput(value);
 
     if (value === currentSentence) {
-      const progress = 100 / 3; // 3 laps to complete
+      const progress = 100 / 3;
       const newPosition = carPosition + progress;
       setCarPosition(newPosition);
       setRaceScore((prev) => prev + currentSentence.length * 5);
       setRaceInput("");
 
-      // Check if lap completed
       if (Math.floor(newPosition / 33.33) > lapTimes.length) {
         const lapTime = (Date.now() - currentLapStartTime) / 1000;
         setLapTimes((prev) => [...prev, lapTime]);
         setCurrentLapStartTime(Date.now());
       }
 
-      // Check if race finished (3 laps)
       if (newPosition >= 100) {
         setRaceGameOver(true);
+        const totalTime = (Date.now() - raceStartTime) / 1000;
+        const wpm = Math.round((raceScore / 5) / (totalTime / 60));
+        saveTestRecord({ type: 'game', wpm, accuracy: 98, title: 'Speed Race', duration: totalTime });
         return;
       }
 
@@ -318,6 +369,614 @@ const Games = () => {
     setCarPosition(0);
     setLapTimes([]);
   };
+
+  // Space Typing Game Logic
+  const startSpaceGame = () => {
+    setSpaceGameStarted(true);
+    setSpaceGameOver(false);
+    setSpaceScore(0);
+    setAliens([]);
+    setSpaceInput("");
+    setSpaceLevel(1);
+    setSpaceLives(5);
+    setTimeout(() => spaceInputRef.current?.focus(), 100);
+  };
+
+  useEffect(() => {
+    if (spaceGameStarted && !spaceGameOver && spaceLives > 0) {
+      const spawnInterval = setInterval(
+        () => {
+          const newAlien: Alien = {
+            id: Date.now() + Math.random(),
+            word: wordsList[Math.floor(Math.random() * wordsList.length)],
+            x: Math.random() * 80 + 10,
+            y: Math.random() * 40 + 10,
+            destroyed: false,
+          };
+          setAliens((prev) => {
+            if (prev.length < 6) {
+              return [...prev, newAlien];
+            }
+            return prev;
+          });
+        },
+        Math.max(2500 - spaceLevel * 250, 1200)
+      );
+
+      return () => clearInterval(spawnInterval);
+    }
+  }, [spaceGameStarted, spaceLevel, spaceGameOver, spaceLives, wordsList]);
+
+  useEffect(() => {
+    if (spaceGameStarted && !spaceGameOver && aliens.length > 8) {
+      setSpaceLives((prev) => {
+        const newLives = prev - 1;
+        if (newLives <= 0) {
+          setSpaceGameOver(true);
+          saveTestRecord({ type: 'game', wpm: Math.round(spaceScore / 6), accuracy: 94, title: 'Space Typing' });
+        }
+        return newLives;
+      });
+      setAliens((prev) => prev.slice(0, 6));
+    }
+  }, [aliens.length, spaceGameStarted, spaceGameOver, spaceScore]);
+
+  const handleSpaceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSpaceInput(value);
+
+    const matchedAlien = aliens.find((alien) => !alien.destroyed && alien.word === value.trim());
+    if (matchedAlien) {
+      setAliens((prev) =>
+        prev.map((a) => (a.id === matchedAlien.id ? { ...a, destroyed: true } : a))
+      );
+      
+      setTimeout(() => {
+        setAliens((prev) => prev.filter((a) => a.id !== matchedAlien.id));
+      }, 300);
+
+      setSpaceScore((prev) => prev + value.length * 20);
+      setSpaceInput("");
+
+      if ((spaceScore + value.length * 20) % 150 === 0) {
+        setSpaceLevel((prev) => prev + 1);
+      }
+    }
+  };
+
+  const resetSpaceGame = () => {
+    setSpaceGameStarted(false);
+    setSpaceGameOver(false);
+    setSpaceScore(0);
+    setAliens([]);
+    setSpaceInput("");
+    setSpaceLevel(1);
+    setSpaceLives(5);
+  };
+
+  // Zombie Typing Game Logic
+  const startZombieGame = () => {
+    setZombieGameStarted(true);
+    setZombieGameOver(false);
+    setZombieScore(0);
+    setZombies([]);
+    setZombieInput("");
+    setZombieLevel(1);
+    setZombieLives(3);
+    setTimeout(() => zombieInputRef.current?.focus(), 100);
+  };
+
+  useEffect(() => {
+    if (zombieGameStarted && !zombieGameOver && zombieLives > 0) {
+      const spawnInterval = setInterval(
+        () => {
+          const newZombie: Zombie = {
+            id: Date.now() + Math.random(),
+            word: wordsList[Math.floor(Math.random() * wordsList.length)],
+            x: Math.random() * 80 + 10,
+            distance: 100,
+            speed: 0.5 + zombieLevel * 0.2,
+          };
+          setZombies((prev) => {
+            if (prev.length < 5) {
+              return [...prev, newZombie];
+            }
+            return prev;
+          });
+        },
+        Math.max(3500 - zombieLevel * 300, 2000)
+      );
+
+      return () => clearInterval(spawnInterval);
+    }
+  }, [zombieGameStarted, zombieLevel, zombieGameOver, zombieLives, wordsList]);
+
+  useEffect(() => {
+    if (zombieGameStarted && !zombieGameOver) {
+      const moveInterval = setInterval(() => {
+        setZombies((prev) => {
+          const updated = prev.map((zombie) => ({
+            ...zombie,
+            distance: zombie.distance - zombie.speed,
+          }));
+
+          const reachedPlayer = updated.some((zombie) => zombie.distance <= 0);
+          if (reachedPlayer) {
+            setZombieLives((lives) => {
+              const newLives = lives - 1;
+              if (newLives <= 0) {
+                setZombieGameOver(true);
+                saveTestRecord({ type: 'game', wpm: Math.round(zombieScore / 6), accuracy: 90, title: 'Zombie Typing' });
+              }
+              return newLives;
+            });
+            return updated.filter((zombie) => zombie.distance > 0);
+          }
+
+          return updated;
+        });
+      }, 100);
+
+      return () => clearInterval(moveInterval);
+    }
+  }, [zombieGameStarted, zombieGameOver, zombieScore]);
+
+  const handleZombieInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setZombieInput(value);
+
+    const matchedZombie = zombies.find((zombie) => zombie.word === value.trim());
+    if (matchedZombie) {
+      setZombies((prev) => prev.filter((z) => z.id !== matchedZombie.id));
+      setZombieScore((prev) => prev + value.length * 18);
+      setZombieInput("");
+
+      if ((zombieScore + value.length * 18) % 120 === 0) {
+        setZombieLevel((prev) => prev + 1);
+      }
+    }
+  };
+
+  const resetZombieGame = () => {
+    setZombieGameStarted(false);
+    setZombieGameOver(false);
+    setZombieScore(0);
+    setZombies([]);
+    setZombieInput("");
+    setZombieLevel(1);
+    setZombieLives(3);
+  };
+
+  // Marathon Game Logic
+  const startMarathonGame = () => {
+    setMarathonGameStarted(true);
+    setMarathonGameOver(false);
+    setMarathonScore(0);
+    setMarathonInput("");
+    setMarathonTime(60);
+    setCorrectWords(0);
+    setMarathonWPM(0);
+    const initialWords = Array.from({ length: 5 }, () => 
+      wordsList[Math.floor(Math.random() * wordsList.length)]
+    );
+    setMarathonWords(initialWords);
+    setTimeout(() => marathonInputRef.current?.focus(), 100);
+  };
+
+  useEffect(() => {
+    if (marathonGameStarted && !marathonGameOver && marathonTime > 0) {
+      const timer = setInterval(() => {
+        setMarathonTime((prev) => {
+          if (prev <= 1) {
+            setMarathonGameOver(true);
+            const wpm = Math.round((correctWords * 60) / 60);
+            saveTestRecord({ type: 'game', wpm, accuracy: 96, title: 'Word Marathon', duration: 60 });
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [marathonGameStarted, marathonGameOver, marathonTime, correctWords]);
+
+  const handleMarathonInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMarathonInput(value);
+
+    if (value.endsWith(" ") && marathonWords[0] === value.trim()) {
+      setMarathonScore((prev) => prev + value.trim().length * 10);
+      setCorrectWords((prev) => prev + 1);
+      setMarathonInput("");
+      setMarathonWords((prev) => {
+        const newWords = [...prev.slice(1)];
+        newWords.push(wordsList[Math.floor(Math.random() * wordsList.length)]);
+        return newWords;
+      });
+      
+      const elapsed = 60 - marathonTime;
+      if (elapsed > 0) {
+        setMarathonWPM(Math.round((correctWords + 1) * 60 / elapsed));
+      }
+    }
+  };
+
+  const resetMarathonGame = () => {
+    setMarathonGameStarted(false);
+    setMarathonGameOver(false);
+    setMarathonScore(0);
+    setMarathonInput("");
+    setMarathonTime(60);
+    setMarathonWPM(0);
+    setCorrectWords(0);
+  };
+
+  // Space Typing Game Render
+  if (selectedGame === "space-typing") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+
+        <main className="container mx-auto px-4 py-8 flex-1">
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "स्कोर" : "Score"}</p>
+                <p className="text-3xl font-bold text-primary">{spaceScore}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "लेवल" : "Level"}</p>
+                <p className="text-3xl font-bold text-secondary">{spaceLevel}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "एलियंस" : "Aliens"}</p>
+                <p className="text-3xl font-bold text-warning">{aliens.length}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "जीवन" : "Lives"}</p>
+                <p className="text-3xl font-bold text-destructive flex items-center justify-center gap-1">
+                  {Array.from({ length: spaceLives }).map((_, i) => (
+                    <Heart key={i} className="h-5 w-5 fill-current" />
+                  ))}
+                </p>
+              </Card>
+            </div>
+
+            <Card className="relative overflow-hidden bg-gradient-to-b from-indigo-950 to-black" style={{ height: "500px" }}>
+              <div className="relative w-full h-full p-4">
+                {!spaceGameStarted && !spaceGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-3xl font-bold mb-4 text-foreground">
+                        👾 {isHindi ? "स्पेस टाइपिंग" : "Space Typing"}
+                      </h3>
+                      <p className="text-muted-foreground mb-6 max-w-md">
+                        {isHindi 
+                          ? "एलियंस को नष्ट करने के लिए शब्द टाइप करें! सावधान रहें, वे तेजी से आ रहे हैं!"
+                          : "Type words to destroy aliens! Be careful, they're coming fast!"}
+                      </p>
+                      <Button onClick={startSpaceGame} size="lg" className="gap-2">
+                        <Play className="h-5 w-5" />
+                        {isHindi ? "गेम शुरू करें" : "Start Game"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {spaceGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-4xl font-bold mb-4 text-foreground">
+                        {isHindi ? "गेम ओवर!" : "Game Over!"}
+                      </h3>
+                      <p className="text-2xl mb-2 text-primary">{isHindi ? "अंतिम स्कोर" : "Final Score"}: {spaceScore}</p>
+                      <p className="text-lg mb-6 text-muted-foreground">
+                        {isHindi ? "लेवल" : "Level"}: {spaceLevel}
+                      </p>
+                      <div className="flex gap-4 justify-center">
+                        <Button onClick={resetSpaceGame} size="lg" className="gap-2">
+                          <RotateCcw className="h-5 w-5" />
+                          {isHindi ? "फिर से खेलें" : "Play Again"}
+                        </Button>
+                        <Button onClick={() => setSelectedGame(null)} variant="outline" size="lg">
+                          {isHindi ? "गेम्स पर वापस" : "Back to Games"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {spaceGameStarted && !spaceGameOver && (
+                  <div className="relative h-full">
+                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-6xl">
+                      🚀
+                    </div>
+
+                    {aliens.map((alien) => (
+                      <div
+                        key={alien.id}
+                        className={`absolute text-3xl transition-all duration-300 ${
+                          alien.destroyed ? 'scale-0' : 'scale-100'
+                        }`}
+                        style={{
+                          left: `${alien.x}%`,
+                          top: `${alien.y}%`,
+                        }}
+                      >
+                        <div className="text-center">
+                          <div className="text-4xl mb-1">👾</div>
+                          <div className="bg-background/90 px-2 py-1 rounded text-xs font-mono text-foreground">
+                            {alien.word}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {spaceGameStarted && !spaceGameOver && (
+              <Card className="mt-6 p-6">
+                <Input
+                  ref={spaceInputRef}
+                  value={spaceInput}
+                  onChange={handleSpaceInputChange}
+                  placeholder={isHindi ? "एलियंस को नष्ट करने के लिए टाइप करें..." : "Type to destroy aliens..."}
+                  className="text-2xl text-center font-mono"
+                  autoFocus
+                />
+              </Card>
+            )}
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
+
+  // Zombie Typing Game Render
+  if (selectedGame === "zombie-typing") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+
+        <main className="container mx-auto px-4 py-8 flex-1">
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "स्कोर" : "Score"}</p>
+                <p className="text-3xl font-bold text-primary">{zombieScore}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "लेवल" : "Level"}</p>
+                <p className="text-3xl font-bold text-secondary">{zombieLevel}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "ज़ोंबी" : "Zombies"}</p>
+                <p className="text-3xl font-bold text-warning">{zombies.length}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "जीवन" : "Lives"}</p>
+                <p className="text-3xl font-bold text-destructive flex items-center justify-center gap-1">
+                  {Array.from({ length: zombieLives }).map((_, i) => (
+                    <Heart key={i} className="h-5 w-5 fill-current" />
+                  ))}
+                </p>
+              </Card>
+            </div>
+
+            <Card className="relative overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900" style={{ height: "500px" }}>
+              <div className="relative w-full h-full p-4">
+                {!zombieGameStarted && !zombieGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-3xl font-bold mb-4 text-foreground">
+                        🧟 {isHindi ? "ज़ोंबी टाइपिंग" : "Zombie Typing"}
+                      </h3>
+                      <p className="text-muted-foreground mb-6 max-w-md">
+                        {isHindi 
+                          ? "ज़ोंबी आ रहे हैं! उन्हें मारने के लिए शब्द टाइप करें इससे पहले कि वे आप तक पहुंचें!"
+                          : "Zombies are coming! Type words to kill them before they reach you!"}
+                      </p>
+                      <Button onClick={startZombieGame} size="lg" className="gap-2">
+                        <Play className="h-5 w-5" />
+                        {isHindi ? "गेम शुरू करें" : "Start Game"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {zombieGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-4xl font-bold mb-4 text-destructive">
+                        {isHindi ? "ज़ोंबी ने आपको पकड़ लिया!" : "Zombies Got You!"}
+                      </h3>
+                      <p className="text-2xl mb-2 text-primary">{isHindi ? "अंतिम स्कोर" : "Final Score"}: {zombieScore}</p>
+                      <p className="text-lg mb-6 text-muted-foreground">
+                        {isHindi ? "लेवल" : "Level"}: {zombieLevel}
+                      </p>
+                      <div className="flex gap-4 justify-center">
+                        <Button onClick={resetZombieGame} size="lg" className="gap-2">
+                          <RotateCcw className="h-5 w-5" />
+                          {isHindi ? "फिर से खेलें" : "Play Again"}
+                        </Button>
+                        <Button onClick={() => setSelectedGame(null)} variant="outline" size="lg">
+                          {isHindi ? "गेम्स पर वापस" : "Back to Games"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {zombieGameStarted && !zombieGameOver && (
+                  <div className="relative h-full">
+                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-6xl">
+                      🏠
+                    </div>
+
+                    {zombies.map((zombie) => (
+                      <div
+                        key={zombie.id}
+                        className="absolute transition-all duration-100"
+                        style={{
+                          left: `${zombie.x}%`,
+                          bottom: `${zombie.distance}px`,
+                        }}
+                      >
+                        <div className="text-center">
+                          <div className="text-4xl mb-1">🧟</div>
+                          <div className="bg-background/90 px-2 py-1 rounded text-xs font-mono text-foreground">
+                            {zombie.word}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="absolute bottom-0 left-0 right-0 h-2 bg-red-500/30" />
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {zombieGameStarted && !zombieGameOver && (
+              <Card className="mt-6 p-6">
+                <Input
+                  ref={zombieInputRef}
+                  value={zombieInput}
+                  onChange={handleZombieInputChange}
+                  placeholder={isHindi ? "ज़ोंबी को मारने के लिए टाइप करें..." : "Type to kill zombies..."}
+                  className="text-2xl text-center font-mono"
+                  autoFocus
+                />
+              </Card>
+            )}
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
+
+  // Word Marathon Game Render
+  if (selectedGame === "word-marathon") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+
+        <main className="container mx-auto px-4 py-8 flex-1">
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "स्कोर" : "Score"}</p>
+                <p className="text-3xl font-bold text-primary">{marathonScore}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "समय" : "Time"}</p>
+                <p className="text-3xl font-bold text-destructive">{marathonTime}s</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">{isHindi ? "शब्द" : "Words"}</p>
+                <p className="text-3xl font-bold text-success">{correctWords}</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-1">WPM</p>
+                <p className="text-3xl font-bold text-secondary">{marathonWPM}</p>
+              </Card>
+            </div>
+
+            <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950" style={{ height: "400px" }}>
+              <div className="relative w-full h-full p-8">
+                {!marathonGameStarted && !marathonGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-3xl font-bold mb-4 text-foreground">
+                        🏃 {isHindi ? "वर्ड मैराथन" : "Word Marathon"}
+                      </h3>
+                      <p className="text-muted-foreground mb-6 max-w-md">
+                        {isHindi 
+                          ? "60 सेकंड में जितने हो सके उतने शब्द टाइप करें! प्रत्येक शब्द के बाद स्पेस दबाएं।"
+                          : "Type as many words as you can in 60 seconds! Press space after each word."}
+                      </p>
+                      <Button onClick={startMarathonGame} size="lg" className="gap-2">
+                        <Play className="h-5 w-5" />
+                        {isHindi ? "गेम शुरू करें" : "Start Game"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {marathonGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-4xl font-bold mb-4 text-foreground">
+                        {isHindi ? "मैराथन पूरी हुई!" : "Marathon Complete!"}
+                      </h3>
+                      <p className="text-2xl mb-2 text-primary">{isHindi ? "कुल स्कोर" : "Total Score"}: {marathonScore}</p>
+                      <p className="text-lg mb-2 text-success">{isHindi ? "शब्द टाइप किए" : "Words Typed"}: {correctWords}</p>
+                      <p className="text-lg mb-6 text-secondary">WPM: {marathonWPM}</p>
+                      <div className="flex gap-4 justify-center">
+                        <Button onClick={resetMarathonGame} size="lg" className="gap-2">
+                          <RotateCcw className="h-5 w-5" />
+                          {isHindi ? "फिर से खेलें" : "Play Again"}
+                        </Button>
+                        <Button onClick={() => setSelectedGame(null)} variant="outline" size="lg">
+                          {isHindi ? "गेम्स पर वापस" : "Back to Games"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {marathonGameStarted && !marathonGameOver && (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="text-center mb-8">
+                      <div className="text-6xl font-bold text-primary mb-4">
+                        {marathonWords[0]}
+                      </div>
+                      <div className="flex gap-4 justify-center text-2xl text-muted-foreground">
+                        {marathonWords.slice(1, 4).map((word, idx) => (
+                          <span key={idx} className="opacity-50">{word}</span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="w-full max-w-md">
+                      <div className="h-2 bg-muted rounded-full overflow-hidden mb-4">
+                        <div 
+                          className="h-full bg-primary transition-all duration-1000"
+                          style={{ width: `${(marathonTime / 60) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {marathonGameStarted && !marathonGameOver && (
+              <Card className="mt-6 p-6">
+                <Input
+                  ref={marathonInputRef}
+                  value={marathonInput}
+                  onChange={handleMarathonInputChange}
+                  placeholder={isHindi ? "शब्द टाइप करें और स्पेस दबाएं..." : "Type word and press space..."}
+                  className="text-2xl text-center font-mono"
+                  autoFocus
+                />
+              </Card>
+            )}
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
 
   if (selectedGame === "speed-race") {
     const totalTime = lapTimes.reduce((a, b) => a + b, 0);
@@ -481,61 +1140,61 @@ const Games = () => {
               </Card>
               <Card className="p-4 text-center">
                 <p className="text-sm text-muted-foreground mb-1">{t('words')}</p>
-                <p className="text-3xl font-bold text-success">{Math.floor(score / 50)}</p>
+                <p className="text-3xl font-bold text-warning">{words.length}</p>
               </Card>
             </div>
 
             {/* Game Area */}
-            <Card className="relative overflow-hidden" style={{ height: "450px" }}>
-              <div
-                ref={gameRef}
-                className="absolute inset-0 bg-gradient-to-b from-background to-muted/30"
-              >
+            <Card className="relative overflow-hidden bg-gradient-to-b from-sky-100 to-sky-50 dark:from-sky-950 dark:to-background" style={{ height: "500px" }}>
+              <div ref={gameRef} className="relative w-full h-full">
                 {!gameStarted && !gameOver && (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <h2 className="text-3xl font-bold text-foreground mb-4">
-                      {t('fallingWordsGame')}
-                    </h2>
-                    <p className="text-muted-foreground mb-8 text-center max-w-md">
-                      {t('fallingWordsInstruction')}
-                    </p>
-                    <Button onClick={startGame} size="lg" className="gap-2">
-                      <Play className="h-5 w-5" />
-                      {t('startGame')}
-                    </Button>
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-3xl font-bold mb-4 text-foreground">{t('fallingWords')}</h3>
+                      <p className="text-muted-foreground mb-6 max-w-md">
+                        {t('fallingWordsInstruction')}
+                      </p>
+                      <Button onClick={startGame} size="lg" className="gap-2">
+                        <Play className="h-5 w-5" />
+                        {t('startGame')}
+                      </Button>
+                    </div>
                   </div>
                 )}
 
                 {gameOver && (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <h2 className="text-3xl font-bold text-destructive mb-4">{t('gameOver')}</h2>
-                    <p className="text-2xl text-foreground mb-2">{t('finalScore')}: {score}</p>
-                    <p className="text-lg text-muted-foreground mb-8">
-                      {t('levelReached')}: {level}
-                    </p>
-                    <Button onClick={resetGame} size="lg" className="gap-2">
-                      <RotateCcw className="h-5 w-5" />
-                      {t('playAgain')}
-                    </Button>
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <h3 className="text-4xl font-bold mb-4 text-foreground">{t('gameOver')}</h3>
+                      <p className="text-2xl mb-2 text-primary">{t('finalScore')}: {score}</p>
+                      <p className="text-lg mb-6 text-muted-foreground">{t('levelReached')}: {level}</p>
+                      <div className="flex gap-4 justify-center">
+                        <Button onClick={resetGame} size="lg" className="gap-2">
+                          <RotateCcw className="h-5 w-5" />
+                          {t('playAgain')}
+                        </Button>
+                        <Button onClick={() => setSelectedGame(null)} variant="outline" size="lg">
+                          {t('backToGames')}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
-                {gameStarted && !gameOver && (
-                  <>
-                    {words.map((word) => (
-                      <div
-                        key={word.id}
-                        className="absolute text-2xl font-bold text-primary transition-all"
-                        style={{
-                          left: `${word.x}%`,
-                          top: `${word.y}px`,
-                        }}
-                      >
-                        {word.word}
-                      </div>
-                    ))}
-                  </>
-                )}
+                {/* Falling words */}
+                {words.map((word) => (
+                  <div
+                    key={word.id}
+                    className="absolute bg-primary text-primary-foreground px-3 py-1 rounded-md font-mono text-lg shadow-lg"
+                    style={{
+                      left: `${word.x}%`,
+                      top: `${word.y}px`,
+                      transition: "top 0.05s linear",
+                    }}
+                  >
+                    {word.word}
+                  </div>
+                ))}
               </div>
             </Card>
 
@@ -546,7 +1205,7 @@ const Games = () => {
                   ref={inputRef}
                   value={currentInput}
                   onChange={handleInputChange}
-                  placeholder={t('typeFallingWords')}
+                  placeholder={t('typeWords')}
                   className="text-2xl text-center font-mono"
                   autoFocus
                 />
@@ -579,21 +1238,25 @@ const Games = () => {
               </Card>
               <Card className="p-4 text-center">
                 <p className="text-sm text-muted-foreground mb-1">{t('bubbles')}</p>
-                <p className="text-3xl font-bold text-success">{bubbles.length}</p>
+                <p className="text-3xl font-bold text-warning">{bubbles.length}</p>
               </Card>
               <Card className="p-4 text-center">
                 <p className="text-sm text-muted-foreground mb-1">{t('lives')}</p>
-                <p className="text-3xl font-bold text-destructive">{"❤️".repeat(lives)}</p>
+                <p className="text-3xl font-bold text-destructive flex items-center justify-center gap-1">
+                  {Array.from({ length: lives }).map((_, i) => (
+                    <Heart key={i} className="h-5 w-5 fill-current" />
+                  ))}
+                </p>
               </Card>
             </div>
 
             {/* Game Area */}
-            <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950" style={{ height: "500px" }}>
+            <Card className="relative overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-950 dark:to-purple-950" style={{ height: "500px" }}>
               <div className="relative w-full h-full p-4">
                 {!shooterGameStarted && !shooterGameOver && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
                     <div className="text-center">
-                      <h3 className="text-3xl font-bold mb-4 text-foreground">{t('wordShooterGame')}</h3>
+                      <h3 className="text-3xl font-bold mb-4 text-foreground">{t('wordShooter')}</h3>
                       <p className="text-muted-foreground mb-6 max-w-md">
                         {t('wordShooterInstruction')}
                       </p>
@@ -625,49 +1288,23 @@ const Games = () => {
                 )}
 
                 {/* Bubbles */}
-                {shooterGameStarted && (
-                  <>
-                    {bubbles.map((bubble) => (
-                      <div
-                        key={bubble.id}
-                        className={`absolute transition-all duration-500 ${
-                          bubble.exploding ? "scale-150 opacity-0" : "scale-100 opacity-100"
-                        }`}
-                        style={{
-                          left: `${bubble.x}%`,
-                          top: `${bubble.y}%`,
-                          transform: "translate(-50%, -50%)",
-                        }}
-                      >
-                        <div
-                          className={`relative ${
-                            bubble.exploding ? "animate-ping" : ""
-                          }`}
-                          style={{
-                            width: "100px",
-                            height: "100px",
-                            borderRadius: "50%",
-                            backgroundColor: bubble.color,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
-                            border: "3px solid rgba(255,255,255,0.3)",
-                          }}
-                        >
-                          <span className="text-white font-bold text-lg">
-                            {bubble.word}
-                          </span>
-                          {bubble.exploding && (
-                            <div className="absolute inset-0 flex items-center justify-center text-4xl">
-                              💥
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                )}
+                {bubbles.map((bubble) => (
+                  <div
+                    key={bubble.id}
+                    className={`absolute rounded-full flex items-center justify-center font-mono font-bold text-white shadow-lg transition-all duration-500 ${
+                      bubble.exploding ? 'scale-150 opacity-0' : 'scale-100 opacity-100'
+                    }`}
+                    style={{
+                      left: `${bubble.x}%`,
+                      top: `${bubble.y}%`,
+                      width: "80px",
+                      height: "80px",
+                      backgroundColor: bubble.color,
+                    }}
+                  >
+                    {bubble.word}
+                  </div>
+                ))}
               </div>
             </Card>
 
@@ -678,7 +1315,7 @@ const Games = () => {
                   ref={shooterInputRef}
                   value={shooterInput}
                   onChange={handleShooterInputChange}
-                  placeholder={t('typeToShoot')}
+                  placeholder={t('shootBubbles')}
                   className="text-2xl text-center font-mono"
                   autoFocus
                 />
@@ -707,7 +1344,7 @@ const Games = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card
               className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
               onClick={() => setSelectedGame("falling-words")}
@@ -777,7 +1414,10 @@ const Games = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-border opacity-60">
+            <Card
+              className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
+              onClick={() => setSelectedGame("space-typing")}
+            >
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
                   👾 {t('spaceTyping')}
@@ -790,8 +1430,59 @@ const Games = () => {
                 <p className="text-muted-foreground mb-4">
                   {t('spaceTypingInfo')}
                 </p>
-                <Button className="w-full" disabled>
-                  {t('comingSoon')}
+                <Button className="w-full gap-2">
+                  <Play className="h-5 w-5" />
+                  {t('playNow')}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
+              onClick={() => setSelectedGame("zombie-typing")}
+            >
+              <CardHeader>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  🧟 {isHindi ? "ज़ोंबी टाइपिंग" : "Zombie Typing"}
+                </CardTitle>
+                <CardDescription className="text-base">
+                  {isHindi ? "ज़ोंबी से बचाव करें" : "Defend against zombies"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  {isHindi 
+                    ? "ज़ोंबी को मारने के लिए शब्द टाइप करें इससे पहले कि वे आप तक पहुंचें!"
+                    : "Type words to kill zombies before they reach you!"}
+                </p>
+                <Button className="w-full gap-2">
+                  <Play className="h-5 w-5" />
+                  {t('playNow')}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
+              onClick={() => setSelectedGame("word-marathon")}
+            >
+              <CardHeader>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  🏃 {isHindi ? "वर्ड मैराथन" : "Word Marathon"}
+                </CardTitle>
+                <CardDescription className="text-base">
+                  {isHindi ? "60 सेकंड की चुनौती" : "60 second challenge"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  {isHindi 
+                    ? "60 सेकंड में जितने हो सके उतने शब्द टाइप करें!"
+                    : "Type as many words as you can in 60 seconds!"}
+                </p>
+                <Button className="w-full gap-2">
+                  <Play className="h-5 w-5" />
+                  {t('playNow')}
                 </Button>
               </CardContent>
             </Card>

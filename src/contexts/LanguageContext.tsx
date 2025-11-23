@@ -92,6 +92,8 @@ const translations: Record<string, { en: string; hi: string }> = {
   currentLap: { en: "Current Lap", hi: "वर्तमान लैप" },
   raceFinished: { en: "Race Finished!", hi: "रेस पूरी हुई!" },
   totalTime: { en: "Total Time", hi: "कुल समय" },
+  typeWords: { en: "Type words...", hi: "शब्द टाइप करें..." },
+  shootBubbles: { en: "Type to shoot bubbles...", hi: "बुलबुले शूट करने के लिए टाइप करें..." },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
