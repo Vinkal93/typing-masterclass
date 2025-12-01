@@ -1,11 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Target, Clock, Award, Trophy, Zap } from "lucide-react";
+import { TrendingUp, Target, Clock, Award, Trophy, Zap, Flame, Trash2, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProgressData, getAverageWpm, getAverageAccuracy, getRecentTests } from "@/lib/progressTracker";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Progress = () => {
   const navigate = useNavigate();
@@ -13,7 +26,60 @@ const Progress = () => {
   const progress = getProgressData();
   const avgWpm = getAverageWpm();
   const avgAccuracy = getAverageAccuracy();
-  const recentTests = getRecentTests(5);
+  const recentTests = getRecentTests(10);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+
+  // Calculate streak
+  const calculateStreak = () => {
+    if (progress.tests.length === 0) return 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const testDates = progress.tests.map(test => {
+      const date = new Date(test.timestamp);
+      date.setHours(0, 0, 0, 0);
+      return date.getTime();
+    });
+    
+    const uniqueDates = [...new Set(testDates)].sort((a, b) => b - a);
+    
+    let streak = 0;
+    let currentDate = today.getTime();
+    
+    for (const date of uniqueDates) {
+      if (date === currentDate) {
+        streak++;
+        currentDate -= 24 * 60 * 60 * 1000;
+      } else if (date === currentDate) {
+        continue;
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  };
+
+  const streak = calculateStreak();
+
+  // Prepare chart data
+  const chartData = progress.tests.slice(-20).map((test, index) => ({
+    name: `#${index + 1}`,
+    WPM: test.wpm,
+    Accuracy: test.accuracy,
+    date: new Date(test.timestamp).toLocaleDateString(),
+  }));
+
+  const handleClearHistory = () => {
+    localStorage.removeItem('typing_progress');
+    toast({
+      title: isHindi ? "इतिहास साफ हो गया" : "History Cleared",
+      description: isHindi ? "आपका सभी प्रगति डेटा साफ कर दिया गया है" : "All your progress data has been cleared",
+    });
+    setShowClearDialog(false);
+    window.location.reload();
+  };
 
   const badges = [
     { 
@@ -34,7 +100,7 @@ const Progress = () => {
       id: "accuracy_king",
       name: isHindi ? "सटीकता राजा" : "Accuracy King", 
       desc: isHindi ? "95% सटीकता" : "95% accuracy", 
-      icon: "🎪",
+      icon: "🎯",
       unlocked: progress.achievements.includes('accuracy_king')
     },
     { 
@@ -43,20 +109,6 @@ const Progress = () => {
       desc: isHindi ? "10 पाठ पूरे करें" : "10 lessons done", 
       icon: "📚",
       unlocked: progress.achievements.includes('practice_master')
-    },
-    { 
-      id: "game_champion",
-      name: isHindi ? "गेम चैंपियन" : "Game Champion", 
-      desc: isHindi ? "5 गेम जीतें" : "Win 5 games", 
-      icon: "🏆",
-      unlocked: false // Not tracking game wins yet
-    },
-    { 
-      id: "streak_legend",
-      name: isHindi ? "स्ट्रीक लीजेंड" : "Streak Legend", 
-      desc: isHindi ? "7 दिन की स्ट्रीक" : "7 day streak", 
-      icon: "🔥",
-      unlocked: false // Not tracking streaks yet
     },
     { 
       id: "fast_fingers",
@@ -76,23 +128,29 @@ const Progress = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-
       <main className="container mx-auto px-4 py-8 flex-1">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground mb-4">
-              {isHindi ? "आपका प्रगति डैशबोर्ड" : "Your Progress Dashboard"}
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              {isHindi ? "अपनी सुधार को ट्रैक करें" : "Track your improvement"}
-            </p>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-4xl font-bold text-foreground mb-2">
+                {isHindi ? "आपका प्रगति डैशबोर्ड" : "Your Progress Dashboard"}
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                {isHindi ? "अपनी सुधार को ट्रैक करें" : "Track your improvement"}
+              </p>
+            </div>
+            {progress.totalTests > 0 && (
+              <Button variant="destructive" onClick={() => setShowClearDialog(true)}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                {isHindi ? "इतिहास साफ करें" : "Clear History"}
+              </Button>
+            )}
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
             <Card className="border-border">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm">
                     {isHindi ? "कुल टेस्ट" : "Total Tests"}
@@ -102,36 +160,30 @@ const Progress = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-foreground">{progress.totalTests}</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isHindi ? "टेस्ट पूरे हुए" : "Tests completed"}
-                </p>
               </CardContent>
             </Card>
 
             <Card className="border-border">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm">
-                    {isHindi ? "औसत गति" : "Avg Speed"}
+                    {isHindi ? "औसत WPM" : "Avg WPM"}
                   </CardTitle>
                   <TrendingUp className="h-5 w-5 text-secondary" />
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-foreground">{avgWpm}</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isHindi ? "WPM औसत" : "WPM average"}
-                </p>
                 {progress.bestWpm > 0 && (
                   <p className="text-xs text-primary mt-1">
-                    {isHindi ? "सर्वश्रेष्ठ" : "Best"}: {progress.bestWpm} WPM
+                    {isHindi ? "सर्वश्रेष्ठ" : "Best"}: {progress.bestWpm}
                   </p>
                 )}
               </CardContent>
             </Card>
 
             <Card className="border-border">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm">
                     {isHindi ? "औसत सटीकता" : "Avg Accuracy"}
@@ -141,9 +193,6 @@ const Progress = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-foreground">{avgAccuracy}%</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isHindi ? "सटीकता दर" : "Accuracy rate"}
-                </p>
                 {progress.bestAccuracy > 0 && (
                   <p className="text-xs text-success mt-1">
                     {isHindi ? "सर्वश्रेष्ठ" : "Best"}: {progress.bestAccuracy}%
@@ -153,36 +202,105 @@ const Progress = () => {
             </Card>
 
             <Card className="border-border">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm">
                     {isHindi ? "उपलब्धियां" : "Achievements"}
                   </CardTitle>
-                  <Award className="h-5 w-5 text-primary" />
+                  <Award className="h-5 w-5 text-accent" />
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-foreground">
                   {progress.achievements.length}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isHindi ? "बैज अर्जित किए" : "Badges earned"}
+              </CardContent>
+            </Card>
+
+            <Card className="border-border bg-gradient-to-br from-primary/10 to-secondary/10">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm">
+                    {isHindi ? "दिन की स्ट्रीक" : "Day Streak"}
+                  </CardTitle>
+                  <Flame className="h-5 w-5 text-secondary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold text-foreground">{streak} 🔥</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {isHindi ? "दिन" : "days"}
                 </p>
               </CardContent>
             </Card>
           </div>
 
+          {/* Performance Charts */}
+          {chartData.length > 0 && (
+            <Card className="border-border mb-8">
+              <CardHeader>
+                <CardTitle>{isHindi ? "प्रदर्शन रुझान" : "Performance Trends"}</CardTitle>
+                <CardDescription>
+                  {isHindi ? "पिछले 20 टेस्ट" : "Last 20 tests"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                      <XAxis dataKey="name" />
+                      <YAxis yAxisId="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))', 
+                          border: '1px solid hsl(var(--border))' 
+                        }}
+                      />
+                      <Legend />
+                      <Line 
+                        yAxisId="left"
+                        type="monotone" 
+                        dataKey="WPM" 
+                        stroke="hsl(var(--primary))" 
+                        strokeWidth={2}
+                        dot={{ fill: 'hsl(var(--primary))' }}
+                      />
+                      <Line 
+                        yAxisId="right"
+                        type="monotone" 
+                        dataKey="Accuracy" 
+                        stroke="hsl(var(--success))" 
+                        strokeWidth={2}
+                        dot={{ fill: 'hsl(var(--success))' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Recent Tests */}
           {recentTests.length > 0 && (
             <Card className="border-border mb-8">
               <CardHeader>
-                <CardTitle>{isHindi ? "हाल के टेस्ट" : "Recent Tests"}</CardTitle>
-                <CardDescription>
-                  {isHindi ? "आपके हाल के प्रदर्शन" : "Your recent performances"}
-                </CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>{isHindi ? "हाल के टेस्ट" : "Recent Tests"}</CardTitle>
+                    <CardDescription>
+                      {isHindi ? "आपके हाल के प्रदर्शन" : "Your recent performances"}
+                    </CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => navigate("/exam-history")}>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    {isHindi ? "पूरा इतिहास" : "Full History"}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {recentTests.map((test) => (
                     <div
                       key={test.id}
@@ -190,12 +308,17 @@ const Progress = () => {
                     >
                       <div className="flex items-center gap-4">
                         <div className="p-2 rounded-full bg-primary/10">
-                          {test.type === 'test' ? <Zap className="h-5 w-5 text-primary" /> : <Trophy className="h-5 w-5 text-secondary" />}
+                          {test.type === 'exam' ? <Trophy className="h-5 w-5 text-secondary" /> : <Zap className="h-5 w-5 text-primary" />}
                         </div>
                         <div>
-                          <p className="font-semibold">{test.title}</p>
+                          <p className="font-semibold">{test.title || (isHindi ? "टाइपिंग टेस्ट" : "Typing Test")}</p>
                           <p className="text-sm text-muted-foreground">
-                            {new Date(test.timestamp).toLocaleDateString(isHindi ? 'hi-IN' : 'en-US')}
+                            {new Date(test.timestamp).toLocaleDateString(isHindi ? 'hi-IN' : 'en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
                           </p>
                         </div>
                       </div>
@@ -227,7 +350,7 @@ const Progress = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {badges.map((badge) => (
                   <Card
                     key={badge.id}
@@ -315,6 +438,28 @@ const Progress = () => {
       </main>
 
       <Footer />
+
+      {/* Clear History Confirmation Dialog */}
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isHindi ? "क्या आप सुनिश्चित हैं?" : "Are you absolutely sure?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isHindi
+                ? "यह क्रिया आपके सभी टेस्ट इतिहास, उपलब्धियों और प्रगति को स्थायी रूप से हटा देगी। इसे पूर्ववत नहीं किया जा सकता।"
+                : "This action will permanently delete all your test history, achievements, and progress. This cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{isHindi ? "रद्द करें" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearHistory} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {isHindi ? "हां, साफ करें" : "Yes, clear it"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

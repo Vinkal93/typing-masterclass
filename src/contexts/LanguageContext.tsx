@@ -94,6 +94,11 @@ const translations: Record<string, { en: string; hi: string }> = {
   totalTime: { en: "Total Time", hi: "कुल समय" },
   typeWords: { en: "Type words...", hi: "शब्द टाइप करें..." },
   shootBubbles: { en: "Type to shoot bubbles...", hi: "बुलबुले शूट करने के लिए टाइप करें..." },
+  
+  // Navigation & UI
+  navigation: { en: "Navigation", hi: "नेविगेशन" },
+  more: { en: "More", hi: "अधिक" },
+  examHistory: { en: "Exam History", hi: "परीक्षा इतिहास" },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
