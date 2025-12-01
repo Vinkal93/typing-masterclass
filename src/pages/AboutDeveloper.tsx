@@ -1,5 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Globe, Code2, Lightbulb, Target, Award } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Mail, Globe, Code2, Lightbulb, Target, Award, ExternalLink, Github, Linkedin } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -7,211 +9,268 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const AboutDeveloper = () => {
   const { isHindi } = useLanguage();
 
+  const skills = [
+    "React", "TypeScript", "Android Development", "Java/Kotlin",
+    "PHP", "WordPress", "AI Integration", "UI/UX Design",
+    "Excel Automation", "Web Development", "Mobile Apps"
+  ];
+
+  const projects = [
+    {
+      title: "TypeMaster",
+      description: isHindi ? "संपूर्ण टाइपिंग प्रशिक्षण सॉफ़्टवेयर" : "Complete typing training software",
+      tech: ["React", "TypeScript", "Tailwind"]
+    },
+    {
+      title: "Advanced Calculator",
+      description: isHindi ? "Android कैलकुलेटर ऐप" : "Android calculator app",
+      tech: ["Android", "Java"]
+    },
+    {
+      title: "AI Chatbot",
+      description: isHindi ? "वेबसाइटों के लिए कस्टम चैटबॉट" : "Custom chatbot for websites",
+      tech: ["AI", "JavaScript", "PHP"]
+    },
+    {
+      title: "Data Automation Tools",
+      description: isHindi ? "छात्रों के लिए ऑटोमेशन" : "Automation for students",
+      tech: ["Excel", "VBA", "Python"]
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-      
       <main className="container mx-auto px-4 py-12 flex-1">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-8 text-foreground">
-            {isHindi ? "डेवलपर के बारे में" : "About the Developer"}
-          </h1>
-
-          {/* Profile Card */}
-          <Card className="mb-8">
-            <CardHeader className="text-center">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center">
+        <div className="max-w-6xl mx-auto">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <div className="relative inline-block mb-6">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary via-secondary to-accent mx-auto flex items-center justify-center shadow-2xl">
                 <Code2 className="h-16 w-16 text-white" />
               </div>
-              <CardTitle className="text-3xl">Vinkal Prajapati</CardTitle>
-              <CardDescription className="text-lg">Web Developer & Android App Developer</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-5 w-5 text-primary" />
-                  <a href="mailto:vinkal93041@gmail.com" className="text-primary hover:underline">
-                    vinkal93041@gmail.com
-                  </a>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Globe className="h-5 w-5 text-primary" />
-                  <a href="https://quantuminstitute.framer.website" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                    quantuminstitute.framer.website
-                  </a>
-                </div>
+              <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-success rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-2xl">✨</span>
               </div>
-              
-              <p className="text-muted-foreground leading-relaxed">
-                {isHindi 
-                  ? "मैं विंकल प्रजापति हूं, एक passionate Web और Android Developer जो आधुनिक, responsive और intelligent डिजिटल solutions बनाने के लिए प्रतिबद्ध हूं। मेरा काम सादगी, दक्षता और उच्च गुणवत्ता वाले user experience पर केंद्रित है, यह सुनिश्चित करते हुए कि मेरे द्वारा विकसित प्रत्येक tool वास्तव में users को सीखने, बढ़ने और बेहतर प्रदर्शन करने में मदद करता है।"
-                  : "I am Vinkal Prajapati, a passionate Web and Android Developer committed to creating modern, responsive, and intelligent digital solutions. My work focuses on simplicity, efficiency, and high-quality user experience, ensuring that every tool I develop genuinely helps users learn, grow, and perform better."
-                }
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+            
+            <h1 className="text-5xl font-bold text-foreground mb-3">
+              Vinkal Prajapati
+            </h1>
+            <p className="text-2xl text-muted-foreground mb-6">
+              {isHindi ? "वेब और Android डेवलपर" : "Web & Android Developer"}
+            </p>
+            
+            <div className="flex gap-3 justify-center mb-8">
+              <Button variant="outline" size="sm" asChild>
+                <a href="mailto:vinkal93041@gmail.com" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email
+                </a>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <a href="https://quantuminstitute.framer.website" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Website
+                </a>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <a href="https://dev.to/vinkalprajapati" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <Github className="h-4 w-4" />
+                  Dev.to
+                </a>
+              </Button>
+            </div>
+
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              {isHindi 
+                ? "मैं एक passionate डेवलपर हूं जो आधुनिक, responsive और intelligent डिजिटल solutions बनाने के लिए प्रतिबद्ध हूं। मेरा काम सादगी, दक्षता और उच्च गुणवत्ता वाले user experience पर केंद्रित है।"
+                : "I'm a passionate developer committed to creating modern, responsive, and intelligent digital solutions. My work focuses on simplicity, efficiency, and high-quality user experience."
+              }
+            </p>
+          </div>
 
           {/* Vision & Mission */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Card>
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
+            <Card className="border-2 border-primary/20 hover:border-primary/50 transition-colors">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="h-6 w-6 text-primary" />
-                  {isHindi ? "विज़न" : "Vision"}
-                </CardTitle>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Lightbulb className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-2xl">{isHindi ? "विज़न" : "Vision"}</CardTitle>
+                </div>
               </CardHeader>
               <CardContent>
-                <p className="italic text-muted-foreground">
+                <p className="text-lg font-semibold text-primary mb-3">
                   {isHindi 
-                    ? '"प्रौद्योगिकी को सीखने को आसान, तेज़ और अधिक सुलभ बनाना चाहिए।"'
-                    : '"Technology should make learning easier, faster, and more accessible."'
+                    ? '"प्रौद्योगिकी को सीखने को आसान बनाना चाहिए"'
+                    : '"Technology should make learning easier"'
                   }
                 </p>
-                <p className="mt-4 text-sm">
+                <p className="text-muted-foreground">
                   {isHindi
-                    ? "इस विश्वास के साथ, मैंने TypeMaster बनाया, एक संपूर्ण typing training solution जो students, professionals और किसी भी व्यक्ति के लिए डिज़ाइन किया गया है जो अपनी typing speed और accuracy में सुधार करना चाहता है।"
-                    : "With this belief, I built TypeMaster, a complete typing training solution designed for students, professionals, and anyone who wants to improve their typing speed and accuracy."
+                    ? "इस विश्वास के साथ, मैंने TypeMaster बनाया - एक संपूर्ण typing training solution जो सभी के लिए डिज़ाइन किया गया है।"
+                    : "With this belief, I built TypeMaster - a complete typing training solution designed for everyone."
                   }
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-2 border-secondary/20 hover:border-secondary/50 transition-colors">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-6 w-6 text-secondary" />
-                  {isHindi ? "मिशन" : "Mission"}
-                </CardTitle>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-secondary/10">
+                    <Target className="h-6 w-6 text-secondary" />
+                  </div>
+                  <CardTitle className="text-2xl">{isHindi ? "मिशन" : "Mission"}</CardTitle>
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
                   {isHindi
-                    ? "स्मार्ट, user-friendly और विश्वसनीय डिजिटल tools बनाना जो learners को उनके skills को बढ़ाने और excellence हासिल करने के लिए सशक्त बनाते हैं — beginner से advanced level तक।"
-                    : "To build smart, user-friendly, and reliable digital tools that empower learners to enhance their skills and achieve excellence — from beginner to advanced level."
+                    ? "स्मार्ट, user-friendly और विश्वसनीय डिजिटल tools बनाना जो learners को उनके skills को बढ़ाने और excellence हासिल करने के लिए सशक्त बनाते हैं।"
+                    : "To build smart, user-friendly, and reliable digital tools that empower learners to enhance their skills and achieve excellence."
                   }
                 </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Skills & Expertise */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-6 w-6 text-success" />
-                {isHindi ? "मुख्य Skills & Expertise" : "Core Skills & Expertise"}
-              </CardTitle>
+          {/* Skills */}
+          <Card className="mb-12 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+              <div className="flex items-center gap-3">
+                <Award className="h-6 w-6 text-primary" />
+                <CardTitle className="text-2xl">
+                  {isHindi ? "मुख्य Skills & Expertise" : "Core Skills & Expertise"}
+                </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4">
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    Android Development (Java/Kotlin)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    Web Development (HTML, CSS, JavaScript, PHP)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    AI Integration using Google Gemini API
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    Excel Automation & Data Dashboards
-                  </li>
-                </ul>
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                    WordPress Development
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                    UI/UX Designing
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                    Educational Software Development
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                    Typing Tools Development
-                  </li>
-                </ul>
+            <CardContent className="pt-6">
+              <div className="flex flex-wrap gap-3">
+                {skills.map((skill, index) => (
+                  <Badge 
+                    key={index} 
+                    variant="secondary" 
+                    className="px-4 py-2 text-sm font-medium hover:scale-105 transition-transform"
+                  >
+                    {skill}
+                  </Badge>
+                ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* Major Projects */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>{isHindi ? "प्रमुख Projects" : "Major Projects"}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-lg mb-2">{isHindi ? "Software & Apps" : "Software & Apps"}</h4>
-                  <ul className="space-y-1 text-muted-foreground">
-                    <li>• Advanced Calculator App (Android)</li>
-                    <li>• TypeMaster Typing Software</li>
-                    <li>• Custom AI Chatbot for Websites</li>
-                    <li>• Data Automation Tools for Students</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-lg mb-2">{isHindi ? "Web-Based Projects" : "Web-Based Projects"}</h4>
-                  <ul className="space-y-1 text-muted-foreground">
-                    <li>• MaxxPe Landing Page</li>
-                    <li>• Custom WordPress Share Widget Plugin</li>
-                    <li>• Multiple Interactive Web Tools</li>
-                    <li>• Dashboard Systems</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Projects */}
+          <div className="mb-12">
+            <h3 className="text-3xl font-bold text-foreground mb-6 text-center">
+              {isHindi ? "प्रमुख Projects" : "Major Projects"}
+            </h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              {projects.map((project, index) => (
+                <Card key={index} className="hover:shadow-xl transition-all hover:scale-[1.02]">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      {project.title}
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    </CardTitle>
+                    <CardDescription className="text-base">{project.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {project.tech.map((tech, i) => (
+                        <Badge key={i} variant="outline" className="text-xs">
+                          {tech}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
 
           {/* Philosophy */}
-          <Card>
+          <Card className="mb-12 bg-gradient-to-br from-accent/10 to-primary/10 border-2 border-accent/20">
             <CardHeader>
-              <CardTitle>{isHindi ? "कार्य दर्शन" : "Work Philosophy"}</CardTitle>
+              <CardTitle className="text-2xl">{isHindi ? "कार्य दर्शन" : "Work Philosophy"}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2 text-muted-foreground">
-                <li>✓ Clean and Minimal UI</li>
-                <li>✓ Fast and Smooth User Experience</li>
-                <li>✓ Real-World Problem Solving</li>
-                <li>✓ Continuous Improvement and Innovation</li>
-                <li>✓ User-Centric Design Approach</li>
-              </ul>
-              <p className="mt-6 italic text-center text-lg font-medium text-foreground">
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-success font-bold">✓</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Clean & Minimal UI</p>
+                    <p className="text-sm text-muted-foreground">Focused on simplicity</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-success font-bold">✓</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Fast Performance</p>
+                    <p className="text-sm text-muted-foreground">Smooth user experience</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-success font-bold">✓</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Problem Solving</p>
+                    <p className="text-sm text-muted-foreground">Real-world solutions</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-success font-bold">✓</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold">User-Centric</p>
+                    <p className="text-sm text-muted-foreground">Always thinking of users</p>
+                  </div>
+                </div>
+              </div>
+              <blockquote className="border-l-4 border-primary pl-4 italic text-lg font-medium text-foreground">
                 {isHindi 
                   ? '"अच्छा software सिर्फ बनाया नहीं जाता — इसे detail, logic और empathy के साथ तैयार किया जाता है।"'
                   : '"Good software is not just built — it is crafted with detail, logic, and empathy."'
                 }
-              </p>
+              </blockquote>
             </CardContent>
           </Card>
 
-          {/* Contact */}
-          <div className="mt-8 text-center p-6 bg-accent/10 rounded-lg">
-            <h3 className="text-xl font-bold mb-4">
-              {isHindi ? "संपर्क जानकारी" : "Contact Information"}
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              {isHindi 
-                ? "यदि आपके पास TypeMaster को बेहतर बनाने के लिए सुझाव, विचार या feedback हैं, तो बेझिझक संपर्क करें:"
-                : "If you have suggestions, ideas, or feedback to improve TypeMaster, feel free to reach out:"
-              }
-            </p>
-            <div className="space-y-2">
-              <p><strong>Email:</strong> <a href="mailto:vinkal93041@gmail.com" className="text-primary hover:underline">vinkal93041@gmail.com</a></p>
-              <p><strong>Website:</strong> <a href="https://quantuminstitute.framer.website" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">quantuminstitute.framer.website</a></p>
-              <p><strong>Developer Profile:</strong> <a href="https://dev.to/vinkalprajapati" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">dev.to/vinkalprajapati</a></p>
-            </div>
-          </div>
+          {/* Contact CTA */}
+          <Card className="bg-gradient-to-br from-primary to-secondary text-white border-0">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-2xl font-bold mb-4">
+                {isHindi ? "संपर्क करें" : "Get in Touch"}
+              </h3>
+              <p className="text-white/90 mb-6 max-w-2xl mx-auto">
+                {isHindi 
+                  ? "यदि आपके पास TypeMaster को बेहतर बनाने के लिए सुझाव या feedback हैं, तो बेझिझक संपर्क करें।"
+                  : "If you have suggestions or feedback to improve TypeMaster, feel free to reach out."
+                }
+              </p>
+              <div className="flex gap-3 justify-center flex-wrap">
+                <Button variant="secondary" asChild>
+                  <a href="mailto:vinkal93041@gmail.com" className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    vinkal93041@gmail.com
+                  </a>
+                </Button>
+                <Button variant="secondary" asChild>
+                  <a href="https://quantuminstitute.framer.website" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    Portfolio Website
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
 
