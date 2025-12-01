@@ -56,7 +56,7 @@ const AboutDeveloper = () => {
                 </a>
               </Button>
               <Button variant="outline" size="sm" asChild>
-                <a href="https://quantuminstitute.framer.website" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                <a target="_blank" rel="noopener noreferrer" className="flex items-center gap-2" href="https://vinkal93.github.io/vinkal-prajapati/">
                   <Globe className="h-4 w-4" />
                   Website
                 </a>
