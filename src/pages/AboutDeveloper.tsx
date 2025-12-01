@@ -5,41 +5,29 @@ import { Mail, Globe, Code2, Lightbulb, Target, Award, ExternalLink, Github, Lin
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
-
 const AboutDeveloper = () => {
-  const { isHindi } = useLanguage();
-
-  const skills = [
-    "React", "TypeScript", "Android Development", "Java/Kotlin",
-    "PHP", "WordPress", "AI Integration", "UI/UX Design",
-    "Excel Automation", "Web Development", "Mobile Apps"
-  ];
-
-  const projects = [
-    {
-      title: "TypeMaster",
-      description: isHindi ? "संपूर्ण टाइपिंग प्रशिक्षण सॉफ़्टवेयर" : "Complete typing training software",
-      tech: ["React", "TypeScript", "Tailwind"]
-    },
-    {
-      title: "Advanced Calculator",
-      description: isHindi ? "Android कैलकुलेटर ऐप" : "Android calculator app",
-      tech: ["Android", "Java"]
-    },
-    {
-      title: "AI Chatbot",
-      description: isHindi ? "वेबसाइटों के लिए कस्टम चैटबॉट" : "Custom chatbot for websites",
-      tech: ["AI", "JavaScript", "PHP"]
-    },
-    {
-      title: "Data Automation Tools",
-      description: isHindi ? "छात्रों के लिए ऑटोमेशन" : "Automation for students",
-      tech: ["Excel", "VBA", "Python"]
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
+  const {
+    isHindi
+  } = useLanguage();
+  const skills = ["React", "TypeScript", "Android Development", "Java/Kotlin", "PHP", "WordPress", "AI Integration", "UI/UX Design", "Excel Automation", "Web Development", "Mobile Apps"];
+  const projects = [{
+    title: "TypeMaster",
+    description: isHindi ? "संपूर्ण टाइपिंग प्रशिक्षण सॉफ़्टवेयर" : "Complete typing training software",
+    tech: ["React", "TypeScript", "Tailwind"]
+  }, {
+    title: "Advanced Calculator",
+    description: isHindi ? "Android कैलकुलेटर ऐप" : "Android calculator app",
+    tech: ["Android", "Java"]
+  }, {
+    title: "AI Chatbot",
+    description: isHindi ? "वेबसाइटों के लिए कस्टम चैटबॉट" : "Custom chatbot for websites",
+    tech: ["AI", "JavaScript", "PHP"]
+  }, {
+    title: "Data Automation Tools",
+    description: isHindi ? "छात्रों के लिए ऑटोमेशन" : "Automation for students",
+    tech: ["Excel", "VBA", "Python"]
+  }];
+  return <div className="min-h-screen bg-background flex flex-col">
       <main className="container mx-auto px-4 py-12 flex-1">
         <div className="max-w-6xl mx-auto">
           {/* Hero Section */}
@@ -82,10 +70,7 @@ const AboutDeveloper = () => {
             </div>
 
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              {isHindi 
-                ? "मैं एक passionate डेवलपर हूं जो आधुनिक, responsive और intelligent डिजिटल solutions बनाने के लिए प्रतिबद्ध हूं। मेरा काम सादगी, दक्षता और उच्च गुणवत्ता वाले user experience पर केंद्रित है।"
-                : "I'm a passionate developer committed to creating modern, responsive, and intelligent digital solutions. My work focuses on simplicity, efficiency, and high-quality user experience."
-              }
+              {isHindi ? "मैं एक passionate डेवलपर हूं जो आधुनिक, responsive और intelligent डिजिटल solutions बनाने के लिए प्रतिबद्ध हूं। मेरा काम सादगी, दक्षता और उच्च गुणवत्ता वाले user experience पर केंद्रित है।" : "I'm a passionate developer committed to creating modern, responsive, and intelligent digital solutions. My work focuses on simplicity, efficiency, and high-quality user experience."}
             </p>
           </div>
 
@@ -102,16 +87,10 @@ const AboutDeveloper = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-lg font-semibold text-primary mb-3">
-                  {isHindi 
-                    ? '"प्रौद्योगिकी को सीखने को आसान बनाना चाहिए"'
-                    : '"Technology should make learning easier"'
-                  }
+                  {isHindi ? '"प्रौद्योगिकी को सीखने को आसान बनाना चाहिए"' : '"Technology should make learning easier"'}
                 </p>
                 <p className="text-muted-foreground">
-                  {isHindi
-                    ? "इस विश्वास के साथ, मैंने TypeMaster बनाया - एक संपूर्ण typing training solution जो सभी के लिए डिज़ाइन किया गया है।"
-                    : "With this belief, I built TypeMaster - a complete typing training solution designed for everyone."
-                  }
+                  {isHindi ? "इस विश्वास के साथ, मैंने TypeMaster बनाया - एक संपूर्ण typing training solution जो सभी के लिए डिज़ाइन किया गया है।" : "With this belief, I built TypeMaster - a complete typing training solution designed for everyone."}
                 </p>
               </CardContent>
             </Card>
@@ -127,10 +106,7 @@ const AboutDeveloper = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  {isHindi
-                    ? "स्मार्ट, user-friendly और विश्वसनीय डिजिटल tools बनाना जो learners को उनके skills को बढ़ाने और excellence हासिल करने के लिए सशक्त बनाते हैं।"
-                    : "To build smart, user-friendly, and reliable digital tools that empower learners to enhance their skills and achieve excellence."
-                  }
+                  {isHindi ? "स्मार्ट, user-friendly और विश्वसनीय डिजिटल tools बनाना जो learners को उनके skills को बढ़ाने और excellence हासिल करने के लिए सशक्त बनाते हैं।" : "To build smart, user-friendly, and reliable digital tools that empower learners to enhance their skills and achieve excellence."}
                 </p>
               </CardContent>
             </Card>
@@ -148,15 +124,9 @@ const AboutDeveloper = () => {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="flex flex-wrap gap-3">
-                {skills.map((skill, index) => (
-                  <Badge 
-                    key={index} 
-                    variant="secondary" 
-                    className="px-4 py-2 text-sm font-medium hover:scale-105 transition-transform"
-                  >
+                {skills.map((skill, index) => <Badge key={index} variant="secondary" className="px-4 py-2 text-sm font-medium hover:scale-105 transition-transform">
                     {skill}
-                  </Badge>
-                ))}
+                  </Badge>)}
               </div>
             </CardContent>
           </Card>
@@ -167,8 +137,7 @@ const AboutDeveloper = () => {
               {isHindi ? "प्रमुख Projects" : "Major Projects"}
             </h3>
             <div className="grid md:grid-cols-2 gap-6">
-              {projects.map((project, index) => (
-                <Card key={index} className="hover:shadow-xl transition-all hover:scale-[1.02]">
+              {projects.map((project, index) => <Card key={index} className="hover:shadow-xl transition-all hover:scale-[1.02]">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       {project.title}
@@ -178,15 +147,12 @@ const AboutDeveloper = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {project.tech.map((tech, i) => (
-                        <Badge key={i} variant="outline" className="text-xs">
+                      {project.tech.map((tech, i) => <Badge key={i} variant="outline" className="text-xs">
                           {tech}
-                        </Badge>
-                      ))}
+                        </Badge>)}
                     </div>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
 
@@ -235,10 +201,7 @@ const AboutDeveloper = () => {
                 </div>
               </div>
               <blockquote className="border-l-4 border-primary pl-4 italic text-lg font-medium text-foreground">
-                {isHindi 
-                  ? '"अच्छा software सिर्फ बनाया नहीं जाता — इसे detail, logic और empathy के साथ तैयार किया जाता है।"'
-                  : '"Good software is not just built — it is crafted with detail, logic, and empathy."'
-                }
+                {isHindi ? '"अच्छा software सिर्फ बनाया नहीं जाता — इसे detail, logic और empathy के साथ तैयार किया जाता है।"' : '"Good software is not just built — it is crafted with detail, logic, and empathy."'}
               </blockquote>
             </CardContent>
           </Card>
@@ -250,10 +213,7 @@ const AboutDeveloper = () => {
                 {isHindi ? "संपर्क करें" : "Get in Touch"}
               </h3>
               <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-                {isHindi 
-                  ? "यदि आपके पास TypeMaster को बेहतर बनाने के लिए सुझाव या feedback हैं, तो बेझिझक संपर्क करें।"
-                  : "If you have suggestions or feedback to improve TypeMaster, feel free to reach out."
-                }
+                {isHindi ? "यदि आपके पास TypeMaster को बेहतर बनाने के लिए सुझाव या feedback हैं, तो बेझिझक संपर्क करें।" : "If you have suggestions or feedback to improve TypeMaster, feel free to reach out."}
               </p>
               <div className="flex gap-3 justify-center flex-wrap">
                 <Button variant="secondary" asChild>
@@ -263,7 +223,7 @@ const AboutDeveloper = () => {
                   </a>
                 </Button>
                 <Button variant="secondary" asChild>
-                  <a href="https://quantuminstitute.framer.website" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <a target="_blank" rel="noopener noreferrer" className="flex items-center gap-2" href="https://vinkal93.github.io/vinkal-prajapati/">
                     <Globe className="h-4 w-4" />
                     Portfolio Website
                   </a>
@@ -275,8 +235,6 @@ const AboutDeveloper = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default AboutDeveloper;
