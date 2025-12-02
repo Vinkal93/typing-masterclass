@@ -93,9 +93,13 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    font-family: var(--selected-font, 'Inter', sans-serif);
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: inherit;
   }
 }
 

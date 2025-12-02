@@ -1,20 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Target, TrendingUp, Play, BarChart3, Keyboard } from "lucide-react";
+import { Clock, Target, TrendingUp, Play, BarChart3, Keyboard, Trophy, Flame } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getProgressData, getAverageWpm, getAverageAccuracy } from "@/lib/progressTracker";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, isHindi } = useLanguage();
+  const progress = getProgressData();
+  const avgWpm = getAverageWpm();
+  const avgAccuracy = getAverageAccuracy();
+
+  // Calculate today's tests
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todaysTests = progress.tests.filter(test => test.timestamp >= today.getTime()).length;
 
   const stats = [
-    { label: t('todaysTests'), value: "0", icon: Clock, color: "text-primary" },
-    { label: t('avgWPM'), value: "0", icon: TrendingUp, color: "text-secondary" },
-    { label: t('accuracy'), value: "0%", icon: Target, color: "text-success" },
-    { label: t('totalTests'), value: "0", icon: BarChart3, color: "text-accent" },
+    { label: t('todaysTests'), value: todaysTests.toString(), icon: Clock, color: "text-primary" },
+    { label: t('avgWPM'), value: avgWpm.toString(), icon: TrendingUp, color: "text-secondary" },
+    { label: t('accuracy'), value: `${avgAccuracy}%`, icon: Target, color: "text-success" },
+    { label: t('totalTests'), value: progress.totalTests.toString(), icon: BarChart3, color: "text-accent" },
   ];
 
   return (

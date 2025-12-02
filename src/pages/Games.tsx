@@ -111,19 +111,55 @@ const Games = () => {
   const [correctWords, setCorrectWords] = useState(0);
   const marathonInputRef = useRef<HTMLInputElement>(null);
 
-  const englishWords = [
+  // Easy words (Level 1-3)
+  const easyEnglishWords = [
     "cat", "dog", "run", "jump", "fast", "slow", "blue", "red", "green", "happy",
-    "type", "word", "game", "play", "quick", "speed", "time", "moon", "star", "sun",
-    "code", "learn", "skill", "power", "focus", "think", "smart", "brain", "idea", "love",
-    "book", "pen", "desk", "chair", "door", "window", "light", "dark", "day", "night"
+    "type", "word", "game", "play", "quick", "speed", "time", "moon", "star", "sun"
   ];
 
-  const hindiWords = [
+  // Medium words (Level 4-6)  
+  const mediumEnglishWords = [
+    "code", "learn", "skill", "power", "focus", "think", "smart", "brain", "idea", "love",
+    "book", "desk", "chair", "door", "window", "light", "dark", "night", "table", "phone",
+    "keyboard", "computer", "practice", "learning", "progress", "success", "achieve", "master"
+  ];
+
+  // Hard words (Level 7+)
+  const hardEnglishWords = [
+    "development", "programming", "achievement", "experience", "professional", "technology",
+    "communication", "understanding", "improvement", "application", "visualization", "performance",
+    "efficiency", "productivity", "collaboration", "responsibility", "determination", "opportunity"
+  ];
+
+  const easyHindiWords = [
     "कल", "आज", "खेल", "दौड़", "तेज", "धीमा", "नीला", "लाल", "हरा", "खुश",
-    "टाइप", "शब्द", "गेम", "खेलो", "जल्दी", "स्पीड", "समय", "चांद", "तारा", "सूरज",
+    "टाइप", "शब्द", "गेम", "खेलो", "जल्दी", "स्पिड", "समय", "चांद", "तारा", "सूरज"
+  ];
+
+  const mediumHindiWords = [
     "कोड", "सीखो", "कौशल", "शक्ति", "ध्यान", "सोचो", "स्मार्ट", "दिमाग", "विचार", "प्यार",
     "किताब", "कलम", "मेज", "कुर्सी", "दरवाजा", "खिड़की", "रोशनी", "अंधेरा", "दिन", "रात"
   ];
+
+  const hardHindiWords = [
+    "कंप्यूटर", "प्रोग्रामिंग", "टेक्नोलॉजी", "डेवलपमेंट", "प्रोफेशनल", "अचीवमेंट",
+    "कम्युनिकेशन", "अंडरस्टैंडिंग", "इम्प्रूवमेंट", "एप्लीकेशन", "परफॉर्मेंस", "प्रोडक्टिविटी"
+  ];
+
+  // Get words based on level
+  const getWordsByLevel = (level: number) => {
+    if (isHindi) {
+      if (level <= 3) return easyHindiWords;
+      if (level <= 6) return [...easyHindiWords, ...mediumHindiWords];
+      return [...mediumHindiWords, ...hardHindiWords];
+    } else {
+      if (level <= 3) return easyEnglishWords;
+      if (level <= 6) return [...easyEnglishWords, ...mediumEnglishWords];
+      return [...mediumEnglishWords, ...hardEnglishWords];
+    }
+  };
+
+  const wordsList = isHindi ? [...easyHindiWords, ...mediumHindiWords] : [...easyEnglishWords, ...mediumEnglishWords];
 
   const englishSentences = [
     "The quick brown fox jumps over the lazy dog",
@@ -141,7 +177,6 @@ const Games = () => {
     "मेहनत और लगन से सब कुछ हासिल होता है"
   ];
 
-  const wordsList = isHindi ? hindiWords : englishWords;
   const sentencesList = isHindi ? hindiSentences : englishSentences;
 
   // Falling Words Game Logic
@@ -171,23 +206,24 @@ const Games = () => {
 
   useEffect(() => {
     if (gameStarted && !gameOver) {
+      const levelWords = getWordsByLevel(level);
       const spawnInterval = setInterval(
         () => {
           const newWord: FallingWord = {
             id: Date.now(),
-            word: wordsList[Math.floor(Math.random() * wordsList.length)],
+            word: levelWords[Math.floor(Math.random() * levelWords.length)],
             x: Math.random() * 80 + 10,
             y: 0,
-            speed: 1 + level * 0.3,
+            speed: 1 + level * 0.4, // Increased speed scaling
           };
           setWords((prev) => [...prev, newWord]);
         },
-        Math.max(2000 - level * 200, 800)
+        Math.max(2500 - level * 250, 600) // Faster spawn at higher levels
       );
 
       return () => clearInterval(spawnInterval);
     }
-  }, [gameStarted, level, gameOver, wordsList]);
+  }, [gameStarted, level, gameOver, isHindi]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -384,28 +420,30 @@ const Games = () => {
 
   useEffect(() => {
     if (spaceGameStarted && !spaceGameOver && spaceLives > 0) {
+      const levelWords = getWordsByLevel(spaceLevel);
+      const maxAliens = Math.min(4 + spaceLevel, 10); // More aliens at higher levels
       const spawnInterval = setInterval(
         () => {
           const newAlien: Alien = {
             id: Date.now() + Math.random(),
-            word: wordsList[Math.floor(Math.random() * wordsList.length)],
+            word: levelWords[Math.floor(Math.random() * levelWords.length)],
             x: Math.random() * 80 + 10,
             y: Math.random() * 40 + 10,
             destroyed: false,
           };
           setAliens((prev) => {
-            if (prev.length < 6) {
+            if (prev.length < maxAliens) {
               return [...prev, newAlien];
             }
             return prev;
           });
         },
-        Math.max(2500 - spaceLevel * 250, 1200)
+        Math.max(2500 - spaceLevel * 300, 800) // Faster spawn
       );
 
       return () => clearInterval(spawnInterval);
     }
-  }, [spaceGameStarted, spaceLevel, spaceGameOver, spaceLives, wordsList]);
+  }, [spaceGameStarted, spaceLevel, spaceGameOver, spaceLives, isHindi]);
 
   useEffect(() => {
     if (spaceGameStarted && !spaceGameOver && aliens.length > 8) {
@@ -468,28 +506,30 @@ const Games = () => {
 
   useEffect(() => {
     if (zombieGameStarted && !zombieGameOver && zombieLives > 0) {
+      const levelWords = getWordsByLevel(zombieLevel);
+      const maxZombies = Math.min(3 + zombieLevel, 8); // More zombies at higher levels
       const spawnInterval = setInterval(
         () => {
           const newZombie: Zombie = {
             id: Date.now() + Math.random(),
-            word: wordsList[Math.floor(Math.random() * wordsList.length)],
+            word: levelWords[Math.floor(Math.random() * levelWords.length)],
             x: Math.random() * 80 + 10,
             distance: 100,
-            speed: 0.5 + zombieLevel * 0.2,
+            speed: 0.6 + zombieLevel * 0.25, // Faster zombies
           };
           setZombies((prev) => {
-            if (prev.length < 5) {
+            if (prev.length < maxZombies) {
               return [...prev, newZombie];
             }
             return prev;
           });
         },
-        Math.max(3500 - zombieLevel * 300, 2000)
+        Math.max(3000 - zombieLevel * 350, 1500) // Faster spawn
       );
 
       return () => clearInterval(spawnInterval);
     }
-  }, [zombieGameStarted, zombieLevel, zombieGameOver, zombieLives, wordsList]);
+  }, [zombieGameStarted, zombieLevel, zombieGameOver, zombieLives, isHindi]);
 
   useEffect(() => {
     if (zombieGameStarted && !zombieGameOver) {

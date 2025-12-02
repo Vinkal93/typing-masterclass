@@ -1,4 +1,4 @@
-import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History } from "lucide-react";
+import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History, FileText, ClipboardList } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -15,9 +15,9 @@ import { NavLink } from "@/components/NavLink";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const location = useLocation();
-  const { t } = useLanguage();
+  const { t, isHindi } = useLanguage();
   const collapsed = state === "collapsed";
 
   const mainItems = [
@@ -29,30 +29,36 @@ export function AppSidebar() {
   ];
 
   const secondaryItems = [
+    { title: isHindi ? "पूर्ण इतिहास" : "Full History", url: "/full-history", icon: ClipboardList },
     { title: t('examHistory'), url: "/exam-history", icon: History },
     { title: t('about'), url: "/about-developer", icon: User },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
-    <Sidebar className={collapsed ? "w-16" : "w-64"} collapsible="icon">
-      <SidebarContent>
+    <Sidebar collapsible="icon">
+      <SidebarContent className="bg-card">
         <SidebarGroup>
           <SidebarGroupLabel>{t('navigation')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
                       to={item.url}
                       end
                       className="hover:bg-accent/50"
                       activeClassName="bg-accent text-accent-foreground font-medium"
+                      onClick={handleNavClick}
                     >
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -67,15 +73,16 @@ export function AppSidebar() {
             <SidebarMenu>
               {secondaryItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
                       to={item.url}
                       end
                       className="hover:bg-accent/50"
                       activeClassName="bg-accent text-accent-foreground font-medium"
+                      onClick={handleNavClick}
                     >
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
