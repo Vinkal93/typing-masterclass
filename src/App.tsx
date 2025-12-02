@@ -16,6 +16,7 @@ import ExamMode from "./pages/ExamMode";
 import ExamHistory from "./pages/ExamHistory";
 import Games from "./pages/Games";
 import Progress from "./pages/Progress";
+import FullHistory from "./pages/FullHistory";
 import KeyboardGuide from "./pages/KeyboardGuide";
 import AboutDeveloper from "./pages/AboutDeveloper";
 import NotFound from "./pages/NotFound";
@@ -31,7 +32,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <SidebarProvider defaultOpen={true}>
+              <SidebarProvider defaultOpen={false}>
                 <div className="min-h-screen flex w-full">
                   <AppSidebar />
                   <main className="flex-1 overflow-x-hidden">
@@ -44,6 +45,7 @@ const App = () => (
                       <Route path="/exam-history" element={<ExamHistory />} />
                       <Route path="/games" element={<Games />} />
                       <Route path="/progress" element={<Progress />} />
+                      <Route path="/full-history" element={<FullHistory />} />
                       <Route path="/keyboard-guide" element={<KeyboardGuide />} />
                       <Route path="/about-developer" element={<AboutDeveloper />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

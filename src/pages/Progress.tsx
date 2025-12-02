@@ -293,7 +293,7 @@ const Progress = () => {
                       {isHindi ? "आपके हाल के प्रदर्शन" : "Your recent performances"}
                     </CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => navigate("/exam-history")}>
+                  <Button variant="outline" size="sm" onClick={() => navigate("/full-history")}>
                     <Calendar className="h-4 w-4 mr-2" />
                     {isHindi ? "पूरा इतिहास" : "Full History"}
                   </Button>
