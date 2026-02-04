@@ -104,48 +104,47 @@ export const generateDrillText = (length: number = 100): string => {
 };
 
 const generateWordsWithKeys = (keys: string[], length: number): string => {
-  // Words containing common problem keys
+  // Extensive word bank containing common problem keys
   const wordBank: Record<string, string[]> = {
-    'a': ['apple', 'amazing', 'abstract', 'action', 'water', 'data', 'radar', 'camera'],
-    'b': ['better', 'bubble', 'browse', 'bundle', 'symbol', 'rubber', 'lobby', 'hobby'],
-    'c': ['catch', 'circle', 'connect', 'concept', 'account', 'success', 'occur', 'access'],
-    'd': ['daily', 'decide', 'divide', 'depend', 'hidden', 'added', 'sudden', 'indeed'],
-    'e': ['every', 'energy', 'element', 'execute', 'delete', 'receive', 'believe', 'achieve'],
-    'f': ['filter', 'follow', 'finish', 'flutter', 'effort', 'effect', 'afford', 'coffee'],
-    'g': ['global', 'gather', 'getting', 'garage', 'toggle', 'bigger', 'logger', 'trigger'],
-    'h': ['handle', 'hidden', 'height', 'healthy', 'method', 'higher', 'weather', 'whether'],
-    'i': ['inside', 'input', 'invite', 'initial', 'visible', 'decision', 'mission', 'vision'],
-    'j': ['jungle', 'jacket', 'junior', 'adjust', 'inject', 'object', 'project', 'subject'],
-    'k': ['kernel', 'kiosk', 'keypad', 'keyboard', 'market', 'socket', 'pocket', 'ticket'],
-    'l': ['letter', 'little', 'label', 'level', 'follow', 'yellow', 'hello', 'allow'],
-    'm': ['method', 'moment', 'memory', 'module', 'commit', 'summit', 'common', 'mammal'],
-    'n': ['number', 'nation', 'normal', 'notice', 'inner', 'winner', 'dinner', 'banner'],
-    'o': ['option', 'object', 'observe', 'occur', 'follow', 'hollow', 'borrow', 'orrow'],
-    'p': ['proper', 'puppet', 'pepper', 'popular', 'apply', 'happy', 'supply', 'copper'],
-    'q': ['query', 'quick', 'quote', 'square', 'unique', 'require', 'request', 'quality'],
-    'r': ['render', 'remote', 'router', 'rather', 'error', 'mirror', 'terror', 'horror'],
-    's': ['system', 'session', 'select', 'stress', 'success', 'assess', 'message', 'lesson'],
-    't': ['toggle', 'target', 'testing', 'better', 'letter', 'matter', 'butter', 'twitter'],
-    'u': ['unique', 'update', 'useful', 'unused', 'output', 'input', 'submit', 'pursuit'],
-    'v': ['visible', 'virtual', 'value', 'volume', 'never', 'clever', 'driver', 'deliver'],
-    'w': ['window', 'wrapper', 'widget', 'winner', 'follow', 'yellow', 'narrow', 'shadow'],
-    'x': ['execute', 'export', 'expand', 'express', 'index', 'relax', 'complex', 'prefix'],
-    'y': ['yellow', 'yearly', 'system', 'symbol', 'deploy', 'employ', 'destroy', 'survey'],
-    'z': ['zigzag', 'wizard', 'puzzle', 'frozen', 'amazing', 'organize', 'realize', 'analyze'],
-    ' ': ['the', 'and', 'for', 'with', 'from', 'that', 'this', 'have'],
+    'a': ['apple', 'amazing', 'abstract', 'action', 'water', 'data', 'radar', 'camera', 'banana', 'avatar', 'attach', 'adapt', 'annual', 'arrive', 'afraid', 'already', 'against', 'article', 'arrangement', 'apparatus', 'capital', 'natural', 'material', 'available', 'balance', 'arrange', 'advance', 'manager', 'package', 'damage'],
+    'b': ['better', 'bubble', 'browse', 'bundle', 'symbol', 'rubber', 'lobby', 'hobby', 'obtain', 'absorb', 'робот', 'global', 'number', 'member', 'timber', 'bomber', 'button', 'rabbit', 'combat', 'nobody', 'stable', 'enable', 'trouble', 'double', 'mobile', 'fabric', 'tribute', 'battery', 'blubber', 'bamboo'],
+    'c': ['catch', 'circle', 'connect', 'concept', 'account', 'success', 'occur', 'access', 'accept', 'accuse', 'cancel', 'concern', 'concert', 'concise', 'conduct', 'council', 'crucial', 'correct', 'collect', 'classic', 'cascade', 'cyclone', 'ceramic', 'coconut', 'circuit', 'calcium', 'crucial', 'cactus', 'cascade', 'cocaine'],
+    'd': ['daily', 'decide', 'divide', 'depend', 'hidden', 'added', 'sudden', 'indeed', 'demand', 'defend', 'diamond', 'disorder', 'dividend', 'dedicated', 'disorder', 'divided', 'decoded', 'decoded', 'decoded', 'disorder', 'disorder', 'disorder', 'standard', 'standard', 'standard', 'ladder', 'paddle', 'middle', 'muddle', 'fiddle'],
+    'e': ['every', 'energy', 'element', 'execute', 'delete', 'receive', 'believe', 'achieve', 'extreme', 'explore', 'expense', 'express', 'essence', 'exercise', 'exchange', 'experience', 'excellent', 'electronic', 'elsewhere', 'enterprise', 'envelope', 'emergence', 'elsewhere', 'elsewhere', 'employee', 'employee', 'sleeve', 'freeze', 'breeze', 'squeeze'],
+    'f': ['filter', 'follow', 'finish', 'flutter', 'effort', 'effect', 'afford', 'coffee', 'differ', 'suffer', 'buffer', 'offer', 'office', 'officer', 'official', 'offline', 'football', 'fifteen', 'fixture', 'firefox', 'fluffy', 'fulfill', 'fixture', 'fixture', 'fixture', 'waffle', 'baffle', 'raffle', 'shuffle', 'muffle'],
+    'g': ['global', 'gather', 'getting', 'garage', 'toggle', 'bigger', 'logger', 'trigger', 'giggle', 'goggle', 'juggle', 'jungle', 'struggle', 'struggle', 'struggle', 'engage', 'garbage', 'gorgeous', 'guardian', 'gadget', 'gigantic', 'gorgeous', 'gorgeous', 'gorgeous', 'gorgeous', 'nugget', 'stagger', 'dagger', 'swagger', 'trigger'],
+    'h': ['handle', 'hidden', 'height', 'healthy', 'method', 'higher', 'weather', 'whether', 'rhythm', 'southern', 'northern', 'without', 'beneath', 'hardware', 'household', 'hurricane', 'hypothesis', 'helicopter', 'hierarchy', 'highway', 'shoulder', 'brother', 'another', 'gather', 'feather', 'leather', 'mother', 'father', 'rather', 'lather'],
+    'i': ['inside', 'input', 'invite', 'initial', 'visible', 'decision', 'mission', 'vision', 'division', 'position', 'condition', 'tradition', 'addition', 'edition', 'audition', 'ignition', 'intuition', 'initiative', 'individual', 'intimate', 'invisible', 'incident', 'incident', 'incident', 'incident', 'digit', 'visit', 'spirit', 'imit', 'limit'],
+    'j': ['jungle', 'jacket', 'junior', 'adjust', 'inject', 'object', 'project', 'subject', 'reject', 'eject', 'major', 'enjoy', 'injury', 'majority', 'jigsaw', 'journal', 'journey', 'justice', 'jealous', 'jolly', 'joyful', 'judgment', 'juggler', 'junction', 'jumper', 'juniper', 'justify', 'jersey', 'jingle', 'jubilee'],
+    'k': ['kernel', 'kiosk', 'keypad', 'keyboard', 'market', 'socket', 'pocket', 'ticket', 'jacket', 'packet', 'bracket', 'blanket', 'basket', 'cricket', 'kingdom', 'kitchen', 'kindness', 'knockout', 'knowledge', 'bookkeeper', 'backpack', 'kickback', 'trackback', 'workbook', 'notebook', 'textbook', 'checkbook', 'cookbook', 'bookmark', 'lookout'],
+    'l': ['letter', 'little', 'label', 'level', 'follow', 'yellow', 'hello', 'allow', 'balloon', 'brilliant', 'collapse', 'collect', 'collar', 'college', 'parallel', 'satellite', 'satellite', 'satellite', 'satellite', 'literally', 'locally', 'legally', 'finally', 'totally', 'actually', 'naturally', 'usually', 'actually', 'carefully', 'skillfully'],
+    'm': ['method', 'moment', 'memory', 'module', 'commit', 'summit', 'common', 'mammal', 'command', 'comment', 'commerce', 'community', 'communicate', 'minimum', 'maximum', 'swimming', 'programming', 'mammogram', 'mammoth', 'hammer', 'grammar', 'ammer', 'swimmer', 'shimmer', 'glimmer', 'summer', 'drummer', 'stammer', 'stammer', 'stammer'],
+    'n': ['number', 'nation', 'normal', 'notice', 'inner', 'winner', 'dinner', 'banner', 'connect', 'innocent', 'announce', 'antenna', 'anniversary', 'announce', 'announce', 'announce', 'announce', 'announce', 'annual', 'pennant', 'channel', 'tunnel', 'funnel', 'manner', 'manner', 'manner', 'manner', 'manner', 'manner', 'manner'],
+    'o': ['option', 'object', 'observe', 'occur', 'follow', 'hollow', 'borrow', 'sorrow', 'tomorrow', 'coconut', 'control', 'protocol', 'monopoly', 'biology', 'zoology', 'topology', 'outlook', 'outdoor', 'outcome', 'ongoing', 'onboard', 'orthodox', 'opposite', 'opposite', 'opposite', 'opposite', 'opposite', 'opposite', 'opposite', 'opposite'],
+    'p': ['proper', 'puppet', 'pepper', 'popular', 'apply', 'happy', 'supply', 'copper', 'support', 'suppose', 'propose', 'purpose', 'approach', 'approve', 'apparent', 'appreciate', 'appropriate', 'opponent', 'opportunity', 'pineapple', 'typewriter', 'paperclip', 'passport', 'passport', 'passport', 'passport', 'passport', 'passport', 'passport', 'passport'],
+    'q': ['query', 'quick', 'quote', 'square', 'unique', 'require', 'request', 'quality', 'quantity', 'quarter', 'question', 'equipment', 'frequent', 'sequence', 'technique', 'antique', 'bouquet', 'banquet', 'conquest', 'eloquent', 'adequate', 'aquarium', 'quiver', 'quilted', 'quietly', 'qualify', 'quarrel', 'quarter', 'squeeze', 'squash'],
+    'r': ['render', 'remote', 'router', 'rather', 'error', 'mirror', 'terror', 'horror', 'correct', 'corridor', 'irregular', 'surrender', 'territory', 'reservoir', 'refrigerator', 'referral', 'recurring', 'recorder', 'reminder', 'reporter', 'narrator', 'director', 'creator', 'warrior', 'barrier', 'carrier', 'terrier', 'premier', 'courier', 'barrier'],
+    's': ['system', 'session', 'select', 'stress', 'success', 'assess', 'message', 'lesson', 'mission', 'passion', 'ression', 'ression', 'possess', 'possible', 'pressure', 'professor', 'expression', 'impressive', 'aggressive', 'succession', 'discussion', 'submission', 'commission', 'permission', 'admission', 'ssassinate', 'accessible', 'assistance', 'successful', 'passionate'],
+    't': ['toggle', 'target', 'testing', 'better', 'letter', 'matter', 'butter', 'twitter', 'flutter', 'scatter', 'shatter', 'pattern', 'battery', 'lottery', 'pottery', 'buttery', 'attorney', 'attention', 'attitude', 'attribute', 'attraction', 'attachment', 'attachment', 'attachment', 'attachment', 'attachment', 'attachment', 'attachment', 'attachment', 'attachment'],
+    'u': ['unique', 'update', 'useful', 'unused', 'output', 'input', 'submit', 'pursuit', 'unusual', 'usually', 'universe', 'unanimous', 'ultimate', 'umbrella', 'uncertain', 'undercut', 'undertook', 'unfulfilled', 'ubiquitous', 'ukulele', 'ululate', 'ultimate', 'tumult', 'cumulus', 'stimulus', 'surplus', 'virtuous', 'surplus', 'surplus', 'surplus'],
+    'v': ['visible', 'virtual', 'value', 'volume', 'never', 'clever', 'driver', 'deliver', 'evolve', 'involve', 'revolve', 'observe', 'deserve', 'reserve', 'conserve', 'preserve', 'overview', 'interview', 'whatever', 'however', 'forever', 'wherever', 'whenever', 'whoever', 'whatever', 'whatever', 'whatever', 'whatever', 'whatever', 'whatever'],
+    'w': ['window', 'wrapper', 'widget', 'winner', 'follow', 'yellow', 'narrow', 'shadow', 'swallow', 'borrow', 'orrow', 'tomorrow', 'willow', 'widow', 'shower', 'tower', 'power', 'flower', 'lower', 'slower', 'browser', 'drawer', 'withdraw', 'somewhere', 'anywhere', 'nowhere', 'elsewhere', 'sandwich', 'workflow', 'wordwork'],
+    'x': ['execute', 'export', 'expand', 'express', 'index', 'relax', 'complex', 'prefix', 'suffix', 'mixture', 'fixture', 'texture', 'context', 'syntax', 'maximum', 'maximum', 'minimum', 'extreme', 'excuse', 'examine', 'example', 'exactly', 'exclude', 'exhibit', 'external', 'extract', 'flexible', 'reflexive', 'perplexed', 'vexation'],
+    'y': ['yellow', 'yearly', 'system', 'symbol', 'deploy', 'employ', 'destroy', 'survey', 'anyway', 'keyway', 'gateway', 'getaway', 'flyaway', 'runway', 'highway', 'subway', 'byway', 'midway', 'pathway', 'railway', 'synergy', 'mystery', 'history', 'factory', 'battery', 'gallery', 'dynasty', 'analyte', 'analyze', 'paralyze'],
+    'z': ['zigzag', 'wizard', 'puzzle', 'frozen', 'amazing', 'organize', 'realize', 'analyze', 'recognize', 'authorize', 'emphasize', 'summarize', 'customize', 'visualize', 'capitalize', 'neutralize', 'maximize', 'minimize', 'optimize', 'horizon', 'magazine', 'pizzazz', 'blizzard', 'drizzle', 'frazzle', 'muzzle', 'puzzle', 'nozzle', 'sizzle', 'fizzle'],
+    ' ': ['the', 'and', 'for', 'with', 'from', 'that', 'this', 'have', 'been', 'were', 'what', 'when', 'where', 'which', 'while', 'about', 'after', 'again', 'being', 'could'],
   };
   
   const words: string[] = [];
   let currentLength = 0;
   
   while (currentLength < length) {
-    // Pick a random key from the missed keys
     const targetKey = keys[Math.floor(Math.random() * keys.length)];
     const keyWords = wordBank[targetKey] || wordBank['a'];
     const word = keyWords[Math.floor(Math.random() * keyWords.length)];
     
     words.push(word);
-    currentLength += word.length + 1; // +1 for space
+    currentLength += word.length + 1;
   }
   
   return words.join(' ');
@@ -156,7 +155,15 @@ const generateDefaultDrillText = (length: number): string => {
     'the', 'quick', 'brown', 'fox', 'jumps', 'over', 'lazy', 'dog',
     'practice', 'typing', 'speed', 'accuracy', 'keyboard', 'fingers',
     'home', 'row', 'keys', 'position', 'correct', 'technique',
-    'improve', 'skills', 'daily', 'exercise', 'focus', 'concentration'
+    'improve', 'skills', 'daily', 'exercise', 'focus', 'concentration',
+    'efficient', 'productive', 'learning', 'progress', 'challenge', 'master',
+    'rhythm', 'smooth', 'steady', 'consistent', 'precision', 'develop',
+    'muscle', 'memory', 'training', 'session', 'performance', 'goal',
+    'achieve', 'success', 'dedicated', 'practice', 'perfect', 'results',
+    'computer', 'software', 'application', 'document', 'writing', 'content',
+    'professional', 'workplace', 'business', 'communication', 'technology', 'modern',
+    'advantage', 'competitive', 'essential', 'valuable', 'important', 'necessary',
+    'foundation', 'building', 'strength', 'confidence', 'capability', 'expert'
   ];
   
   const words: string[] = [];
