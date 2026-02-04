@@ -8,20 +8,42 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { trackMissedKeys } from "@/lib/missedKeysTracker";
 import { saveTestRecord } from "@/lib/progressTracker";
 
-// Word pools by difficulty
+// Word pools by difficulty - extensive collection for variety
 const englishWords = {
   easy: [
     "the", "and", "for", "are", "but", "not", "you", "all", "can", "had",
     "her", "was", "one", "our", "out", "day", "get", "has", "him", "his",
     "how", "its", "may", "new", "now", "old", "see", "two", "way", "who",
-    "boy", "did", "let", "put", "say", "she", "too", "use", "big", "ask"
+    "boy", "did", "let", "put", "say", "she", "too", "use", "big", "ask",
+    "run", "sit", "eat", "red", "blue", "top", "low", "end", "own", "set",
+    "try", "why", "man", "few", "act", "add", "age", "ago", "air", "also",
+    "any", "arm", "art", "bad", "bag", "bed", "bit", "box", "bus", "car",
+    "cat", "cup", "cut", "dog", "ear", "eye", "far", "fat", "fit", "fly",
+    "fun", "gas", "god", "got", "gun", "guy", "hat", "hit", "hot", "ice",
+    "job", "key", "kid", "law", "leg", "lie", "lot", "map", "mix", "mom",
+    "net", "oil", "pay", "pen", "pet", "pop", "pot", "raw", "row", "sea",
+    "sit", "six", "sky", "son", "sun", "tax", "tea", "ten", "tie", "tip",
+    "top", "toy", "war", "web", "win", "won", "yes", "yet", "zoo", "bar"
   ],
   medium: [
     "about", "after", "again", "being", "below", "between", "both", "come",
     "could", "down", "each", "find", "first", "from", "give", "good", "great",
     "have", "here", "high", "home", "house", "into", "just", "know", "last",
     "life", "little", "long", "made", "make", "more", "most", "much", "must",
-    "name", "never", "next", "only", "other", "over", "part", "place", "right"
+    "name", "never", "next", "only", "other", "over", "part", "place", "right",
+    "small", "start", "state", "still", "story", "study", "style", "table",
+    "teach", "thank", "there", "these", "thing", "think", "those", "three",
+    "today", "under", "until", "using", "value", "voice", "water", "watch",
+    "week", "where", "which", "while", "white", "whole", "woman", "women",
+    "world", "would", "write", "wrong", "years", "young", "yield", "zonal",
+    "above", "accept", "across", "action", "active", "actual", "advice", "affect",
+    "agency", "almost", "always", "amount", "animal", "answer", "anyone", "appear",
+    "around", "attack", "author", "become", "before", "behind", "better", "beyond",
+    "black", "blood", "board", "bring", "brown", "build", "buyer", "carry",
+    "catch", "cause", "center", "change", "charge", "check", "child", "choice",
+    "civil", "claim", "class", "clean", "clear", "close", "coach", "color",
+    "coming", "common", "corner", "couple", "course", "cover", "create", "cross",
+    "death", "design", "detail", "direct", "doctor", "drive", "early", "earth"
   ],
   hard: [
     "absolutely", "accomplish", "achievement", "acknowledge", "administration",
@@ -29,22 +51,55 @@ const englishWords = {
     "breakthrough", "calculation", "certificate", "characteristic", "communication",
     "comprehensive", "concentration", "consideration", "contemporary", "contribution",
     "development", "difference", "difficulty", "disappointment", "discrimination",
-    "effectiveness", "environment", "established", "examination", "extraordinary"
+    "effectiveness", "environment", "established", "examination", "extraordinary",
+    "fundamental", "furthermore", "government", "immediately", "implementation",
+    "improvement", "independent", "information", "infrastructure", "international",
+    "investigation", "manufacturing", "nevertheless", "opportunities", "organization",
+    "participation", "particularly", "performance", "philosophical", "possibilities",
+    "professional", "psychological", "qualification", "recommendation", "relationship",
+    "representative", "responsibility", "significantly", "sophisticated", "specification",
+    "straightforward", "substantially", "technological", "transformation", "understanding",
+    "unfortunately", "unprecedented", "visualization", "vulnerability", "accomplishment",
+    "accountability", "acknowledgement", "administrative", "advantageous", "alternatively",
+    "announcement", "appreciation", "architectural", "automatically", "characteristics",
+    "circumstances", "collaboration", "communicative", "complementary", "comprehensive",
+    "concentration", "configuration", "consequently", "consolidation", "constitutional",
+    "controversial", "conventional", "coordination", "corresponding", "counterproductive",
+    "demonstration", "determination", "disadvantage", "disappointment", "distinguished",
+    "documentation", "effectiveness", "encyclopedia", "entertainment", "entrepreneurial",
+    "environmental", "establishment", "experimental", "extraordinary", "functionality"
   ]
 };
 
 const hindiWords = {
   easy: [
     "और", "का", "है", "में", "को", "से", "के", "पर", "यह", "था",
-    "हम", "वह", "जो", "तो", "भी", "ने", "या", "कि", "एक", "हो"
+    "हम", "वह", "जो", "तो", "भी", "ने", "या", "कि", "एक", "हो",
+    "अब", "जब", "कब", "क्या", "कौन", "कहां", "यहां", "वहां", "कैसे", "क्यों",
+    "मैं", "तुम", "आप", "उस", "इस", "अपना", "सब", "कुछ", "ज़रा", "बस",
+    "आज", "कल", "पहले", "बाद", "ऊपर", "नीचे", "अंदर", "बाहर", "साथ", "बीच",
+    "घर", "काम", "दिन", "रात", "समय", "बात", "आदमी", "औरत", "बच्चा", "लोग"
   ],
   medium: [
     "करना", "होना", "जाना", "आना", "देना", "लेना", "कहना", "रहना", "बनना", "चलना",
-    "सकता", "चाहिए", "लगता", "मिलना", "पाना", "रखना", "देखना", "सोचना", "समझना", "पहुँचना"
+    "सकता", "चाहिए", "लगता", "मिलना", "पाना", "रखना", "देखना", "सोचना", "समझना", "पहुँचना",
+    "बताना", "सुनना", "पढ़ना", "लिखना", "खाना", "पीना", "सोना", "उठना", "बैठना", "खड़ा",
+    "अच्छा", "बुरा", "बड़ा", "छोटा", "नया", "पुराना", "सही", "गलत", "आसान", "मुश्किल",
+    "ज़रूरी", "खास", "अलग", "एक", "दूसरा", "पहला", "आखिरी", "पूरा", "आधा", "थोड़ा",
+    "ज़्यादा", "कम", "सभी", "कोई", "कुछ", "कई", "हर", "किसी", "जैसे", "तरह",
+    "शुरू", "खत्म", "पास", "दूर", "सामने", "पीछे", "दाएं", "बाएं", "बीच", "किनारा",
+    "जीवन", "दुनिया", "देश", "शहर", "गांव", "स्कूल", "किताब", "पानी", "खाना", "कपड़ा"
   ],
   hard: [
     "प्रशासन", "सम्मान", "व्यवस्था", "अभिव्यक्ति", "प्रतिनिधित्व", "सुविधाजनक",
-    "अनुभव", "स्थापित", "संस्थान", "विकास", "सम्बन्ध", "प्रभावशाली"
+    "अनुभव", "स्थापित", "संस्थान", "विकास", "सम्बन्ध", "प्रभावशाली",
+    "सरकार", "संविधान", "लोकतंत्र", "अधिकार", "स्वतंत्रता", "समानता", "न्याय", "कानून",
+    "शिक्षा", "स्वास्थ्य", "अर्थव्यवस्था", "उद्योग", "प्रौद्योगिकी", "विज्ञान", "अनुसंधान", "आविष्कार",
+    "पर्यावरण", "प्रदूषण", "जलवायु", "परिवर्तन", "संरक्षण", "सतत", "ऊर्जा", "संसाधन",
+    "संस्कृति", "परंपरा", "विरासत", "कला", "साहित्य", "संगीत", "नृत्य", "त्योहार",
+    "राजनीति", "चुनाव", "सांसद", "मंत्री", "नीति", "योजना", "बजट", "कर",
+    "व्यापार", "निवेश", "उत्पादन", "निर्यात", "आयात", "बाज़ार", "उपभोक्ता", "प्रतिस्पर्धा",
+    "प्रौद्योगिकी", "डिजिटल", "इंटरनेट", "सॉफ्टवेयर", "हार्डवेयर", "नेटवर्क", "सुरक्षा", "गोपनीयता"
   ]
 };
 
