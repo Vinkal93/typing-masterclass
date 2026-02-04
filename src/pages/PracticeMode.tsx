@@ -8,6 +8,7 @@ import TestResult from "@/components/TestResult";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { saveTestRecord, markLessonComplete } from "@/lib/progressTracker";
+import { trackMissedKeys } from "@/lib/missedKeysTracker";
 
 interface TestStats {
   wpm: number;
@@ -90,6 +91,10 @@ const PracticeMode = () => {
 
   const handleFinish = () => {
     setIsFinished(true);
+    
+    // Track missed keys for smart practice
+    trackMissedKeys(text, userInput);
+    
     // Save progress
     saveTestRecord({
       type: 'lesson',

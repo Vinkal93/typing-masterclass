@@ -1,4 +1,4 @@
-import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History, FileText, ClipboardList } from "lucide-react";
+import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History, ClipboardList, Zap, Target } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -22,7 +22,9 @@ export function AppSidebar() {
 
   const mainItems = [
     { title: t('dashboard'), url: "/", icon: Home },
+    { title: isHindi ? "फास्ट ट्रैक" : "Fast Track", url: "/fast-track", icon: Zap },
     { title: t('lessons'), url: "/lessons", icon: BookOpen },
+    { title: isHindi ? "स्मार्ट प्रैक्टिस" : "Smart Practice", url: "/smart-practice", icon: Target },
     { title: t('games'), url: "/games", icon: Gamepad2 },
     { title: t('progress'), url: "/progress", icon: TrendingUp },
     { title: t('keyboardGuide'), url: "/keyboard-guide", icon: Keyboard },
