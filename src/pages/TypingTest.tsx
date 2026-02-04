@@ -8,6 +8,7 @@ import TestResult from "@/components/TestResult";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { saveTestRecord } from "@/lib/progressTracker";
+import { trackMissedKeys } from "@/lib/missedKeysTracker";
 
 const sampleTexts = [
   "The quick brown fox jumps over the lazy dog. Programming is the art of telling another human what one wants the computer to do. Practice makes perfect when it comes to typing speed and accuracy.",
@@ -103,6 +104,10 @@ const TypingTest = () => {
 
   const handleFinish = () => {
     setIsFinished(true);
+    
+    // Track missed keys for smart practice
+    trackMissedKeys(text, userInput);
+    
     // Save progress
     saveTestRecord({
       type: 'test',

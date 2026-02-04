@@ -19,6 +19,8 @@ import Progress from "./pages/Progress";
 import FullHistory from "./pages/FullHistory";
 import KeyboardGuide from "./pages/KeyboardGuide";
 import AboutDeveloper from "./pages/AboutDeveloper";
+import FastTrack from "./pages/FastTrack";
+import SmartPractice from "./pages/SmartPractice";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +50,8 @@ const App = () => (
                       <Route path="/full-history" element={<FullHistory />} />
                       <Route path="/keyboard-guide" element={<KeyboardGuide />} />
                       <Route path="/about-developer" element={<AboutDeveloper />} />
+                      <Route path="/fast-track" element={<FastTrack />} />
+                      <Route path="/smart-practice" element={<SmartPractice />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
