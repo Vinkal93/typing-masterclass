@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+export type HindiKeyboardLayout = 'inscript' | 'remington';
+
+export const hindiKeyboardLayouts = [
+  { name: 'InScript (Standard)', value: 'inscript' as HindiKeyboardLayout },
+  { name: 'Remington GAIL', value: 'remington' as HindiKeyboardLayout },
+];
+
 interface FontContextType {
   currentFont: string;
   setFont: (font: string) => void;
@@ -7,6 +14,8 @@ interface FontContextType {
   setFontSize: (size: number) => void;
   hindiKeyboardFont: string;
   setHindiKeyboardFont: (font: string) => void;
+  hindiKeyboardLayout: HindiKeyboardLayout;
+  setHindiKeyboardLayout: (layout: HindiKeyboardLayout) => void;
 }
 
 const FontContext = createContext<FontContextType | undefined>(undefined);
@@ -35,6 +44,9 @@ export const FontProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [hindiKeyboardFont, setHindiKeyboardFontState] = useState(
     localStorage.getItem('hindiKeyboardFont') || 'Mangal, "Noto Sans Devanagari", sans-serif'
   );
+  const [hindiKeyboardLayout, setHindiKeyboardLayoutState] = useState<HindiKeyboardLayout>(
+    (localStorage.getItem('hindiKeyboardLayout') as HindiKeyboardLayout) || 'inscript'
+  );
 
   const setFont = (font: string) => {
     setCurrentFont(font);
@@ -54,6 +66,11 @@ export const FontProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     document.documentElement.style.setProperty('--hindi-keyboard-font', font);
   };
 
+  const setHindiKeyboardLayout = (layout: HindiKeyboardLayout) => {
+    setHindiKeyboardLayoutState(layout);
+    localStorage.setItem('hindiKeyboardLayout', layout);
+  };
+
   useEffect(() => {
     document.documentElement.style.setProperty('--selected-font', currentFont);
     document.documentElement.style.fontSize = `${fontSize}px`;
@@ -61,7 +78,7 @@ export const FontProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   return (
-    <FontContext.Provider value={{ currentFont, setFont, fontSize, setFontSize, hindiKeyboardFont, setHindiKeyboardFont }}>
+    <FontContext.Provider value={{ currentFont, setFont, fontSize, setFontSize, hindiKeyboardFont, setHindiKeyboardFont, hindiKeyboardLayout, setHindiKeyboardLayout }}>
       {children}
     </FontContext.Provider>
   );

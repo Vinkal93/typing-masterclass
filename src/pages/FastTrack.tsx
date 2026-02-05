@@ -9,6 +9,99 @@ import { trackMissedKeys } from "@/lib/missedKeysTracker";
 import { saveTestRecord } from "@/lib/progressTracker";
 
 // Word pools by difficulty - extensive collection for variety
+const englishSentences = [
+  // Famous quotes
+  "The only way to do great work is to love what you do.",
+  "In the middle of difficulty lies opportunity.",
+  "Success is not final failure is not fatal it is the courage to continue that counts.",
+  "The future belongs to those who believe in the beauty of their dreams.",
+  "It does not matter how slowly you go as long as you do not stop.",
+  "The greatest glory in living lies not in never falling but in rising every time we fall.",
+  "The way to get started is to quit talking and begin doing.",
+  "Your time is limited so do not waste it living someone elses life.",
+  "If life were predictable it would cease to be life and be without flavor.",
+  "Life is what happens when you are busy making other plans.",
+  "The purpose of our lives is to be happy.",
+  "You only live once but if you do it right once is enough.",
+  "Many of lifes failures are people who did not realize how close they were to success when they gave up.",
+  "If you want to live a happy life tie it to a goal not to people or things.",
+  "Never let the fear of striking out keep you from playing the game.",
+  "Money and success dont change people they merely amplify what is already there.",
+  "Not how long but how well you have lived is the main thing.",
+  "In three words I can sum up everything I have learned about life it goes on.",
+  "Life is really simple but we insist on making it complicated.",
+  "The best time to plant a tree was twenty years ago the second best time is now.",
+  // Common sentences
+  "The quick brown fox jumps over the lazy dog.",
+  "Pack my box with five dozen liquor jugs.",
+  "How vexingly quick daft zebras jump.",
+  "The five boxing wizards jump quickly.",
+  "Sphinx of black quartz judge my vow.",
+  "Two driven jocks help fax my big quiz.",
+  "The job requires extra pluck and zeal from every young wage earner.",
+  "A mad boxer shot a quick gloved jab to the jaw of his dizzy opponent.",
+  "Crazy Frederick bought many very exquisite opal jewels.",
+  "We promptly judged antique ivory buckles for the next prize.",
+  // Professional sentences
+  "Please schedule a meeting for next Monday at ten in the morning.",
+  "The quarterly report shows significant improvement in all departments.",
+  "Could you please review the attached documents and provide feedback.",
+  "We appreciate your continued support and look forward to working together.",
+  "The deadline for the project submission has been extended by two weeks.",
+  "Please ensure all team members have access to the shared drive.",
+  "The new software update will be deployed during the maintenance window.",
+  "Customer satisfaction remains our top priority across all service areas.",
+  "The annual budget review meeting will be held in the main conference room.",
+  "Please submit your expense reports by the end of this business day.",
+  // Tech related
+  "The algorithm processes data efficiently using parallel computing techniques.",
+  "Version control helps teams collaborate on software development projects.",
+  "Cloud computing enables scalable and flexible infrastructure solutions.",
+  "Machine learning models require large datasets for accurate predictions.",
+  "The database query returned over one million records in seconds.",
+  "Responsive design ensures websites work well on all device sizes.",
+  "The API endpoint accepts JSON formatted requests and responses.",
+  "Encryption protects sensitive data during transmission and storage.",
+  "The load balancer distributes traffic across multiple server instances.",
+  "Continuous integration automates the testing and deployment process.",
+];
+
+const hindiSentences = [
+  // Famous Hindi quotes and proverbs
+  "करत करत अभ्यास के जड़मति होत सुजान।",
+  "जहां चाह वहां राह।",
+  "परिश्रम ही सफलता की कुंजी है।",
+  "धीरे धीरे रे मना धीरे सब कुछ होय।",
+  "अभ्यास से ही सिद्धि प्राप्त होती है।",
+  "समय बहुत बलवान है।",
+  "जो बीत गई सो बात गई।",
+  "आज का काम कल पर मत छोड़ो।",
+  "सच्चा मित्र वही है जो विपत्ति में साथ दे।",
+  "ज्ञान से बड़ा कोई धन नहीं होता।",
+  "मेहनत का फल मीठा होता है।",
+  "सब्र का फल मीठा होता है।",
+  "एकता में शक्ति है।",
+  "अच्छी शुरुआत आधी जीत है।",
+  "हार मानना सबसे बड़ी हार है।",
+  // Common sentences
+  "भारत एक महान देश है जहां विविधता में एकता है।",
+  "हिंदी हमारी राष्ट्रभाषा है और हमें इस पर गर्व है।",
+  "शिक्षा जीवन का सबसे महत्वपूर्ण भाग है।",
+  "प्रौद्योगिकी ने हमारे जीवन को बहुत आसान बना दिया है।",
+  "स्वास्थ्य ही सबसे बड़ा धन है इसे संभाल कर रखो।",
+  "किताबें हमारी सबसे अच्छी मित्र होती हैं।",
+  "प्रकृति की रक्षा करना हमारा कर्तव्य है।",
+  "परिवार के साथ समय बिताना बहुत जरूरी है।",
+  "सकारात्मक सोच से जीवन में बदलाव आता है।",
+  "हमें अपने लक्ष्य पर केंद्रित रहना चाहिए।",
+  // Professional Hindi sentences
+  "कृपया अपना काम समय पर पूरा करें।",
+  "बैठक कल सुबह दस बजे होगी।",
+  "आपका सहयोग हमारे लिए बहुत महत्वपूर्ण है।",
+  "नई परियोजना अगले महीने शुरू होगी।",
+  "कृपया सभी दस्तावेज़ जमा करें।",
+];
+
 const englishWords = {
   easy: [
     "the", "and", "for", "are", "but", "not", "you", "all", "can", "had",
@@ -133,6 +226,15 @@ const FastTrack = () => {
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
 
   const generateParagraph = useCallback((wordCount: number = 30) => {
+    // 30% chance to use a sentence instead of random words
+    if (Math.random() < 0.3) {
+      const sentences = isHindi ? hindiSentences : englishSentences;
+      // Pick 2-3 random sentences and join them
+      const numSentences = Math.floor(Math.random() * 2) + 2;
+      const shuffled = [...sentences].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, numSentences).join(' ');
+    }
+    
     const words = isHindi ? hindiWords : englishWords;
     const pool = [...words.easy, ...(difficulty !== 'easy' ? words.medium : []), ...(difficulty === 'hard' ? words.hard : [])];
     
