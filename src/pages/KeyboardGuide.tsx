@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useFont, hindiKeyboardFonts } from "@/contexts/FontContext";
+import { useFont, hindiKeyboardFonts, hindiKeyboardLayouts } from "@/contexts/FontContext";
 import { RotateCcw, Download } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import jsPDF from "jspdf";
@@ -15,6 +15,7 @@ import html2canvas from "html2canvas";
 interface KeyData {
   char: string;
   hindiChar?: string;
+  remingtonChar?: string;
   finger: string;
   width?: string;
 }
@@ -33,7 +34,7 @@ interface DrillExercise {
 
 const KeyboardGuide = () => {
   const { isHindi, t } = useLanguage();
-  const { hindiKeyboardFont, setHindiKeyboardFont } = useFont();
+  const { hindiKeyboardFont, setHindiKeyboardFont, hindiKeyboardLayout, setHindiKeyboardLayout } = useFont();
   const [activeKey, setActiveKey] = useState<string>("");
   const keyboardRef = useRef<HTMLDivElement>(null);
   
@@ -557,34 +558,34 @@ const KeyboardGuide = () => {
   const keyboardRows: KeyData[][] = [
     // Number row
     [
-      { char: '`', finger: 'leftPinky' },
-      { char: '1', finger: 'leftPinky' },
-      { char: '2', finger: 'leftRing' },
-      { char: '3', finger: 'leftMiddle' },
-      { char: '4', finger: 'leftIndex' },
-      { char: '5', finger: 'leftIndex' },
-      { char: '6', finger: 'rightIndex' },
-      { char: '7', finger: 'rightIndex' },
-      { char: '8', finger: 'rightMiddle' },
-      { char: '9', finger: 'rightRing' },
-      { char: '0', finger: 'rightPinky' },
-      { char: '-', finger: 'rightPinky' },
-      { char: '=', finger: 'rightPinky' },
+      { char: '`', remingtonChar: '़', finger: 'leftPinky' },
+      { char: '1', remingtonChar: '१', finger: 'leftPinky' },
+      { char: '2', remingtonChar: '२', finger: 'leftRing' },
+      { char: '3', remingtonChar: '३', finger: 'leftMiddle' },
+      { char: '4', remingtonChar: '४', finger: 'leftIndex' },
+      { char: '5', remingtonChar: '५', finger: 'leftIndex' },
+      { char: '6', remingtonChar: '६', finger: 'rightIndex' },
+      { char: '7', remingtonChar: '७', finger: 'rightIndex' },
+      { char: '8', remingtonChar: '८', finger: 'rightMiddle' },
+      { char: '9', remingtonChar: '९', finger: 'rightRing' },
+      { char: '0', remingtonChar: '०', finger: 'rightPinky' },
+      { char: '-', remingtonChar: '-', finger: 'rightPinky' },
+      { char: '=', remingtonChar: 'ृ', finger: 'rightPinky' },
       { char: 'Delete', finger: 'rightPinky', width: 'w-20' },
     ],
     // QWERTY row
     [
       { char: 'Tab', finger: 'leftPinky', width: 'w-16' },
-      { char: 'Q', hindiChar: 'औ', finger: 'leftPinky' },
-      { char: 'W', hindiChar: 'ै', finger: 'leftRing' },
-      { char: 'E', hindiChar: 'ा', finger: 'leftMiddle' },
-      { char: 'R', hindiChar: 'ी', finger: 'leftIndex' },
-      { char: 'T', hindiChar: 'ू', finger: 'leftIndex' },
-      { char: 'Y', hindiChar: 'ब', finger: 'rightIndex' },
-      { char: 'U', hindiChar: 'ह', finger: 'rightIndex' },
-      { char: 'I', hindiChar: 'ग', finger: 'rightMiddle' },
-      { char: 'O', hindiChar: 'द', finger: 'rightRing' },
-      { char: 'P', hindiChar: 'ज', finger: 'rightPinky' },
+      { char: 'Q', hindiChar: 'औ', remingtonChar: 'ौ', finger: 'leftPinky' },
+      { char: 'W', hindiChar: 'ै', remingtonChar: 'ै', finger: 'leftRing' },
+      { char: 'E', hindiChar: 'ा', remingtonChar: 'ा', finger: 'leftMiddle' },
+      { char: 'R', hindiChar: 'ी', remingtonChar: 'ी', finger: 'leftIndex' },
+      { char: 'T', hindiChar: 'ू', remingtonChar: 'ू', finger: 'leftIndex' },
+      { char: 'Y', hindiChar: 'ब', remingtonChar: 'ब', finger: 'rightIndex' },
+      { char: 'U', hindiChar: 'ह', remingtonChar: 'ह', finger: 'rightIndex' },
+      { char: 'I', hindiChar: 'ग', remingtonChar: 'ग', finger: 'rightMiddle' },
+      { char: 'O', hindiChar: 'द', remingtonChar: 'द', finger: 'rightRing' },
+      { char: 'P', hindiChar: 'ज', remingtonChar: 'ज', finger: 'rightPinky' },
       { char: '[', finger: 'rightPinky' },
       { char: ']', finger: 'rightPinky' },
       { char: '\\', finger: 'rightPinky' },
@@ -592,32 +593,32 @@ const KeyboardGuide = () => {
     // ASDF row (Home row)
     [
       { char: 'Caps', finger: 'leftPinky', width: 'w-20' },
-      { char: 'A', hindiChar: 'ो', finger: 'leftPinky' },
-      { char: 'S', hindiChar: 'े', finger: 'leftRing' },
-      { char: 'D', hindiChar: '्', finger: 'leftMiddle' },
-      { char: 'F', hindiChar: 'ि', finger: 'leftIndex' },
-      { char: 'G', hindiChar: 'ु', finger: 'leftIndex' },
-      { char: 'H', hindiChar: 'प', finger: 'rightIndex' },
-      { char: 'J', hindiChar: 'र', finger: 'rightIndex' },
-      { char: 'K', hindiChar: 'क', finger: 'rightMiddle' },
-      { char: 'L', hindiChar: 'त', finger: 'rightRing' },
-      { char: ';', hindiChar: 'च', finger: 'rightPinky' },
+      { char: 'A', hindiChar: 'ो', remingtonChar: 'ो', finger: 'leftPinky' },
+      { char: 'S', hindiChar: 'े', remingtonChar: 'े', finger: 'leftRing' },
+      { char: 'D', hindiChar: '्', remingtonChar: 'क', finger: 'leftMiddle' },
+      { char: 'F', hindiChar: 'ि', remingtonChar: 'ि', finger: 'leftIndex' },
+      { char: 'G', hindiChar: 'ु', remingtonChar: 'ु', finger: 'leftIndex' },
+      { char: 'H', hindiChar: 'प', remingtonChar: 'प', finger: 'rightIndex' },
+      { char: 'J', hindiChar: 'र', remingtonChar: 'र', finger: 'rightIndex' },
+      { char: 'K', hindiChar: 'क', remingtonChar: 'क', finger: 'rightMiddle' },
+      { char: 'L', hindiChar: 'त', remingtonChar: 'त', finger: 'rightRing' },
+      { char: ';', hindiChar: 'च', remingtonChar: 'च', finger: 'rightPinky' },
       { char: "'", finger: 'rightPinky' },
       { char: 'Return', finger: 'rightPinky', width: 'w-24' },
     ],
     // ZXCV row
     [
       { char: 'Shift', finger: 'leftPinky', width: 'w-28' },
-      { char: 'Z', hindiChar: 'ं', finger: 'leftPinky' },
-      { char: 'X', hindiChar: 'ँ', finger: 'leftRing' },
-      { char: 'C', hindiChar: 'म', finger: 'leftMiddle' },
-      { char: 'V', hindiChar: 'न', finger: 'leftIndex' },
-      { char: 'B', hindiChar: 'व', finger: 'leftIndex' },
-      { char: 'N', hindiChar: 'ल', finger: 'rightIndex' },
-      { char: 'M', hindiChar: 'स', finger: 'rightIndex' },
-      { char: ',', hindiChar: ',', finger: 'rightMiddle' },
-      { char: '.', hindiChar: '.', finger: 'rightRing' },
-      { char: '/', hindiChar: 'य', finger: 'rightPinky' },
+      { char: 'Z', hindiChar: 'ं', remingtonChar: 'ॅ', finger: 'leftPinky' },
+      { char: 'X', hindiChar: 'ँ', remingtonChar: 'ख', finger: 'leftRing' },
+      { char: 'C', hindiChar: 'म', remingtonChar: 'म', finger: 'leftMiddle' },
+      { char: 'V', hindiChar: 'न', remingtonChar: 'न', finger: 'leftIndex' },
+      { char: 'B', hindiChar: 'व', remingtonChar: 'व', finger: 'leftIndex' },
+      { char: 'N', hindiChar: 'ल', remingtonChar: 'ल', finger: 'rightIndex' },
+      { char: 'M', hindiChar: 'स', remingtonChar: 'स', finger: 'rightIndex' },
+      { char: ',', hindiChar: ',', remingtonChar: ',', finger: 'rightMiddle' },
+      { char: '.', hindiChar: '.', remingtonChar: '।', finger: 'rightRing' },
+      { char: '/', hindiChar: 'य', remingtonChar: 'य', finger: 'rightPinky' },
       { char: 'Shift', finger: 'rightPinky', width: 'w-28' },
     ],
     // Space row
@@ -632,8 +633,15 @@ const KeyboardGuide = () => {
     ],
   ];
 
-  const KeyCap = ({ keyData, showHindi }: { keyData: KeyData; showHindi: boolean }) => {
-    const displayChar = showHindi && keyData.hindiChar ? keyData.hindiChar : keyData.char;
+  const KeyCap = ({ keyData, showHindi, layout }: { keyData: KeyData; showHindi: boolean; layout: 'inscript' | 'remington' }) => {
+    let displayChar = keyData.char;
+    if (showHindi) {
+      if (layout === 'remington' && keyData.remingtonChar) {
+        displayChar = keyData.remingtonChar;
+      } else if (keyData.hindiChar) {
+        displayChar = keyData.hindiChar;
+      }
+    }
     const baseWidth = keyData.width || 'w-12';
     
     return (
@@ -738,22 +746,41 @@ const KeyboardGuide = () => {
               <CardContent>
                 {/* Hindi Keyboard Font Selector */}
                 {isHindi && (
-                  <div className="flex items-center gap-4 mb-6 justify-center">
-                    <label className="text-sm font-medium">
-                      {isHindi ? "हिंदी फ़ॉन्ट:" : "Hindi Font:"}
-                    </label>
-                    <Select value={hindiKeyboardFont} onValueChange={setHindiKeyboardFont}>
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {hindiKeyboardFonts.map((font) => (
-                          <SelectItem key={font.value} value={font.value}>
-                            {font.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="flex flex-wrap items-center gap-4 mb-6 justify-center">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-medium">
+                        {isHindi ? "कीबोर्ड लेआउट:" : "Keyboard Layout:"}
+                      </label>
+                      <Select value={hindiKeyboardLayout} onValueChange={setHindiKeyboardLayout}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hindiKeyboardLayouts.map((layout) => (
+                            <SelectItem key={layout.value} value={layout.value}>
+                              {layout.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-medium">
+                        {isHindi ? "हिंदी फ़ॉन्ट:" : "Hindi Font:"}
+                      </label>
+                      <Select value={hindiKeyboardFont} onValueChange={setHindiKeyboardFont}>
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hindiKeyboardFonts.map((font) => (
+                            <SelectItem key={font.value} value={font.value}>
+                              {font.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 )}
 
@@ -784,7 +811,7 @@ const KeyboardGuide = () => {
                   {keyboardRows.map((row, rowIndex) => (
                     <div key={rowIndex} className="flex justify-center mb-1">
                       {row.map((keyData, keyIndex) => (
-                        <KeyCap key={`${rowIndex}-${keyIndex}`} keyData={keyData} showHindi={isHindi} />
+                        <KeyCap key={`${rowIndex}-${keyIndex}`} keyData={keyData} showHindi={isHindi} layout={hindiKeyboardLayout} />
                       ))}
                     </div>
                   ))}

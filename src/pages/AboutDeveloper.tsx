@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Mail, Globe, Code2, Lightbulb, Target, Award, ExternalLink, Github, Linkedin } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import developerImage from "@/assets/developer-profile.webp";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -33,9 +35,12 @@ const AboutDeveloper = () => {
           {/* Hero Section */}
           <div className="text-center mb-16">
             <div className="relative inline-block mb-6">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary via-secondary to-accent mx-auto flex items-center justify-center shadow-2xl">
-                <Code2 className="h-16 w-16 text-white" />
-              </div>
+              <Avatar className="w-32 h-32 mx-auto shadow-2xl border-4 border-primary/20">
+                <AvatarImage src={developerImage} alt="Vinkal Prajapati" className="object-cover" />
+                <AvatarFallback className="bg-gradient-to-br from-primary via-secondary to-accent text-4xl text-white">
+                  VP
+                </AvatarFallback>
+              </Avatar>
               <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-success rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-2xl">✨</span>
               </div>
