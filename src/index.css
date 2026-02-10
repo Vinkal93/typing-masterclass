@@ -130,3 +130,57 @@ All colors MUST be HSL.
     animation: ping 0.5s cubic-bezier(0, 0, 0.2, 1);
   }
 }
+
+/* UI Style: Glassmorphism */
+.ui-glassmorphism .border-border {
+  border-color: hsla(var(--border) / 0.3);
+}
+
+.ui-glassmorphism [class*="bg-card"] {
+  background: hsla(var(--card) / 0.6) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid hsla(var(--border) / 0.2);
+}
+
+.ui-glassmorphism [class*="bg-background"] {
+  background: linear-gradient(135deg, hsl(var(--background)), hsl(var(--muted)));
+}
+
+.ui-glassmorphism .border {
+  border-color: hsla(var(--border) / 0.3);
+}
+
+/* UI Style: Neumorphism */
+.ui-neumorphism [class*="bg-card"] {
+  background: hsl(var(--background)) !important;
+  box-shadow: 6px 6px 12px hsla(var(--foreground) / 0.08), -6px -6px 12px hsla(var(--card) / 0.9);
+  border: none !important;
+}
+
+.dark .ui-neumorphism [class*="bg-card"] {
+  box-shadow: 6px 6px 12px hsla(0 0% 0% / 0.3), -6px -6px 12px hsla(var(--muted) / 0.1);
+}
+
+.ui-neumorphism button[class*="bg-primary"] {
+  box-shadow: 3px 3px 6px hsla(var(--foreground) / 0.1), -3px -3px 6px hsla(var(--card) / 0.9);
+}
+
+/* UI Style: Cyberpunk */
+.ui-cyberpunk {
+  --primary: 280 100% 60%;
+  --accent: 160 100% 50%;
+}
+
+.ui-cyberpunk [class*="bg-card"] {
+  border: 1px solid hsla(var(--primary) / 0.3) !important;
+  box-shadow: 0 0 15px hsla(var(--primary) / 0.1), inset 0 0 15px hsla(var(--primary) / 0.05);
+}
+
+.ui-cyberpunk [class*="text-primary"] {
+  text-shadow: 0 0 8px hsla(var(--primary) / 0.5);
+}
+
+.ui-cyberpunk button[class*="bg-primary"] {
+  box-shadow: 0 0 15px hsla(var(--primary) / 0.4);
+}

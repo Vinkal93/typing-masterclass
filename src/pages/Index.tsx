@@ -69,7 +69,7 @@ const Index = () => {
 
         {/* Quick Start Options */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/typing-test?duration=60")}>
+          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate(`/typing-test?duration=60&r=${Date.now()}`)}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
@@ -82,7 +82,7 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/typing-test?duration=120")}>
+          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate(`/typing-test?duration=120&r=${Date.now()}`)}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-secondary" />
@@ -95,7 +95,7 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate("/typing-test?duration=300")}>
+          <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate(`/typing-test?duration=300&r=${Date.now()}`)}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-success" />

@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RotateCcw, Zap, Timer, Target, TrendingUp } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RotateCcw, Zap, Timer, Target, TrendingUp, Trophy } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { trackMissedKeys } from "@/lib/missedKeysTracker";
 import { saveTestRecord } from "@/lib/progressTracker";
 
-// Word pools by difficulty - extensive collection for variety
 const englishSentences = [
-  // Famous quotes
   "The only way to do great work is to love what you do.",
   "In the middle of difficulty lies opportunity.",
   "Success is not final failure is not fatal it is the courage to continue that counts.",
@@ -31,7 +31,6 @@ const englishSentences = [
   "In three words I can sum up everything I have learned about life it goes on.",
   "Life is really simple but we insist on making it complicated.",
   "The best time to plant a tree was twenty years ago the second best time is now.",
-  // Common sentences
   "The quick brown fox jumps over the lazy dog.",
   "Pack my box with five dozen liquor jugs.",
   "How vexingly quick daft zebras jump.",
@@ -42,7 +41,6 @@ const englishSentences = [
   "A mad boxer shot a quick gloved jab to the jaw of his dizzy opponent.",
   "Crazy Frederick bought many very exquisite opal jewels.",
   "We promptly judged antique ivory buckles for the next prize.",
-  // Professional sentences
   "Please schedule a meeting for next Monday at ten in the morning.",
   "The quarterly report shows significant improvement in all departments.",
   "Could you please review the attached documents and provide feedback.",
@@ -53,7 +51,6 @@ const englishSentences = [
   "Customer satisfaction remains our top priority across all service areas.",
   "The annual budget review meeting will be held in the main conference room.",
   "Please submit your expense reports by the end of this business day.",
-  // Tech related
   "The algorithm processes data efficiently using parallel computing techniques.",
   "Version control helps teams collaborate on software development projects.",
   "Cloud computing enables scalable and flexible infrastructure solutions.",
@@ -64,10 +61,19 @@ const englishSentences = [
   "Encryption protects sensitive data during transmission and storage.",
   "The load balancer distributes traffic across multiple server instances.",
   "Continuous integration automates the testing and deployment process.",
+  "Education is the most powerful weapon which you can use to change the world.",
+  "The only limit to our realization of tomorrow will be our doubts of today.",
+  "It is during our darkest moments that we must focus to see the light.",
+  "The best and most beautiful things in the world cannot be seen or even touched they must be felt with the heart.",
+  "Tell me and I forget teach me and I remember involve me and I learn.",
+  "Do not judge each day by the harvest you reap but by the seeds that you plant.",
+  "The greatest wealth is to live content with little.",
+  "Happiness is not something ready made it comes from your own actions.",
+  "In the end we will remember not the words of our enemies but the silence of our friends.",
+  "Believe you can and you are halfway there.",
 ];
 
 const hindiSentences = [
-  // Famous Hindi quotes and proverbs
   "करत करत अभ्यास के जड़मति होत सुजान।",
   "जहां चाह वहां राह।",
   "परिश्रम ही सफलता की कुंजी है।",
@@ -83,7 +89,6 @@ const hindiSentences = [
   "एकता में शक्ति है।",
   "अच्छी शुरुआत आधी जीत है।",
   "हार मानना सबसे बड़ी हार है।",
-  // Common sentences
   "भारत एक महान देश है जहां विविधता में एकता है।",
   "हिंदी हमारी राष्ट्रभाषा है और हमें इस पर गर्व है।",
   "शिक्षा जीवन का सबसे महत्वपूर्ण भाग है।",
@@ -94,7 +99,6 @@ const hindiSentences = [
   "परिवार के साथ समय बिताना बहुत जरूरी है।",
   "सकारात्मक सोच से जीवन में बदलाव आता है।",
   "हमें अपने लक्ष्य पर केंद्रित रहना चाहिए।",
-  // Professional Hindi sentences
   "कृपया अपना काम समय पर पूरा करें।",
   "बैठक कल सुबह दस बजे होगी।",
   "आपका सहयोग हमारे लिए बहुत महत्वपूर्ण है।",
@@ -154,13 +158,7 @@ const englishWords = {
     "straightforward", "substantially", "technological", "transformation", "understanding",
     "unfortunately", "unprecedented", "visualization", "vulnerability", "accomplishment",
     "accountability", "acknowledgement", "administrative", "advantageous", "alternatively",
-    "announcement", "appreciation", "architectural", "automatically", "characteristics",
-    "circumstances", "collaboration", "communicative", "complementary", "comprehensive",
-    "concentration", "configuration", "consequently", "consolidation", "constitutional",
-    "controversial", "conventional", "coordination", "corresponding", "counterproductive",
-    "demonstration", "determination", "disadvantage", "disappointment", "distinguished",
-    "documentation", "effectiveness", "encyclopedia", "entertainment", "entrepreneurial",
-    "environmental", "establishment", "experimental", "extraordinary", "functionality"
+    "announcement", "appreciation", "architectural", "automatically", "characteristics"
   ]
 };
 
@@ -177,22 +175,13 @@ const hindiWords = {
     "करना", "होना", "जाना", "आना", "देना", "लेना", "कहना", "रहना", "बनना", "चलना",
     "सकता", "चाहिए", "लगता", "मिलना", "पाना", "रखना", "देखना", "सोचना", "समझना", "पहुँचना",
     "बताना", "सुनना", "पढ़ना", "लिखना", "खाना", "पीना", "सोना", "उठना", "बैठना", "खड़ा",
-    "अच्छा", "बुरा", "बड़ा", "छोटा", "नया", "पुराना", "सही", "गलत", "आसान", "मुश्किल",
-    "ज़रूरी", "खास", "अलग", "एक", "दूसरा", "पहला", "आखिरी", "पूरा", "आधा", "थोड़ा",
-    "ज़्यादा", "कम", "सभी", "कोई", "कुछ", "कई", "हर", "किसी", "जैसे", "तरह",
-    "शुरू", "खत्म", "पास", "दूर", "सामने", "पीछे", "दाएं", "बाएं", "बीच", "किनारा",
-    "जीवन", "दुनिया", "देश", "शहर", "गांव", "स्कूल", "किताब", "पानी", "खाना", "कपड़ा"
+    "अच्छा", "बुरा", "बड़ा", "छोटा", "नया", "पुराना", "सही", "गलत", "आसान", "मुश्किल"
   ],
   hard: [
     "प्रशासन", "सम्मान", "व्यवस्था", "अभिव्यक्ति", "प्रतिनिधित्व", "सुविधाजनक",
     "अनुभव", "स्थापित", "संस्थान", "विकास", "सम्बन्ध", "प्रभावशाली",
     "सरकार", "संविधान", "लोकतंत्र", "अधिकार", "स्वतंत्रता", "समानता", "न्याय", "कानून",
-    "शिक्षा", "स्वास्थ्य", "अर्थव्यवस्था", "उद्योग", "प्रौद्योगिकी", "विज्ञान", "अनुसंधान", "आविष्कार",
-    "पर्यावरण", "प्रदूषण", "जलवायु", "परिवर्तन", "संरक्षण", "सतत", "ऊर्जा", "संसाधन",
-    "संस्कृति", "परंपरा", "विरासत", "कला", "साहित्य", "संगीत", "नृत्य", "त्योहार",
-    "राजनीति", "चुनाव", "सांसद", "मंत्री", "नीति", "योजना", "बजट", "कर",
-    "व्यापार", "निवेश", "उत्पादन", "निर्यात", "आयात", "बाज़ार", "उपभोक्ता", "प्रतिस्पर्धा",
-    "प्रौद्योगिकी", "डिजिटल", "इंटरनेट", "सॉफ्टवेयर", "हार्डवेयर", "नेटवर्क", "सुरक्षा", "गोपनीयता"
+    "शिक्षा", "स्वास्थ्य", "अर्थव्यवस्था", "उद्योग", "प्रौद्योगिकी", "विज्ञान", "अनुसंधान", "आविष्कार"
   ]
 };
 
@@ -202,6 +191,11 @@ interface TestStats {
   accuracy: number;
   errors: number;
   timeSpent: number;
+}
+
+interface WpmDataPoint {
+  time: number;
+  wpm: number;
 }
 
 const FastTrack = () => {
@@ -214,57 +208,60 @@ const FastTrack = () => {
   const [bestWpm, setBestWpm] = useState(0);
   const [avgWpm, setAvgWpm] = useState(0);
   const [totalWpmSum, setTotalWpmSum] = useState(0);
+  const [showResult, setShowResult] = useState(false);
+  const [wpmHistory, setWpmHistory] = useState<WpmDataPoint[]>([]);
   const [stats, setStats] = useState<TestStats>({
-    wpm: 0,
-    cpm: 0,
-    accuracy: 100,
-    errors: 0,
-    timeSpent: 0,
+    wpm: 0, cpm: 0, accuracy: 100, errors: 0, timeSpent: 0,
   });
   
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textDisplayRef = useRef<HTMLDivElement>(null);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
+  const wpmTrackingRef = useRef<WpmDataPoint[]>([]);
 
-  const generateParagraph = useCallback((wordCount: number = 30) => {
-    // 30% chance to use a sentence instead of random words
+  const generateParagraph = useCallback((wordCount: number = 40) => {
     if (Math.random() < 0.3) {
       const sentences = isHindi ? hindiSentences : englishSentences;
-      // Pick 2-3 random sentences and join them
       const numSentences = Math.floor(Math.random() * 2) + 2;
       const shuffled = [...sentences].sort(() => Math.random() - 0.5);
       return shuffled.slice(0, numSentences).join(' ');
     }
-    
     const words = isHindi ? hindiWords : englishWords;
     const pool = [...words.easy, ...(difficulty !== 'easy' ? words.medium : []), ...(difficulty === 'hard' ? words.hard : [])];
-    
     const result: string[] = [];
     for (let i = 0; i < wordCount; i++) {
-      const randomWord = pool[Math.floor(Math.random() * pool.length)];
-      result.push(randomWord);
+      result.push(pool[Math.floor(Math.random() * pool.length)]);
     }
     return result.join(' ');
   }, [isHindi, difficulty]);
 
   const startNewTest = useCallback(() => {
-    const newText = generateParagraph(35);
-    setText(newText);
+    setText(generateParagraph(40));
     setUserInput("");
     setStartTime(null);
     setIsActive(false);
-    setStats({
-      wpm: 0,
-      cpm: 0,
-      accuracy: 100,
-      errors: 0,
-      timeSpent: 0,
-    });
+    setShowResult(false);
+    wpmTrackingRef.current = [];
+    setWpmHistory([]);
+    setStats({ wpm: 0, cpm: 0, accuracy: 100, errors: 0, timeSpent: 0 });
     setTimeout(() => inputRef.current?.focus(), 50);
   }, [generateParagraph]);
 
   useEffect(() => {
     startNewTest();
   }, [difficulty, isHindi]);
+
+  // Track WPM over time
+  useEffect(() => {
+    if (!isActive || !startTime) return;
+    const interval = setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      const wordsTyped = userInput.trim().split(/\s+/).filter(w => w).length;
+      const wpm = elapsed > 0 ? Math.round((wordsTyped / elapsed) * 60) : 0;
+      wpmTrackingRef.current.push({ time: Math.round(elapsed), wpm });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isActive, startTime, userInput]);
 
   useEffect(() => {
     if (userInput.length > 0 && !startTime) {
@@ -276,20 +273,13 @@ const FastTrack = () => {
       const timeElapsed = (Date.now() - startTime) / 1000 / 60;
       const wordsTyped = userInput.trim().split(/\s+/).length;
       const charsTyped = userInput.length;
-      
       let errors = 0;
       for (let i = 0; i < userInput.length; i++) {
-        if (userInput[i] !== text[i]) {
-          errors++;
-        }
+        if (userInput[i] !== text[i]) errors++;
       }
-      
       const accuracy = userInput.length > 0 
-        ? Math.max(0, ((userInput.length - errors) / userInput.length) * 100)
-        : 100;
-
+        ? Math.max(0, ((userInput.length - errors) / userInput.length) * 100) : 100;
       const currentWpm = timeElapsed > 0 ? Math.round(wordsTyped / timeElapsed) : 0;
-
       setStats({
         wpm: currentWpm,
         cpm: timeElapsed > 0 ? Math.round(charsTyped / timeElapsed) : 0,
@@ -300,55 +290,46 @@ const FastTrack = () => {
     }
   }, [userInput, startTime, text]);
 
+  // Auto-scroll text display to keep current position visible
+  useEffect(() => {
+    if (textDisplayRef.current && userInput.length > 0) {
+      const currentCharEl = textDisplayRef.current.querySelector(`[data-index="${userInput.length}"]`);
+      if (currentCharEl) {
+        currentCharEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+  }, [userInput]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    
     if (value.length <= text.length) {
       setUserInput(value);
     }
-
-    // Auto-complete when finished
     if (value.length === text.length) {
       finishTest();
     }
   };
 
   const finishTest = () => {
-    // Track missed keys
     trackMissedKeys(text, userInput);
-    
-    // Update stats
     const newTestCount = testCount + 1;
     setTestCount(newTestCount);
-    
     const newTotalWpm = totalWpmSum + stats.wpm;
     setTotalWpmSum(newTotalWpm);
     setAvgWpm(Math.round(newTotalWpm / newTestCount));
+    if (stats.wpm > bestWpm) setBestWpm(stats.wpm);
     
-    if (stats.wpm > bestWpm) {
-      setBestWpm(stats.wpm);
-    }
-    
-    // Save progress
     saveTestRecord({
-      type: 'test',
-      wpm: stats.wpm,
-      cpm: stats.cpm,
-      accuracy: stats.accuracy,
-      errors: stats.errors,
-      timeSpent: stats.timeSpent,
-      title: 'Fast Track'
+      type: 'test', wpm: stats.wpm, cpm: stats.cpm,
+      accuracy: stats.accuracy, errors: stats.errors,
+      timeSpent: stats.timeSpent, title: 'Fast Track'
     });
     
-    // Auto-progress difficulty
-    if (stats.accuracy >= 95 && stats.wpm >= 40 && difficulty === 'easy') {
-      setDifficulty('medium');
-    } else if (stats.accuracy >= 90 && stats.wpm >= 50 && difficulty === 'medium') {
-      setDifficulty('hard');
-    }
+    if (stats.accuracy >= 95 && stats.wpm >= 40 && difficulty === 'easy') setDifficulty('medium');
+    else if (stats.accuracy >= 90 && stats.wpm >= 50 && difficulty === 'medium') setDifficulty('hard');
     
-    // Start new test immediately
-    setTimeout(startNewTest, 100);
+    setWpmHistory([...wpmTrackingRef.current]);
+    setShowResult(true);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -364,8 +345,14 @@ const FastTrack = () => {
     return "text-destructive bg-destructive/10";
   };
 
-  // Get current character for cursor effect
   const currentIndex = userInput.length;
+
+  const getPerformanceMessage = () => {
+    if (stats.wpm >= 60 && stats.accuracy >= 95) return { message: isHindi ? "उत्कृष्ट! प्रोफेशनल लेवल" : "Excellent! Professional Level", emoji: "🏆" };
+    if (stats.wpm >= 40 && stats.accuracy >= 90) return { message: isHindi ? "बहुत अच्छा! औसत से ऊपर" : "Great! Above Average", emoji: "🌟" };
+    if (stats.wpm >= 25 && stats.accuracy >= 80) return { message: isHindi ? "अच्छा! अभ्यास जारी रखें" : "Good! Keep Practicing", emoji: "👍" };
+    return { message: isHindi ? "जारी रखें! अभ्यास से सब होता है" : "Keep Going! Practice Makes Perfect", emoji: "💪" };
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -456,15 +443,20 @@ const FastTrack = () => {
             </Card>
           </div>
 
-          {/* Typing Area - Monkeytype Style */}
-          <Card className="p-8 mb-6 bg-card">
+          {/* Typing Area */}
+          <Card 
+            className="p-8 mb-6 bg-card cursor-text overflow-hidden"
+            onClick={() => inputRef.current?.focus()}
+          >
             <div 
-              className="text-2xl md:text-3xl leading-relaxed font-mono select-none mb-8 tracking-wide"
-              style={{ wordSpacing: '0.3em' }}
+              ref={textDisplayRef}
+              className="text-2xl md:text-3xl leading-relaxed font-mono select-none mb-8 tracking-wide max-h-[200px] overflow-y-auto overflow-x-hidden"
+              style={{ wordSpacing: '0.3em', wordBreak: 'break-word', overflowWrap: 'break-word' }}
             >
               {text.split("").map((char, index) => (
                 <span 
-                  key={index} 
+                  key={index}
+                  data-index={index}
                   className={`${getCharacterClass(index)} ${index === currentIndex ? 'border-l-2 border-primary animate-pulse' : ''}`}
                 >
                   {char}
@@ -478,12 +470,11 @@ const FastTrack = () => {
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               className="w-full p-4 text-xl font-mono border-2 border-border rounded-lg focus:outline-none focus:border-primary resize-none bg-background text-foreground opacity-0 absolute"
-              style={{ height: 0, overflow: 'hidden' }}
+              style={{ height: 0, overflow: 'hidden', pointerEvents: 'none' }}
               autoFocus
               spellCheck={false}
             />
 
-            {/* Click to focus hint */}
             {!isActive && userInput.length === 0 && (
               <div 
                 className="text-center text-muted-foreground cursor-pointer py-4"
@@ -508,6 +499,72 @@ const FastTrack = () => {
           </div>
         </div>
       </main>
+
+      {/* Result Popup Dialog */}
+      <Dialog open={showResult} onOpenChange={setShowResult}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl flex items-center justify-center gap-2">
+              <Trophy className="h-6 w-6 text-primary" />
+              {isHindi ? "टेस्ट पूरा!" : "Test Complete!"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="text-center mb-4">
+            <span className="text-4xl">{getPerformanceMessage().emoji}</span>
+            <p className="text-lg font-semibold text-primary mt-2">{getPerformanceMessage().message}</p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <Card className="p-3 text-center">
+              <p className="text-xs text-muted-foreground">WPM</p>
+              <p className="text-2xl font-bold text-primary">{stats.wpm}</p>
+            </Card>
+            <Card className="p-3 text-center">
+              <p className="text-xs text-muted-foreground">CPM</p>
+              <p className="text-2xl font-bold text-foreground">{stats.cpm}</p>
+            </Card>
+            <Card className="p-3 text-center">
+              <p className="text-xs text-muted-foreground">{isHindi ? "सटीकता" : "Accuracy"}</p>
+              <p className="text-2xl font-bold text-success">{stats.accuracy}%</p>
+            </Card>
+            <Card className="p-3 text-center">
+              <p className="text-xs text-muted-foreground">{isHindi ? "गलतियाँ" : "Errors"}</p>
+              <p className="text-2xl font-bold text-destructive">{stats.errors}</p>
+            </Card>
+          </div>
+
+          {/* WPM Line Chart */}
+          {wpmHistory.length > 1 && (
+            <div className="mb-4">
+              <p className="text-sm font-semibold text-foreground mb-2 text-center">
+                {isHindi ? "टाइपिंग स्पीड ग्राफ" : "Typing Speed Over Time"}
+              </p>
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={wpmHistory}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="time" tick={{ fontSize: 11 }} label={{ value: isHindi ? "समय (s)" : "Time (s)", position: "insideBottom", offset: -5, fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} label={{ value: "WPM", angle: -90, position: "insideLeft", fontSize: 11 }} />
+                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
+                  <Line type="monotone" dataKey="wpm" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          <div className="text-center text-sm text-muted-foreground mb-4">
+            {isHindi ? `समय: ${stats.timeSpent}s` : `Time: ${stats.timeSpent}s`}
+          </div>
+
+          <div className="flex gap-3">
+            <Button onClick={() => { setShowResult(false); startNewTest(); }} className="flex-1 gap-2">
+              <RotateCcw className="h-4 w-4" />
+              {isHindi ? "अगला टेस्ट" : "Next Test"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
