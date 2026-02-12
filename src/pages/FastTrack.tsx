@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { trackMissedKeys } from "@/lib/missedKeysTracker";
 import { saveTestRecord } from "@/lib/progressTracker";
+import { useTypingSettings, getCaretClassName, getHighlightClassName } from "@/hooks/useTypingSettings";
 
 const englishSentences = [
   "The only way to do great work is to love what you do.",
@@ -200,6 +201,7 @@ interface WpmDataPoint {
 
 const FastTrack = () => {
   const { isHindi } = useLanguage();
+  const typingSettings = useTypingSettings();
   const [text, setText] = useState("");
   const [userInput, setUserInput] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -302,6 +304,11 @@ const FastTrack = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
+    // Stop on error: prevent advancing if last char is wrong
+    if (typingSettings.stopOnError && value.length > userInput.length) {
+      const lastIndex = value.length - 1;
+      if (value[lastIndex] !== text[lastIndex]) return;
+    }
     if (value.length <= text.length) {
       setUserInput(value);
     }
@@ -339,13 +346,15 @@ const FastTrack = () => {
     }
   };
 
+  const currentIndex = userInput.length;
+
   const getCharacterClass = (index: number) => {
-    if (index >= userInput.length) return "text-muted-foreground";
-    if (userInput[index] === text[index]) return "text-primary";
-    return "text-destructive bg-destructive/10";
+    return getHighlightClassName(typingSettings.highlightMode, index, currentIndex, text, userInput);
   };
 
-  const currentIndex = userInput.length;
+  const getCaretClass = (index: number) => {
+    return getCaretClassName(typingSettings.caretStyle, typingSettings.smoothCaret, index === currentIndex);
+  };
 
   const getPerformanceMessage = () => {
     if (stats.wpm >= 60 && stats.accuracy >= 95) return { message: isHindi ? "उत्कृष्ट! प्रोफेशनल लेवल" : "Excellent! Professional Level", emoji: "🏆" };
@@ -457,7 +466,7 @@ const FastTrack = () => {
                 <span 
                   key={index}
                   data-index={index}
-                  className={`${getCharacterClass(index)} ${index === currentIndex ? 'border-l-2 border-primary animate-pulse' : ''}`}
+                  className={`${getCharacterClass(index)} ${getCaretClass(index)} ${index === currentIndex && typingSettings.caretStyle === 'line' ? 'animate-pulse' : ''}`}
                 >
                   {char}
                 </span>

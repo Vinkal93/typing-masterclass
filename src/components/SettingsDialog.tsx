@@ -38,6 +38,7 @@ export function SettingsDialog() {
   const handleToggle = (key: string, value: boolean, setter: (v: boolean) => void) => {
     setter(value);
     localStorage.setItem(key, String(value));
+    window.dispatchEvent(new Event('typingSettingsChanged'));
   };
 
   const handleClearAllData = () => {
@@ -242,7 +243,7 @@ export function SettingsDialog() {
                   <div
                     key={style.value}
                     className={`border rounded-lg p-2 cursor-pointer text-center transition-all ${caretStyle === style.value ? 'border-primary bg-primary/10' : 'hover:bg-accent/50'}`}
-                    onClick={() => { setCaretStyle(style.value); localStorage.setItem('caretStyle', style.value); }}
+                    onClick={() => { setCaretStyle(style.value); localStorage.setItem('caretStyle', style.value); window.dispatchEvent(new Event('typingSettingsChanged')); }}
                   >
                     <p className="text-2xl font-mono">{style.label}</p>
                     <p className="text-xs text-muted-foreground">{style.name}</p>
@@ -268,7 +269,7 @@ export function SettingsDialog() {
                   <div
                     key={mode.value}
                     className={`border rounded-lg p-2 cursor-pointer text-center transition-all ${highlightMode === mode.value ? 'border-primary bg-primary/10' : 'hover:bg-accent/50'}`}
-                    onClick={() => { setHighlightMode(mode.value); localStorage.setItem('highlightMode', mode.value); }}
+                    onClick={() => { setHighlightMode(mode.value); localStorage.setItem('highlightMode', mode.value); window.dispatchEvent(new Event('typingSettingsChanged')); }}
                   >
                     <p className="text-sm font-medium">{mode.name}</p>
                   </div>
