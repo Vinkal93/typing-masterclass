@@ -21,6 +21,11 @@ import KeyboardGuide from "./pages/KeyboardGuide";
 import AboutDeveloper from "./pages/AboutDeveloper";
 import FastTrack from "./pages/FastTrack";
 import SmartPractice from "./pages/SmartPractice";
+import FingerHeatmap from "./pages/FingerHeatmap";
+import Achievements from "./pages/Achievements";
+import Leaderboard from "./pages/Leaderboard";
+import ErrorAnalysis from "./pages/ErrorAnalysis";
+import CPCTMock from "./pages/CPCTMock";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +57,11 @@ const App = () => (
                       <Route path="/about-developer" element={<AboutDeveloper />} />
                       <Route path="/fast-track" element={<FastTrack />} />
                       <Route path="/smart-practice" element={<SmartPractice />} />
+                      <Route path="/finger-heatmap" element={<FingerHeatmap />} />
+                      <Route path="/achievements" element={<Achievements />} />
+                      <Route path="/leaderboard" element={<Leaderboard />} />
+                      <Route path="/error-analysis" element={<ErrorAnalysis />} />
+                      <Route path="/cpct-mock" element={<CPCTMock />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

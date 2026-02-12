@@ -1,4 +1,4 @@
-import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History, ClipboardList, Zap, Target } from "lucide-react";
+import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History, ClipboardList, Zap, Target, Hand, Trophy, Medal, BarChart3, FileText } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -26,11 +26,16 @@ export function AppSidebar() {
     { title: t('lessons'), url: "/lessons", icon: BookOpen },
     { title: isHindi ? "स्मार्ट प्रैक्टिस" : "Smart Practice", url: "/smart-practice", icon: Target },
     { title: t('games'), url: "/games", icon: Gamepad2 },
+    { title: isHindi ? "CPCT Mock" : "CPCT Mock", url: "/cpct-mock", icon: FileText },
     { title: t('progress'), url: "/progress", icon: TrendingUp },
     { title: t('keyboardGuide'), url: "/keyboard-guide", icon: Keyboard },
   ];
 
   const secondaryItems = [
+    { title: isHindi ? "फिंगर हीटमैप" : "Finger Heatmap", url: "/finger-heatmap", icon: Hand },
+    { title: isHindi ? "उपलब्धियाँ" : "Achievements", url: "/achievements", icon: Trophy },
+    { title: isHindi ? "लीडरबोर्ड" : "Leaderboard", url: "/leaderboard", icon: Medal },
+    { title: isHindi ? "एरर विश्लेषण" : "Error Analysis", url: "/error-analysis", icon: BarChart3 },
     { title: isHindi ? "पूर्ण इतिहास" : "Full History", url: "/full-history", icon: ClipboardList },
     { title: t('examHistory'), url: "/exam-history", icon: History },
     { title: t('about'), url: "/about-developer", icon: User },

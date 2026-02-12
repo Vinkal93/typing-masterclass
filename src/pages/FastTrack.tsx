@@ -10,6 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { trackMissedKeys } from "@/lib/missedKeysTracker";
 import { saveTestRecord } from "@/lib/progressTracker";
 import { useTypingSettings, getCaretClassName, getHighlightClassName } from "@/hooks/useTypingSettings";
+import { soundManager } from "@/lib/soundManager";
 
 const englishSentences = [
   "The only way to do great work is to love what you do.",
@@ -307,7 +308,18 @@ const FastTrack = () => {
     // Stop on error: prevent advancing if last char is wrong
     if (typingSettings.stopOnError && value.length > userInput.length) {
       const lastIndex = value.length - 1;
-      if (value[lastIndex] !== text[lastIndex]) return;
+      if (value[lastIndex] !== text[lastIndex]) {
+        soundManager.playError();
+        return;
+      }
+    }
+    if (value.length > userInput.length) {
+      const lastChar = value[value.length - 1];
+      if (lastChar === text[value.length - 1]) {
+        soundManager.playKeyPress();
+      } else {
+        soundManager.playError();
+      }
     }
     if (value.length <= text.length) {
       setUserInput(value);
@@ -367,8 +379,8 @@ const FastTrack = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="container mx-auto px-4 py-8 flex-1">
-        <div className="max-w-4xl mx-auto">
+      <main className="container mx-auto px-4 py-8 flex-1 overflow-x-hidden">
+        <div className="max-w-4xl mx-auto overflow-x-hidden">
           {/* Header */}
           <div className="text-center mb-6">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
@@ -454,19 +466,19 @@ const FastTrack = () => {
 
           {/* Typing Area */}
           <Card 
-            className="p-8 mb-6 bg-card cursor-text overflow-hidden"
+            className="p-8 mb-6 bg-card cursor-text overflow-hidden max-w-full"
             onClick={() => inputRef.current?.focus()}
           >
             <div 
               ref={textDisplayRef}
-              className="text-2xl md:text-3xl leading-relaxed font-mono select-none mb-8 tracking-wide max-h-[200px] overflow-y-auto overflow-x-hidden"
-              style={{ wordSpacing: '0.3em', wordBreak: 'break-word', overflowWrap: 'break-word' }}
+              className="text-2xl md:text-3xl leading-relaxed font-mono select-none mb-8 tracking-wide max-h-[200px] overflow-y-auto whitespace-pre-wrap"
+              style={{ wordSpacing: '0.3em', wordBreak: 'break-all', overflowWrap: 'anywhere', overflowX: 'hidden' }}
             >
               {text.split("").map((char, index) => (
                 <span 
                   key={index}
                   data-index={index}
-                  className={`${getCharacterClass(index)} ${getCaretClass(index)} ${index === currentIndex && typingSettings.caretStyle === 'line' ? 'animate-pulse' : ''}`}
+                  className={`${getCharacterClass(index)} ${getCaretClass(index)}`}
                 >
                   {char}
                 </span>

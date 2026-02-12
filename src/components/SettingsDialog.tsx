@@ -1,4 +1,4 @@
-import { Settings, Sun, Moon, Monitor, Type, Palette, RotateCcw, Trash2, Sparkles, Volume2, Eye, Gauge } from "lucide-react";
+import { Settings, Sun, Moon, Monitor, Type, Palette, RotateCcw, Trash2, Sparkles, Volume2, Eye, Gauge, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
@@ -15,6 +15,7 @@ import { fonts, hindiKeyboardFonts, useFont } from "@/contexts/FontContext";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
+import { soundManager, type SoundPack } from "@/lib/soundManager";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -32,8 +33,9 @@ export function SettingsDialog() {
   const [showLiveWpm, setShowLiveWpm] = useState(() => localStorage.getItem('showLiveWpm') !== 'false');
   const [smoothCaret, setSmoothCaret] = useState(() => localStorage.getItem('smoothCaret') !== 'false');
   const [caretStyle, setCaretStyle] = useState(() => localStorage.getItem('caretStyle') || 'line');
-  const [highlightMode, setHighlightMode] = useState(() => localStorage.getItem('highlightMode') || 'letter');
+  const [highlightMode, setHighlightMode] = useState(() => localStorage.getItem('highlightMode') || 'off');
   const [stopOnError, setStopOnError] = useState(() => localStorage.getItem('stopOnError') === 'true');
+  const [soundPack, setSoundPack] = useState<SoundPack>(() => soundManager.getPack());
   
   const handleToggle = (key: string, value: boolean, setter: (v: boolean) => void) => {
     setter(value);
@@ -272,6 +274,33 @@ export function SettingsDialog() {
                     onClick={() => { setHighlightMode(mode.value); localStorage.setItem('highlightMode', mode.value); window.dispatchEvent(new Event('typingSettingsChanged')); }}
                   >
                     <p className="text-sm font-medium">{mode.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Sound Pack */}
+            <div>
+              <Label className="text-base font-semibold flex items-center gap-2 mb-3">
+                <Music className="h-4 w-4" />
+                {isHindi ? "कीबोर्ड ध्वनि" : "Keyboard Sound Pack"}
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { value: 'none' as SoundPack, name: isHindi ? 'बंद' : 'Off', desc: isHindi ? 'कोई आवाज़ नहीं' : 'No sound' },
+                  { value: 'mechanical' as SoundPack, name: isHindi ? 'मैकेनिकल' : 'Mechanical', desc: isHindi ? 'चेरी MX जैसी' : 'Cherry MX style' },
+                  { value: 'typewriter' as SoundPack, name: isHindi ? 'टाइपराइटर' : 'Typewriter', desc: isHindi ? 'क्लासिक टाइपराइटर' : 'Classic typewriter' },
+                  { value: 'soft' as SoundPack, name: isHindi ? 'सॉफ्ट' : 'Soft Click', desc: isHindi ? 'हल्की आवाज़' : 'Gentle sound' },
+                ]).map((sp) => (
+                  <div
+                    key={sp.value}
+                    className={`border rounded-lg p-2 cursor-pointer text-center transition-all ${soundPack === sp.value ? 'border-primary bg-primary/10' : 'hover:bg-accent/50'}`}
+                    onClick={() => { setSoundPack(sp.value); soundManager.setPack(sp.value); if (sp.value !== 'none') soundManager.playKeyPress(); }}
+                  >
+                    <p className="text-sm font-medium">{sp.name}</p>
+                    <p className="text-xs text-muted-foreground">{sp.desc}</p>
                   </div>
                 ))}
               </div>
