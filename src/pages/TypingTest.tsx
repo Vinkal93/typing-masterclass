@@ -11,6 +11,7 @@ import { saveTestRecord } from "@/lib/progressTracker";
 import { trackMissedKeys } from "@/lib/missedKeysTracker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTypingSettings, getCaretClassName, getHighlightClassName } from "@/hooks/useTypingSettings";
+import { soundManager } from "@/lib/soundManager";
 
 const englishParagraphs = [
   "The quick brown fox jumps over the lazy dog. Programming is the art of telling another human what one wants the computer to do. Practice makes perfect when it comes to typing speed and accuracy. Every keystroke matters in the digital age where communication happens at the speed of light. The ability to type quickly and accurately is a fundamental skill that opens doors to countless opportunities in the modern workplace.",
@@ -117,7 +118,12 @@ const TypingTest = () => {
     if (!isStarted) setIsStarted(true);
     if (typingSettings.stopOnError && value.length > userInput.length) {
       const lastIndex = value.length - 1;
-      if (value[lastIndex] !== text[lastIndex]) return;
+      if (value[lastIndex] !== text[lastIndex]) { soundManager.playError(); return; }
+    }
+    if (value.length > userInput.length) {
+      const lastChar = value[value.length - 1];
+      if (lastChar === text[value.length - 1]) soundManager.playKeyPress();
+      else soundManager.playError();
     }
     if (value.length <= text.length) setUserInput(value);
     if (value.length === text.length) handleFinish();

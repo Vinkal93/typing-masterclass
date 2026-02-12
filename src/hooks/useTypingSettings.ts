@@ -12,7 +12,7 @@ export interface TypingSettings {
 export function useTypingSettings(): TypingSettings {
   const [settings, setSettings] = useState<TypingSettings>(() => ({
     caretStyle: (localStorage.getItem('caretStyle') as TypingSettings['caretStyle']) || 'line',
-    highlightMode: (localStorage.getItem('highlightMode') as TypingSettings['highlightMode']) || 'letter',
+    highlightMode: (localStorage.getItem('highlightMode') as TypingSettings['highlightMode']) || 'off',
     smoothCaret: localStorage.getItem('smoothCaret') !== 'false',
     stopOnError: localStorage.getItem('stopOnError') === 'true',
     soundEnabled: localStorage.getItem('soundEnabled') === 'true',
@@ -23,7 +23,7 @@ export function useTypingSettings(): TypingSettings {
     const handleStorage = () => {
       setSettings({
         caretStyle: (localStorage.getItem('caretStyle') as TypingSettings['caretStyle']) || 'line',
-        highlightMode: (localStorage.getItem('highlightMode') as TypingSettings['highlightMode']) || 'letter',
+        highlightMode: (localStorage.getItem('highlightMode') as TypingSettings['highlightMode']) || 'off',
         smoothCaret: localStorage.getItem('smoothCaret') !== 'false',
         stopOnError: localStorage.getItem('stopOnError') === 'true',
         soundEnabled: localStorage.getItem('soundEnabled') === 'true',
@@ -70,15 +70,14 @@ export function getHighlightClassName(
 ): string {
   // Already typed characters
   if (index < userInput.length) {
-    if (userInput[index] === text[index]) return "text-primary";
+    if (userInput[index] === text[index]) return "text-foreground/90";
     return "text-destructive bg-destructive/10";
   }
   
   // Upcoming characters based on highlight mode
-  if (highlightMode === 'off') return "text-muted-foreground";
+  if (highlightMode === 'off') return "text-muted-foreground/50";
   
   if (highlightMode === 'word' && index >= currentIndex) {
-    // Find current word boundaries
     let wordStart = currentIndex;
     while (wordStart > 0 && text[wordStart - 1] !== ' ') wordStart--;
     let wordEnd = currentIndex;
@@ -87,12 +86,12 @@ export function getHighlightClassName(
     if (index >= wordStart && index < wordEnd) {
       return "text-foreground bg-accent/40 rounded-sm";
     }
-    return "text-muted-foreground";
+    return "text-muted-foreground/50";
   }
   
   if (highlightMode === 'letter' && index === currentIndex) {
     return "text-foreground bg-accent/50 rounded-sm";
   }
   
-  return "text-muted-foreground";
+  return "text-muted-foreground/50";
 }
