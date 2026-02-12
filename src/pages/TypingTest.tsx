@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import { saveTestRecord } from "@/lib/progressTracker";
 import { trackMissedKeys } from "@/lib/missedKeysTracker";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTypingSettings, getCaretClassName, getHighlightClassName } from "@/hooks/useTypingSettings";
 
 const englishParagraphs = [
   "The quick brown fox jumps over the lazy dog. Programming is the art of telling another human what one wants the computer to do. Practice makes perfect when it comes to typing speed and accuracy. Every keystroke matters in the digital age where communication happens at the speed of light. The ability to type quickly and accurately is a fundamental skill that opens doors to countless opportunities in the modern workplace.",
@@ -46,6 +47,7 @@ const TypingTest = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isHindi } = useLanguage();
+  const typingSettings = useTypingSettings();
   const duration = parseInt(searchParams.get("duration") || "60");
 
   const generateText = useCallback(() => {
@@ -113,6 +115,10 @@ const TypingTest = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     if (!isStarted) setIsStarted(true);
+    if (typingSettings.stopOnError && value.length > userInput.length) {
+      const lastIndex = value.length - 1;
+      if (value[lastIndex] !== text[lastIndex]) return;
+    }
     if (value.length <= text.length) setUserInput(value);
     if (value.length === text.length) handleFinish();
   };
@@ -137,10 +143,14 @@ const TypingTest = () => {
     inputRef.current?.focus();
   };
 
+  const currentIndex = userInput.length;
+
   const getCharacterClass = (index: number) => {
-    if (index >= userInput.length) return "text-muted-foreground";
-    if (userInput[index] === text[index]) return "text-success";
-    return "text-destructive bg-destructive/10";
+    return getHighlightClassName(typingSettings.highlightMode, index, currentIndex, text, userInput);
+  };
+
+  const getCaretClass = (index: number) => {
+    return getCaretClassName(typingSettings.caretStyle, typingSettings.smoothCaret, index === currentIndex);
   };
 
   if (isFinished) {
@@ -187,7 +197,7 @@ const TypingTest = () => {
         <Card className="p-8 mb-6">
           <div className="text-xl leading-relaxed font-mono mb-4 select-none max-h-[300px] overflow-y-auto" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
             {text.split("").map((char, index) => (
-              <span key={index} className={getCharacterClass(index)}>
+              <span key={index} className={`${getCharacterClass(index)} ${getCaretClass(index)}`}>
                 {char}
               </span>
             ))}
