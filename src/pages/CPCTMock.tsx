@@ -142,13 +142,14 @@ const CPCTMock = () => {
 
           {/* Text display */}
           <Card className="p-6 mb-4">
-            <div className="text-lg leading-relaxed font-mono select-none max-h-[250px] overflow-y-auto whitespace-pre-wrap" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
+            <div className="text-lg leading-relaxed font-mono select-none max-h-[250px] overflow-y-auto overflow-x-hidden whitespace-pre-wrap" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
               {text.split("").map((char, i) => {
                 let cls = "text-muted-foreground/50";
                 if (i < userInput.length) {
                   cls = userInput[i] === text[i] ? "text-foreground/90" : "text-destructive bg-destructive/10";
-                } else if (i === userInput.length) {
-                  cls = "text-foreground border-l-2 border-primary";
+                }
+                if (i === userInput.length) {
+                  cls += " border-l-2 border-primary";
                 }
                 return <span key={i} className={cls}>{char}</span>;
               })}
