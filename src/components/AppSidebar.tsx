@@ -1,4 +1,4 @@
-import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History, ClipboardList, Zap, Target, Hand, Trophy, Medal, BarChart3, FileText } from "lucide-react";
+import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History, ClipboardList, Zap, Target, Hand, Trophy, Medal, BarChart3, FileText, Swords } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -27,6 +27,7 @@ export function AppSidebar() {
     { title: isHindi ? "स्मार्ट प्रैक्टिस" : "Smart Practice", url: "/smart-practice", icon: Target },
     { title: t('games'), url: "/games", icon: Gamepad2 },
     { title: isHindi ? "CPCT Mock" : "CPCT Mock", url: "/cpct-mock", icon: FileText },
+    { title: isHindi ? "स्पोर्ट मोड" : "Sport Mode", url: "/sport-mode", icon: Swords },
     { title: t('progress'), url: "/progress", icon: TrendingUp },
     { title: t('keyboardGuide'), url: "/keyboard-guide", icon: Keyboard },
   ];

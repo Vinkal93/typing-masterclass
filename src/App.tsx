@@ -26,6 +26,7 @@ import Achievements from "./pages/Achievements";
 import Leaderboard from "./pages/Leaderboard";
 import ErrorAnalysis from "./pages/ErrorAnalysis";
 import CPCTMock from "./pages/CPCTMock";
+import SportMode from "./pages/SportMode";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +63,7 @@ const App = () => (
                       <Route path="/leaderboard" element={<Leaderboard />} />
                       <Route path="/error-analysis" element={<ErrorAnalysis />} />
                       <Route path="/cpct-mock" element={<CPCTMock />} />
+                      <Route path="/sport-mode" element={<SportMode />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
