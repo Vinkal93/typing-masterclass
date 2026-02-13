@@ -379,8 +379,8 @@ const FastTrack = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="container mx-auto px-4 py-8 flex-1 overflow-x-hidden">
-        <div className="max-w-4xl mx-auto overflow-x-hidden">
+      <main className="container mx-auto px-4 py-8 flex-1 overflow-hidden">
+        <div className="max-w-4xl mx-auto overflow-hidden">
           {/* Header */}
           <div className="text-center mb-6">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
@@ -471,8 +471,8 @@ const FastTrack = () => {
           >
             <div 
               ref={textDisplayRef}
-              className="text-2xl md:text-3xl leading-relaxed font-mono select-none mb-8 tracking-wide max-h-[200px] overflow-y-auto whitespace-pre-wrap"
-              style={{ wordSpacing: '0.3em', wordBreak: 'break-all', overflowWrap: 'anywhere', overflowX: 'hidden' }}
+              className="text-2xl md:text-3xl leading-relaxed font-mono select-none mb-8 tracking-wide max-h-[200px] overflow-y-auto overflow-x-hidden whitespace-pre-wrap"
+              style={{ wordSpacing: '0.3em', overflowWrap: 'break-word', wordBreak: 'normal' }}
             >
               {text.split("").map((char, index) => (
                 <span 

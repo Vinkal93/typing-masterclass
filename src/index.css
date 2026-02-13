@@ -184,3 +184,14 @@ All colors MUST be HSL.
 .ui-cyberpunk button[class*="bg-primary"] {
   box-shadow: 0 0 15px hsla(var(--primary) / 0.4);
 }
+
+/* Hide scrollbars in dialogs and popups globally */
+[role="dialog"] ::-webkit-scrollbar,
+[data-radix-popper-content-wrapper] ::-webkit-scrollbar {
+  display: none;
+}
+[role="dialog"],
+[data-radix-popper-content-wrapper] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
