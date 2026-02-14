@@ -2,7 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { RotateCcw, Zap, Timer, Target, TrendingUp, Trophy } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { RotateCcw, Zap, Timer, Target, TrendingUp, Trophy, Delete } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -200,6 +203,12 @@ interface WpmDataPoint {
   wpm: number;
 }
 
+const TIME_OPTIONS = [
+  { label: "30s", value: 30 },
+  { label: "60s", value: 60 },
+  { label: "120s", value: 120 },
+];
+
 const FastTrack = () => {
   const { isHindi } = useLanguage();
   const typingSettings = useTypingSettings();
@@ -217,15 +226,23 @@ const FastTrack = () => {
     wpm: 0, cpm: 0, accuracy: 100, errors: 0, timeSpent: 0,
   });
   
+  // New settings
+  const [backspaceEnabled, setBackspaceEnabled] = useState(true);
+  const [timerMode, setTimerMode] = useState<number | null>(null); // null = no timer (type to end)
+  const [customTime, setCustomTime] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const textDisplayRef = useRef<HTMLDivElement>(null);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
   const wpmTrackingRef = useRef<WpmDataPoint[]>([]);
 
-  const generateParagraph = useCallback((wordCount: number = 40) => {
+  const generateParagraph = useCallback((wordCount: number = 150) => {
+    // Generate much longer text for extended typing
     if (Math.random() < 0.3) {
       const sentences = isHindi ? hindiSentences : englishSentences;
-      const numSentences = Math.floor(Math.random() * 2) + 2;
+      const numSentences = Math.min(sentences.length, Math.floor(Math.random() * 10) + 8);
       const shuffled = [...sentences].sort(() => Math.random() - 0.5);
       return shuffled.slice(0, numSentences).join(' ');
     }
@@ -239,7 +256,7 @@ const FastTrack = () => {
   }, [isHindi, difficulty]);
 
   const startNewTest = useCallback(() => {
-    setText(generateParagraph(40));
+    setText(generateParagraph(150));
     setUserInput("");
     setStartTime(null);
     setIsActive(false);
@@ -247,12 +264,31 @@ const FastTrack = () => {
     wpmTrackingRef.current = [];
     setWpmHistory([]);
     setStats({ wpm: 0, cpm: 0, accuracy: 100, errors: 0, timeSpent: 0 });
+    setTimeRemaining(timerMode);
     setTimeout(() => inputRef.current?.focus(), 50);
-  }, [generateParagraph]);
+  }, [generateParagraph, timerMode]);
 
   useEffect(() => {
     startNewTest();
   }, [difficulty, isHindi]);
+
+  // Timer countdown
+  useEffect(() => {
+    if (!isActive || !startTime || timerMode === null || timeRemaining === null) return;
+    if (timeRemaining <= 0) {
+      finishTest();
+      return;
+    }
+    const interval = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev === null || prev <= 1) {
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isActive, startTime, timerMode, timeRemaining]);
 
   // Track WPM over time
   useEffect(() => {
@@ -293,7 +329,7 @@ const FastTrack = () => {
     }
   }, [userInput, startTime, text]);
 
-  // Auto-scroll text display to keep current position visible
+  // Auto-scroll text display
   useEffect(() => {
     if (textDisplayRef.current && userInput.length > 0) {
       const currentCharEl = textDisplayRef.current.querySelector(`[data-index="${userInput.length}"]`);
@@ -305,7 +341,13 @@ const FastTrack = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    // Stop on error: prevent advancing if last char is wrong
+    
+    // Block backspace when disabled
+    if (!backspaceEnabled && value.length < userInput.length) {
+      return;
+    }
+    
+    // Stop on error
     if (typingSettings.stopOnError && value.length > userInput.length) {
       const lastIndex = value.length - 1;
       if (value[lastIndex] !== text[lastIndex]) {
@@ -349,12 +391,40 @@ const FastTrack = () => {
     
     setWpmHistory([...wpmTrackingRef.current]);
     setShowResult(true);
+    setIsActive(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Tab') {
       e.preventDefault();
       startNewTest();
+    }
+    if (!backspaceEnabled && e.key === 'Backspace') {
+      e.preventDefault();
+    }
+  };
+
+  const handleSetTimer = (seconds: number | null) => {
+    setTimerMode(seconds);
+    setTimeRemaining(seconds);
+    setShowCustomInput(false);
+    // Restart test with new timer
+    setText(generateParagraph(150));
+    setUserInput("");
+    setStartTime(null);
+    setIsActive(false);
+    setShowResult(false);
+    wpmTrackingRef.current = [];
+    setWpmHistory([]);
+    setStats({ wpm: 0, cpm: 0, accuracy: 100, errors: 0, timeSpent: 0 });
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const handleCustomTimeSubmit = () => {
+    const val = parseInt(customTime);
+    if (val > 0 && val <= 3600) {
+      handleSetTimer(val);
+      setCustomTime("");
     }
   };
 
@@ -382,7 +452,7 @@ const FastTrack = () => {
       <main className="container mx-auto px-4 py-8 flex-1 overflow-hidden">
         <div className="max-w-4xl mx-auto overflow-hidden">
           {/* Header */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-4">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
               <Zap className="h-8 w-8 text-primary" />
               Fast Track
@@ -394,8 +464,74 @@ const FastTrack = () => {
             </p>
           </div>
 
+          {/* Controls Row: Backspace Toggle + Timer + Difficulty */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
+            {/* Backspace Toggle */}
+            <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+              <Delete className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="backspace-toggle" className="text-sm cursor-pointer">
+                {isHindi ? "बैकस्पेस" : "Backspace"}
+              </Label>
+              <Switch
+                id="backspace-toggle"
+                checked={backspaceEnabled}
+                onCheckedChange={setBackspaceEnabled}
+              />
+            </div>
+
+            {/* Timer Options */}
+            <div className="flex items-center gap-1 bg-card border border-border rounded-lg px-2 py-1">
+              <Timer className="h-4 w-4 text-muted-foreground mr-1" />
+              <Button
+                variant={timerMode === null ? "default" : "ghost"}
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => handleSetTimer(null)}
+              >
+                {isHindi ? "अंत तक" : "No Timer"}
+              </Button>
+              {TIME_OPTIONS.map(opt => (
+                <Button
+                  key={opt.value}
+                  variant={timerMode === opt.value ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => handleSetTimer(opt.value)}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+              {showCustomInput ? (
+                <div className="flex items-center gap-1">
+                  <Input
+                    type="number"
+                    value={customTime}
+                    onChange={e => setCustomTime(e.target.value)}
+                    placeholder="sec"
+                    className="h-7 w-16 text-xs"
+                    min={1}
+                    max={3600}
+                    onKeyDown={e => { if (e.key === 'Enter') handleCustomTimeSubmit(); }}
+                  />
+                  <Button size="sm" className="h-7 px-2 text-xs" onClick={handleCustomTimeSubmit}>
+                    ✓
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant={timerMode !== null && !TIME_OPTIONS.some(o => o.value === timerMode) ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => setShowCustomInput(true)}
+                >
+                  {isHindi ? "कस्टम" : "Custom"}
+                </Button>
+              )}
+            </div>
+          </div>
+
           {/* Session Stats */}
-          <div className="grid grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-4 gap-3 mb-4">
             <Card className="p-3 text-center">
               <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
                 <Target className="h-4 w-4" />
@@ -429,7 +565,7 @@ const FastTrack = () => {
           </div>
 
           {/* Difficulty Selector */}
-          <div className="flex justify-center gap-2 mb-6">
+          <div className="flex justify-center gap-2 mb-4">
             {(['easy', 'medium', 'hard'] as const).map((d) => (
               <Button
                 key={d}
@@ -445,7 +581,7 @@ const FastTrack = () => {
           </div>
 
           {/* Live Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-4 gap-4 mb-4">
             <Card className="p-4 text-center bg-card/50">
               <p className="text-xs text-muted-foreground mb-1">WPM</p>
               <p className="text-3xl font-bold text-foreground">{stats.wpm}</p>
@@ -459,19 +595,37 @@ const FastTrack = () => {
               <p className="text-3xl font-bold text-primary">{stats.accuracy}%</p>
             </Card>
             <Card className="p-4 text-center bg-card/50">
-              <p className="text-xs text-muted-foreground mb-1">Time</p>
-              <p className="text-3xl font-bold text-foreground">{stats.timeSpent}s</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                {timerMode !== null ? (isHindi ? "शेष" : "Left") : (isHindi ? "समय" : "Time")}
+              </p>
+              <p className={`text-3xl font-bold ${timerMode !== null && timeRemaining !== null && timeRemaining <= 10 ? 'text-destructive' : 'text-foreground'}`}>
+                {timerMode !== null && timeRemaining !== null ? timeRemaining : stats.timeSpent}s
+              </p>
             </Card>
+          </div>
+
+          {/* Status indicators */}
+          <div className="flex items-center justify-center gap-3 mb-4">
+            {!backspaceEnabled && (
+              <span className="text-xs text-destructive font-semibold bg-destructive/10 px-2 py-1 rounded">
+                ⌫ {isHindi ? "बैकस्पेस बंद" : "Backspace OFF"}
+              </span>
+            )}
+            {timerMode !== null && (
+              <span className="text-xs text-primary font-semibold bg-primary/10 px-2 py-1 rounded">
+                ⏱ {timerMode}s {isHindi ? "टाइमर" : "Timer"}
+              </span>
+            )}
           </div>
 
           {/* Typing Area */}
           <Card 
-            className="p-8 mb-6 bg-card cursor-text overflow-hidden max-w-full"
+            className="p-8 mb-4 bg-card cursor-text overflow-hidden max-w-full"
             onClick={() => inputRef.current?.focus()}
           >
             <div 
               ref={textDisplayRef}
-              className="text-2xl md:text-3xl leading-relaxed font-mono select-none mb-8 tracking-wide max-h-[200px] overflow-y-auto overflow-x-hidden whitespace-pre-wrap"
+              className="text-2xl md:text-3xl leading-relaxed font-mono select-none mb-8 tracking-wide max-h-[300px] overflow-y-auto overflow-x-hidden whitespace-pre-wrap"
               style={{ wordSpacing: '0.3em', overflowWrap: 'break-word', wordBreak: 'normal' }}
             >
               {text.split("").map((char, index) => (
@@ -515,7 +669,7 @@ const FastTrack = () => {
           </div>
 
           {/* Progress indicator */}
-          <div className="mt-6 text-center text-sm text-muted-foreground">
+          <div className="mt-4 text-center text-sm text-muted-foreground">
             {userInput.length} / {text.length} • {Math.round((userInput.length / text.length) * 100)}%
           </div>
         </div>
