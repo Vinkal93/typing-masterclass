@@ -402,7 +402,27 @@ const FastTrack = () => {
     if (!backspaceEnabled && e.key === 'Backspace') {
       e.preventDefault();
     }
+    // Ctrl + Enter = new paragraph (restart with new text)
+    if (e.ctrlKey && e.key === 'Enter') {
+      e.preventDefault();
+      startNewTest();
+    }
   };
+
+  // Auto-focus on any keypress so typing starts immediately
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (showResult) return;
+      // Ignore modifier-only keys and special keys
+      if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Escape'].includes(e.key)) return;
+      // If input is not focused, focus it
+      if (document.activeElement !== inputRef.current) {
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [showResult]);
 
   const handleSetTimer = (seconds: number | null) => {
     setTimerMode(seconds);
@@ -644,8 +664,8 @@ const FastTrack = () => {
               value={userInput}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="w-full p-4 text-xl font-mono border-2 border-border rounded-lg focus:outline-none focus:border-primary resize-none bg-background text-foreground opacity-0 absolute"
-              style={{ height: 0, overflow: 'hidden', pointerEvents: 'none' }}
+              className="absolute opacity-0 h-0 w-0 overflow-hidden"
+              style={{ pointerEvents: 'auto' }}
               autoFocus
               spellCheck={false}
             />
