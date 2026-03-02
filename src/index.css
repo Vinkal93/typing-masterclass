@@ -95,11 +95,14 @@ All colors MUST be HSL.
 
   html {
     font-family: var(--selected-font, 'Inter', sans-serif);
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground;
     font-family: inherit;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 }
 
@@ -187,10 +190,12 @@ All colors MUST be HSL.
 
 /* Hide scrollbars in dialogs and popups globally */
 [role="dialog"] ::-webkit-scrollbar,
-[data-radix-popper-content-wrapper] ::-webkit-scrollbar {
+[data-radix-popper-content-wrapper] ::-webkit-scrollbar,
+[role="dialog"] *::-webkit-scrollbar {
   display: none;
 }
 [role="dialog"],
+[role="dialog"] *,
 [data-radix-popper-content-wrapper] {
   scrollbar-width: none;
   -ms-overflow-style: none;
