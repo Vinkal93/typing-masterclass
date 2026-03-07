@@ -4,6 +4,7 @@ import { Clock, Target, TrendingUp, Play, BarChart3, Keyboard, Trophy, Flame } f
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdBanner from "@/components/AdBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProgressData, getAverageWpm, getAverageAccuracy } from "@/lib/progressTracker";
 
