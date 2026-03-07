@@ -7,6 +7,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import TestResult from "@/components/TestResult";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdBanner from "@/components/AdBanner";
+import AdLayout from "@/components/AdLayout";
 import { saveTestRecord } from "@/lib/progressTracker";
 import { trackMissedKeys } from "@/lib/missedKeysTracker";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -166,6 +168,7 @@ const TypingTest = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <AdLayout showSidebar={true} showHeader={true}>
       <main className="container mx-auto px-4 py-8 flex-1">
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
@@ -221,6 +224,9 @@ const TypingTest = () => {
           />
         </Card>
 
+        {/* Below Typing Box Ad */}
+        <AdBanner slot="1000000005" format="horizontal" className="my-4" />
+
         {/* Controls */}
         <div className="flex justify-center gap-4">
           <Button onClick={handleRestart} variant="outline" size="lg">
@@ -235,6 +241,7 @@ const TypingTest = () => {
         </div>
       </main>
       <Footer />
+      </AdLayout>
     </div>
   );
 };
