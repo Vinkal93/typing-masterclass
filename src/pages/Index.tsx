@@ -4,6 +4,7 @@ import { Clock, Target, TrendingUp, Play, BarChart3, Keyboard, Trophy, Flame } f
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdBanner from "@/components/AdBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProgressData, getAverageWpm, getAverageAccuracy } from "@/lib/progressTracker";
 
@@ -67,6 +68,9 @@ const Index = () => {
           ))}
         </div>
 
+        {/* Ad between stats and quick start */}
+        <AdBanner slot="2345678901" format="horizontal" className="my-8" />
+
         {/* Quick Start Options */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <Card className="border-border hover:shadow-lg transition-all hover:scale-105 cursor-pointer" onClick={() => navigate(`/typing-test?duration=60&r=${Date.now()}`)}>
@@ -121,6 +125,9 @@ const Index = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Ad between quick start and features */}
+        <AdBanner slot="3456789012" format="horizontal" className="my-8" />
 
         {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
