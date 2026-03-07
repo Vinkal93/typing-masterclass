@@ -3,8 +3,9 @@ import AdBanner from "@/components/AdBanner";
 const Footer = () => {
   return (
     <>
-      <div className="container mx-auto px-4">
-        <AdBanner slot="1234567890" format="horizontal" />
+      {/* Above-Footer Ad */}
+      <div className="container mx-auto px-4 my-4">
+        <AdBanner slot="1000000003" format="horizontal" />
       </div>
       <footer className="border-t border-border bg-card/30 py-4 mt-2">
         <div className="container mx-auto px-4 text-center">
