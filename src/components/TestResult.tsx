@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { RotateCcw, Home, TrendingUp, Target, Clock, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import AdBanner from "@/components/AdBanner";
 
 interface TestStats {
   wpm: number;
@@ -164,6 +165,9 @@ const TestResult = ({ stats, onRestart, duration }: TestResultProps) => {
               </ul>
             </CardContent>
           </Card>
+
+          {/* Result Page Ad */}
+          <AdBanner slot="1000000004" format="horizontal" className="my-6" />
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

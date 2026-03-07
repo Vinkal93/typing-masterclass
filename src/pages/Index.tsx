@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AdBanner from "@/components/AdBanner";
+import AdLayout from "@/components/AdLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProgressData, getAverageWpm, getAverageAccuracy } from "@/lib/progressTracker";
 
@@ -30,7 +31,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-
+      <AdLayout showSidebar={true} showHeader={true}>
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12 flex-1">
         {/* Hero Section */}
@@ -173,6 +174,7 @@ const Index = () => {
       </main>
 
       <Footer />
+      </AdLayout>
     </div>
   );
 };
