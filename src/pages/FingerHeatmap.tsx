@@ -143,6 +143,7 @@ const FingerHeatmap = () => {
         </Card>
       </main>
       <Footer />
+      </AdLayout>
     </div>
   );
 };

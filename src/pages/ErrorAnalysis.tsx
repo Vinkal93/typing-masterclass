@@ -141,6 +141,7 @@ const ErrorAnalysis = () => {
         </Card>
       </main>
       <Footer />
+      </AdLayout>
     </div>
   );
 };
