@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import AdLayout from "@/components/AdLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
