@@ -4,6 +4,7 @@ import { TrendingUp, Target, Clock, Award, Trophy, Zap, Flame, Trash2, Calendar 
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdLayout from "@/components/AdLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProgressData, getAverageWpm, getAverageAccuracy, getRecentTests } from "@/lib/progressTracker";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';

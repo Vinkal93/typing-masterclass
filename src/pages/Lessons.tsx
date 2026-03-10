@@ -502,6 +502,7 @@ const Lessons = () => {
       </main>
 
       <Footer />
+      </AdLayout>
     </div>
   );
 };

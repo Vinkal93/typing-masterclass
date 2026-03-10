@@ -7,6 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import TestResult from "@/components/TestResult";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdLayout from "@/components/AdLayout";
 import { saveTestRecord, markLessonComplete } from "@/lib/progressTracker";
 import { trackMissedKeys } from "@/lib/missedKeysTracker";
 
