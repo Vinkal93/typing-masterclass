@@ -1089,6 +1089,7 @@ const KeyboardGuide = () => {
       </main>
 
       <Footer />
+      </AdLayout>
     </div>
   );
 };
