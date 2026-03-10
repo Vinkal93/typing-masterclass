@@ -7,6 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import TestResult from "@/components/TestResult";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdLayout from "@/components/AdLayout";
 import { saveTestRecord, markLessonComplete } from "@/lib/progressTracker";
 import { trackMissedKeys } from "@/lib/missedKeysTracker";
 
@@ -147,6 +148,7 @@ const PracticeMode = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <AdLayout>
 
       <main className="container mx-auto px-4 py-8 flex-1">
         {/* Custom Text Input */}
@@ -236,6 +238,7 @@ const PracticeMode = () => {
       </main>
 
       <Footer />
+      </AdLayout>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdLayout from "@/components/AdLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProgressData } from "@/lib/progressTracker";
 import { Trophy, Star, Zap, Target, Flame, Award, Shield, Crown } from "lucide-react";
@@ -59,6 +60,7 @@ const Achievements = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <AdLayout>
       <main className="container mx-auto px-4 py-8 flex-1">
         <h1 className="text-3xl font-bold text-foreground mb-2 text-center">
           🏆 {isHindi ? "उपलब्धियाँ" : "Achievements"}
@@ -100,6 +102,7 @@ const Achievements = () => {
         </div>
       </main>
       <Footer />
+      </AdLayout>
     </div>
   );
 };

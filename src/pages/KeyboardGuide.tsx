@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdLayout from "@/components/AdLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useFont, hindiKeyboardFonts, hindiKeyboardLayouts } from "@/contexts/FontContext";
 import { RotateCcw, Download } from "lucide-react";
@@ -711,6 +712,7 @@ const KeyboardGuide = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <AdLayout>
       
       <main className="container mx-auto px-4 py-12 flex-1">
         <h1 className="text-4xl font-bold text-center mb-8 text-foreground">
@@ -1087,6 +1089,7 @@ const KeyboardGuide = () => {
       </main>
 
       <Footer />
+      </AdLayout>
     </div>
   );
 };

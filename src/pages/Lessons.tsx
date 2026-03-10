@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AdLayout from "@/components/AdLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProgressData, markLessonComplete } from "@/lib/progressTracker";
 
@@ -218,6 +219,7 @@ const Lessons = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <AdLayout>
 
       <main className="container mx-auto px-4 py-8 flex-1">
         <div className="max-w-6xl mx-auto">
@@ -500,6 +502,7 @@ const Lessons = () => {
       </main>
 
       <Footer />
+      </AdLayout>
     </div>
   );
 };

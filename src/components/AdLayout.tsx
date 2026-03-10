@@ -16,7 +16,9 @@ const AdLayout = ({ children, showSidebar = true, showHeader = true }: AdLayoutP
       {showHeader && (
         <div className="w-full bg-muted/30 py-1">
           <div className="container mx-auto px-4">
-            <AdBanner slot="1000000001" format="leaderboard" className="my-1" />
+            <div className="min-h-0">
+              <AdBanner slot="1000000001" format="leaderboard" className="my-1" />
+            </div>
           </div>
         </div>
       )}
@@ -30,7 +32,7 @@ const AdLayout = ({ children, showSidebar = true, showHeader = true }: AdLayoutP
         {/* Sticky Sidebar Ad - Desktop Only */}
         {showSidebar && !isMobile && (
           <aside className="hidden lg:block w-[320px] shrink-0 pr-4 pt-8">
-            <div className="sticky top-20">
+            <div className="sticky top-20 min-h-0">
               <AdBanner slot="1000000002" format="vertical" className="mb-4" responsive={false} />
             </div>
           </aside>
