@@ -238,6 +238,7 @@ const PracticeMode = () => {
       </main>
 
       <Footer />
+      </AdLayout>
     </div>
   );
 };

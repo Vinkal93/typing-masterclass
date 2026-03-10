@@ -102,6 +102,7 @@ const Achievements = () => {
         </div>
       </main>
       <Footer />
+      </AdLayout>
     </div>
   );
 };

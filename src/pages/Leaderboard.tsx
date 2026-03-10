@@ -101,6 +101,7 @@ const Leaderboard = () => {
         </Card>
       </main>
       <Footer />
+      </AdLayout>
     </div>
   );
 };

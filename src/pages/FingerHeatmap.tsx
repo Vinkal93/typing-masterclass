@@ -58,6 +58,7 @@ const FingerHeatmap = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
+      <AdLayout>
       <main className="container mx-auto px-4 py-8 flex-1">
         <h1 className="text-3xl font-bold text-foreground mb-2 text-center">
           {isHindi ? "🖐️ फिंगर हीटमैप" : "🖐️ Finger Heatmap"}
