@@ -763,6 +763,7 @@ const FastTrack = () => {
       </Dialog>
 
       <Footer />
+      </AdLayout>
     </div>
   );
 };
