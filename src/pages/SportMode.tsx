@@ -50,7 +50,7 @@ const SportMode = () => {
   const [userInput, setUserInput] = useState('');
   const [isFinished, setIsFinished] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Result
   const [lastResult, setLastResult] = useState<CompetitionResult | null>(null);
