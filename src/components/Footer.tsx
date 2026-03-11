@@ -36,12 +36,14 @@ const Footer = () => {
   return (
     <>
       {/* Above-Footer Ad */}
-      <div className="container mx-auto px-4 my-4 min-h-0">
-        <AdBanner slot="1000000003" format="horizontal" />
+      <div className="w-full px-4 my-4">
+        <div className="max-w-7xl mx-auto">
+          <AdBanner slot="1000000003" format="horizontal" />
+        </div>
       </div>
-      <footer className="border-t border-border bg-card/30 py-8 mt-2">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+      <footer className="border-t border-border bg-card/30 py-8 mt-2 w-full">
+        <div className="w-full px-4 md:px-8 lg:px-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6 max-w-7xl mx-auto">
             <div>
               <h3 className="font-semibold text-foreground mb-3 text-sm">Tools</h3>
               <ul className="space-y-1">
@@ -91,7 +93,7 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-          <div className="border-t border-border pt-4 text-center">
+          <div className="border-t border-border pt-4 text-center max-w-7xl mx-auto">
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} TypeMaster - Developed by{" "}
               <a

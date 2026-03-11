@@ -6,8 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { FontProvider } from "./contexts/FontContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AdminProvider } from "./contexts/AdminContext";
 import { SidebarProvider } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
+import { useEffect } from "react";
+import { trackPageView } from "./lib/analyticsTracker";
+import { useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import TypingTest from "./pages/TypingTest";
 import Lessons from "./pages/Lessons";
@@ -28,7 +32,6 @@ import ErrorAnalysis from "./pages/ErrorAnalysis";
 import CPCTMock from "./pages/CPCTMock";
 import SportMode from "./pages/SportMode";
 import NotFound from "./pages/NotFound";
-// New SEO pages
 import TypingPractice from "./pages/TypingPractice";
 import OneMinuteTypingTest from "./pages/OneMinuteTypingTest";
 import ThreeMinuteTypingTest from "./pages/ThreeMinuteTypingTest";
@@ -44,65 +47,86 @@ import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import Disclaimer from "./pages/Disclaimer";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
+
+// Analytics tracker component
+const AnalyticsTracker = () => {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+  return null;
+};
+
+const AppRoutes = () => (
+  <>
+    <AnalyticsTracker />
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/typing-test" element={<TypingTest />} />
+      <Route path="/typing-practice" element={<TypingPractice />} />
+      <Route path="/1-minute-typing-test" element={<OneMinuteTypingTest />} />
+      <Route path="/3-minute-typing-test" element={<ThreeMinuteTypingTest />} />
+      <Route path="/5-minute-typing-test" element={<FiveMinuteTypingTest />} />
+      <Route path="/hindi-typing-test" element={<HindiTypingTest />} />
+      <Route path="/english-typing-test" element={<EnglishTypingTest />} />
+      <Route path="/wpm-calculator" element={<WpmCalculator />} />
+      <Route path="/accuracy-calculator" element={<AccuracyCalculator />} />
+      <Route path="/lessons" element={<Lessons />} />
+      <Route path="/practice" element={<PracticeMode />} />
+      <Route path="/exam" element={<ExamMode />} />
+      <Route path="/exam-history" element={<ExamHistory />} />
+      <Route path="/games" element={<Games />} />
+      <Route path="/progress" element={<Progress />} />
+      <Route path="/full-history" element={<FullHistory />} />
+      <Route path="/keyboard-guide" element={<KeyboardGuide />} />
+      <Route path="/about-developer" element={<AboutDeveloper />} />
+      <Route path="/fast-track" element={<FastTrack />} />
+      <Route path="/smart-practice" element={<SmartPractice />} />
+      <Route path="/finger-heatmap" element={<FingerHeatmap />} />
+      <Route path="/achievements" element={<Achievements />} />
+      <Route path="/leaderboard" element={<Leaderboard />} />
+      <Route path="/error-analysis" element={<ErrorAnalysis />} />
+      <Route path="/cpct-mock" element={<CPCTMock />} />
+      <Route path="/sport-mode" element={<SportMode />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+      <Route path="/disclaimer" element={<Disclaimer />} />
+      <Route path="/admin" element={<AdminLogin />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <LanguageProvider>
         <FontProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <SidebarProvider defaultOpen={false}>
-                <div className="min-h-screen flex w-full">
-                  <AppSidebar />
-                  <main className="flex-1 overflow-x-hidden">
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/typing-test" element={<TypingTest />} />
-                      <Route path="/typing-practice" element={<TypingPractice />} />
-                      <Route path="/1-minute-typing-test" element={<OneMinuteTypingTest />} />
-                      <Route path="/3-minute-typing-test" element={<ThreeMinuteTypingTest />} />
-                      <Route path="/5-minute-typing-test" element={<FiveMinuteTypingTest />} />
-                      <Route path="/hindi-typing-test" element={<HindiTypingTest />} />
-                      <Route path="/english-typing-test" element={<EnglishTypingTest />} />
-                      <Route path="/wpm-calculator" element={<WpmCalculator />} />
-                      <Route path="/accuracy-calculator" element={<AccuracyCalculator />} />
-                      <Route path="/lessons" element={<Lessons />} />
-                      <Route path="/practice" element={<PracticeMode />} />
-                      <Route path="/exam" element={<ExamMode />} />
-                      <Route path="/exam-history" element={<ExamHistory />} />
-                      <Route path="/games" element={<Games />} />
-                      <Route path="/progress" element={<Progress />} />
-                      <Route path="/full-history" element={<FullHistory />} />
-                      <Route path="/keyboard-guide" element={<KeyboardGuide />} />
-                      <Route path="/about-developer" element={<AboutDeveloper />} />
-                      <Route path="/fast-track" element={<FastTrack />} />
-                      <Route path="/smart-practice" element={<SmartPractice />} />
-                      <Route path="/finger-heatmap" element={<FingerHeatmap />} />
-                      <Route path="/achievements" element={<Achievements />} />
-                      <Route path="/leaderboard" element={<Leaderboard />} />
-                      <Route path="/error-analysis" element={<ErrorAnalysis />} />
-                      <Route path="/cpct-mock" element={<CPCTMock />} />
-                      <Route path="/sport-mode" element={<SportMode />} />
-                      <Route path="/blog" element={<Blog />} />
-                      <Route path="/blog/:slug" element={<BlogPost />} />
-                      <Route path="/about" element={<About />} />
-                      <Route path="/contact" element={<Contact />} />
-                      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                      <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-                      <Route path="/disclaimer" element={<Disclaimer />} />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </main>
-                </div>
-              </SidebarProvider>
-            </BrowserRouter>
-          </TooltipProvider>
+          <AdminProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <SidebarProvider defaultOpen={false}>
+                  <div className="min-h-screen flex w-full">
+                    <AppSidebar />
+                    <main className="flex-1 overflow-x-hidden">
+                      <AppRoutes />
+                    </main>
+                  </div>
+                </SidebarProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </AdminProvider>
         </FontProvider>
       </LanguageProvider>
     </ThemeProvider>
