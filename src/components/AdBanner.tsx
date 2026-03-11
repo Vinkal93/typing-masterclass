@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 declare global {
@@ -18,12 +18,22 @@ const AdBanner = ({ slot, format = "auto", className = "", responsive = true }: 
   const adRef = useRef<HTMLDivElement>(null);
   const pushed = useRef(false);
   const isMobile = useIsMobile();
+  const [adLoaded, setAdLoaded] = useState(false);
 
   useEffect(() => {
     if (pushed.current) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
+      // Check if ad rendered after a delay
+      setTimeout(() => {
+        if (adRef.current) {
+          const ins = adRef.current.querySelector('ins');
+          if (ins && ins.getAttribute('data-ad-status') === 'filled') {
+            setAdLoaded(true);
+          }
+        }
+      }, 2000);
     } catch (e) {
       console.error("Ad error:", e);
     }
@@ -43,7 +53,11 @@ const AdBanner = ({ slot, format = "auto", className = "", responsive = true }: 
   };
 
   return (
-    <div className={`ad-container flex justify-center ${className}`} ref={adRef}>
+    <div 
+      className={`ad-container flex justify-center overflow-hidden transition-all duration-300 ${className}`} 
+      ref={adRef}
+      style={{ minHeight: 0, maxHeight: adLoaded ? '600px' : '0px', opacity: adLoaded ? 1 : 0 }}
+    >
       <ins
         className="adsbygoogle"
         style={getAdStyle()}
