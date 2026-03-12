@@ -9,6 +9,7 @@ import AdLayout from "@/components/AdLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useFont, hindiKeyboardFonts, hindiKeyboardLayouts } from "@/contexts/FontContext";
 import { RotateCcw, Download } from "lucide-react";
+import HandPositionGuide from "@/components/HandPositionGuide";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
