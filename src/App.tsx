@@ -130,6 +130,7 @@ const App = () => (
                 </SidebarProvider>
               </BrowserRouter>
             </TooltipProvider>
+            </StudentProvider>
           </AdminProvider>
         </FontProvider>
       </LanguageProvider>
