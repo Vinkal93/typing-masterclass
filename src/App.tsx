@@ -65,6 +65,7 @@ const AnalyticsTracker = () => {
 
 const AppRoutes = () => (
   <>
+    <ScrollToTop />
     <AnalyticsTracker />
     <Routes>
       <Route path="/" element={<Index />} />
