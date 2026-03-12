@@ -9,6 +9,7 @@ import AdLayout from "@/components/AdLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useFont, hindiKeyboardFonts, hindiKeyboardLayouts } from "@/contexts/FontContext";
 import { RotateCcw, Download } from "lucide-react";
+import HandPositionGuide from "@/components/HandPositionGuide";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -658,54 +659,8 @@ const KeyboardGuide = () => {
   };
 
   const HandDiagram = () => (
-    <div className="flex justify-center items-center gap-8 mt-8">
-      {/* Left Hand */}
-      <div className="relative">
-        <div className="text-center mb-4">
-          <h3 className="text-xl font-bold">{isHindi ? "बायां हाथ" : "Left Hand"}</h3>
-          <p className="text-sm text-muted-foreground">{isHindi ? "कुंजियाँ" : "Keys"}</p>
-        </div>
-        <svg width="200" height="250" viewBox="0 0 200 250" className="mx-auto">
-          {/* Palm */}
-          <ellipse cx="100" cy="180" rx="60" ry="70" fill="#f0f0f0" stroke="#333" strokeWidth="2"/>
-          
-          {/* Fingers */}
-          {/* Pinky - Red */}
-          <ellipse cx="40" cy="80" rx="12" ry="40" fill="#ef4444" stroke="#333" strokeWidth="2" transform="rotate(-15 40 80)"/>
-          {/* Ring - Orange */}
-          <ellipse cx="65" cy="50" rx="12" ry="45" fill="#f97316" stroke="#333" strokeWidth="2" transform="rotate(-5 65 50)"/>
-          {/* Middle - Yellow */}
-          <ellipse cx="90" cy="40" rx="12" ry="50" fill="#facc15" stroke="#333" strokeWidth="2"/>
-          {/* Index - Green */}
-          <ellipse cx="115" cy="50" rx="12" ry="45" fill="#22c55e" stroke="#333" strokeWidth="2" transform="rotate(5 115 50)"/>
-          {/* Thumb - Gray */}
-          <ellipse cx="150" cy="160" rx="15" ry="35" fill="#9ca3af" stroke="#333" strokeWidth="2" transform="rotate(45 150 160)"/>
-        </svg>
-      </div>
-
-      {/* Right Hand */}
-      <div className="relative">
-        <div className="text-center mb-4">
-          <h3 className="text-xl font-bold">{isHindi ? "दायां हाथ" : "Right Hand"}</h3>
-          <p className="text-sm text-muted-foreground">{isHindi ? "कुंजियाँ" : "Keys"}</p>
-        </div>
-        <svg width="200" height="250" viewBox="0 0 200 250" className="mx-auto">
-          {/* Palm */}
-          <ellipse cx="100" cy="180" rx="60" ry="70" fill="#f0f0f0" stroke="#333" strokeWidth="2"/>
-          
-          {/* Fingers */}
-          {/* Index - Blue */}
-          <ellipse cx="85" cy="50" rx="12" ry="45" fill="#3b82f6" stroke="#333" strokeWidth="2" transform="rotate(-5 85 50)"/>
-          {/* Middle - Indigo */}
-          <ellipse cx="110" cy="40" rx="12" ry="50" fill="#6366f1" stroke="#333" strokeWidth="2"/>
-          {/* Ring - Purple */}
-          <ellipse cx="135" cy="50" rx="12" ry="45" fill="#a855f7" stroke="#333" strokeWidth="2" transform="rotate(5 135 50)"/>
-          {/* Pinky - Pink */}
-          <ellipse cx="160" cy="80" rx="12" ry="40" fill="#ec4899" stroke="#333" strokeWidth="2" transform="rotate(15 160 80)"/>
-          {/* Thumb - Gray */}
-          <ellipse cx="50" cy="160" rx="15" ry="35" fill="#9ca3af" stroke="#333" strokeWidth="2" transform="rotate(-45 50 160)"/>
-        </svg>
-      </div>
+    <div className="mt-8">
+      <HandPositionGuide activeKey={activeKey} activeFinger={selectedDrill?.finger} />
     </div>
   );
 

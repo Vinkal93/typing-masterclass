@@ -7,8 +7,10 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { FontProvider } from "./contexts/FontContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AdminProvider } from "./contexts/AdminContext";
+import { StudentProvider } from "./contexts/StudentContext";
 import { SidebarProvider } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
+import ScrollToTop from "./components/ScrollToTop";
 import { useEffect } from "react";
 import { trackPageView } from "./lib/analyticsTracker";
 import { useLocation } from "react-router-dom";
@@ -63,6 +65,7 @@ const AnalyticsTracker = () => {
 
 const AppRoutes = () => (
   <>
+    <ScrollToTop />
     <AnalyticsTracker />
     <Routes>
       <Route path="/" element={<Index />} />
@@ -112,6 +115,7 @@ const App = () => (
       <LanguageProvider>
         <FontProvider>
           <AdminProvider>
+            <StudentProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -126,6 +130,7 @@ const App = () => (
                 </SidebarProvider>
               </BrowserRouter>
             </TooltipProvider>
+            </StudentProvider>
           </AdminProvider>
         </FontProvider>
       </LanguageProvider>

@@ -12,9 +12,10 @@ interface AdBannerProps {
   format?: "auto" | "horizontal" | "vertical" | "rectangle" | "leaderboard";
   className?: string;
   responsive?: boolean;
+  onAdLoaded?: () => void;
 }
 
-const AdBanner = ({ slot, format = "auto", className = "", responsive = true }: AdBannerProps) => {
+const AdBanner = ({ slot, format = "auto", className = "", responsive = true, onAdLoaded }: AdBannerProps) => {
   const adRef = useRef<HTMLDivElement>(null);
   const pushed = useRef(false);
   const isMobile = useIsMobile();
@@ -25,12 +26,12 @@ const AdBanner = ({ slot, format = "auto", className = "", responsive = true }: 
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
-      // Check if ad rendered after a delay
       setTimeout(() => {
         if (adRef.current) {
           const ins = adRef.current.querySelector('ins');
           if (ins && ins.getAttribute('data-ad-status') === 'filled') {
             setAdLoaded(true);
+            onAdLoaded?.();
           }
         }
       }, 2000);
