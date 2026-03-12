@@ -115,6 +115,7 @@ const App = () => (
       <LanguageProvider>
         <FontProvider>
           <AdminProvider>
+            <StudentProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
