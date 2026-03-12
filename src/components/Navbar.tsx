@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Keyboard, Menu } from "lucide-react";
+import { Keyboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import StudentAuthDialog from "@/components/StudentAuthDialog";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const Navbar = () => {
             <Label htmlFor="hindi-mode" className="text-sm hidden sm:inline">HI</Label>
           </div>
 
+          <StudentAuthDialog />
           <SettingsDialog />
         </div>
       </div>
