@@ -51,6 +51,9 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import Disclaimer from "./pages/Disclaimer";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
+import CoursePage from "./pages/CoursePage";
+import LessonPractice from "./pages/LessonPractice";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +107,9 @@ const AppRoutes = () => (
       <Route path="/disclaimer" element={<Disclaimer />} />
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/dashboard" element={<StudentDashboard />} />
+      <Route path="/course" element={<CoursePage />} />
+      <Route path="/lesson/:lessonId" element={<LessonPractice />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </>

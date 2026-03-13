@@ -33,6 +33,7 @@ const StudentAuthDialog = () => {
       await login(loginEmail, loginPass);
       toast({ title: "Welcome back!", description: "Successfully logged in." });
       setOpen(false);
+      navigate("/dashboard");
     } catch (err: any) {
       toast({ title: "Login Failed", description: err.message || "Invalid credentials", variant: "destructive" });
     } finally {
@@ -51,6 +52,7 @@ const StudentAuthDialog = () => {
       await signup(signupEmail, signupPass, signupName);
       toast({ title: "Account Created!", description: "Welcome to TypeMaster!" });
       setOpen(false);
+      navigate("/dashboard");
     } catch (err: any) {
       toast({ title: "Signup Failed", description: err.message || "Could not create account", variant: "destructive" });
     } finally {
@@ -117,8 +119,8 @@ const StudentAuthDialog = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button className="flex-1" onClick={() => { setOpen(false); navigate("/lessons"); }}>
-                Continue Learning
+              <Button className="flex-1" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
+                My Dashboard
               </Button>
               <Button variant="destructive" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-1" /> Logout
