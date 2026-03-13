@@ -51,6 +51,9 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import Disclaimer from "./pages/Disclaimer";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
+import CoursePage from "./pages/CoursePage";
+import LessonPractice from "./pages/LessonPractice";
 
 const queryClient = new QueryClient();
 
