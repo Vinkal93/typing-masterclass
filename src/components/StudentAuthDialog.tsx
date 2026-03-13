@@ -33,6 +33,7 @@ const StudentAuthDialog = () => {
       await login(loginEmail, loginPass);
       toast({ title: "Welcome back!", description: "Successfully logged in." });
       setOpen(false);
+      navigate("/dashboard");
     } catch (err: any) {
       toast({ title: "Login Failed", description: err.message || "Invalid credentials", variant: "destructive" });
     } finally {
