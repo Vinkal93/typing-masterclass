@@ -1,4 +1,4 @@
-import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History, ClipboardList, Zap, Target, Hand, Trophy, Medal, BarChart3, FileText, Swords, PenTool } from "lucide-react";
+import { Home, BookOpen, Gamepad2, TrendingUp, Keyboard, User, History, ClipboardList, Zap, Target, Hand, Trophy, Medal, BarChart3, FileText, Swords, PenTool, GraduationCap } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import {
   Sidebar,
