@@ -22,6 +22,7 @@ export function AppSidebar() {
 
   const mainItems = [
     { title: t('dashboard'), url: "/", icon: Home },
+    { title: isHindi ? "टाइपिंग कोर्स" : "Typing Course", url: "/course", icon: GraduationCap },
     { title: isHindi ? "फास्ट ट्रैक" : "Fast Track", url: "/fast-track", icon: Zap },
     { title: t('lessons'), url: "/lessons", icon: BookOpen },
     { title: isHindi ? "स्मार्ट प्रैक्टिस" : "Smart Practice", url: "/smart-practice", icon: Target },
