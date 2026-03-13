@@ -52,6 +52,7 @@ const StudentAuthDialog = () => {
       await signup(signupEmail, signupPass, signupName);
       toast({ title: "Account Created!", description: "Welcome to TypeMaster!" });
       setOpen(false);
+      navigate("/dashboard");
     } catch (err: any) {
       toast({ title: "Signup Failed", description: err.message || "Could not create account", variant: "destructive" });
     } finally {
