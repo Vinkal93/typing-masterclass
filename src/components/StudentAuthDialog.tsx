@@ -119,8 +119,8 @@ const StudentAuthDialog = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button className="flex-1" onClick={() => { setOpen(false); navigate("/lessons"); }}>
-                Continue Learning
+              <Button className="flex-1" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
+                My Dashboard
               </Button>
               <Button variant="destructive" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-1" /> Logout
