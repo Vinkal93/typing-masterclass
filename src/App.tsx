@@ -107,6 +107,9 @@ const AppRoutes = () => (
       <Route path="/disclaimer" element={<Disclaimer />} />
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/dashboard" element={<StudentDashboard />} />
+      <Route path="/course" element={<CoursePage />} />
+      <Route path="/lesson/:lessonId" element={<LessonPractice />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </>
