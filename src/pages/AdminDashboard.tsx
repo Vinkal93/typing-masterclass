@@ -23,6 +23,7 @@ import {
   getTopPages, getTrafficSources, getDailyVisitsChart, clearAnalytics, AnalyticsData
 } from "@/lib/analyticsTracker";
 import { blogPosts as defaultBlogPosts, BlogPost } from "@/lib/blogData";
+import { curriculum, getTotalLessons } from "@/lib/curriculumData";
 
 const COLORS = [
   'hsl(198, 93%, 60%)', 'hsl(24, 95%, 53%)', 'hsl(142, 71%, 45%)',
