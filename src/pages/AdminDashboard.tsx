@@ -598,35 +598,181 @@ const AdminDashboard = () => {
 
           {/* Students */}
           <TabsContent value="students" className="space-y-4">
+            {/* Student Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{students.length}</p>
+                  <p className="text-xs text-muted-foreground">Total Students</p>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{students.filter((s: any) => s.plan === 'premium').length}</p>
+                  <p className="text-xs text-muted-foreground">Premium Students</p>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{students.filter((s: any) => (s.completedLessons?.length || 0) > 0).length}</p>
+                  <p className="text-xs text-muted-foreground">Active Learners</p>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">
+                    {students.length > 0 ? Math.round(students.reduce((s: number, st: any) => s + (st.completedLessons?.length || 0), 0) / students.length) : 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Avg Lessons/Student</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Student Progress Table */}
             <Card className="border-border">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4" /> Registered Students ({students.length})
+                  <GraduationCap className="h-4 w-4" /> Student Progress Tracking
                 </CardTitle>
+                <CardDescription>Detailed lesson completion, WPM, and accuracy for each student</CardDescription>
               </CardHeader>
               <CardContent>
                 {students.length > 0 ? (
-                  <div className="space-y-2">
-                    {students.map((s: any, i) => (
-                      <div key={i} className="flex items-center justify-between border-b border-border pb-2">
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{s.displayName}</p>
-                          <p className="text-xs text-muted-foreground">{s.email}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs font-mono text-primary">{s.studentId}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {s.plan === 'premium' ? '⭐ Premium' : 'Free'} • {s.completedLessons?.length || 0} lessons
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-2 px-2 font-medium text-muted-foreground">Student</th>
+                          <th className="text-left py-2 px-2 font-medium text-muted-foreground">ID</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Plan</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Lessons</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Progress</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Current Level</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Joined</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {students.map((s: any, i: number) => {
+                          const completed = s.completedLessons?.length || 0;
+                          const total = getTotalLessons();
+                          const pct = Math.round((completed / total) * 100);
+                          const allLessons = curriculum.flatMap(l => l.lessons);
+                          const nextLesson = allLessons.find(l => !(s.completedLessons || []).includes(l.id));
+                          const currentLvl = nextLesson ? curriculum.find(lvl => lvl.lessons.some(l => l.id === nextLesson.id)) : null;
+
+                          return (
+                            <tr key={i} className="border-b border-border/50 hover:bg-muted/30">
+                              <td className="py-2.5 px-2">
+                                <p className="font-medium text-foreground">{s.displayName}</p>
+                                <p className="text-xs text-muted-foreground">{s.email}</p>
+                              </td>
+                              <td className="py-2.5 px-2">
+                                <span className="font-mono text-xs text-primary">{s.studentId}</span>
+                              </td>
+                              <td className="py-2.5 px-2 text-center">
+                                <Badge variant={s.plan === 'premium' ? 'default' : 'secondary'} className="text-[10px]">
+                                  {s.plan === 'premium' ? '⭐ Premium' : 'Free'}
+                                </Badge>
+                              </td>
+                              <td className="py-2.5 px-2 text-center font-medium text-foreground">
+                                {completed}/{total}
+                              </td>
+                              <td className="py-2.5 px-2">
+                                <div className="flex items-center gap-2 justify-center">
+                                  <div className="h-2 bg-muted rounded-full w-16">
+                                    <div className="h-2 bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                  </div>
+                                  <span className="text-xs font-medium text-foreground">{pct}%</span>
+                                </div>
+                              </td>
+                              <td className="py-2.5 px-2 text-center text-xs text-muted-foreground">
+                                {currentLvl ? `${currentLvl.icon} ${currentLvl.title.split('—')[0].trim()}` : '🎉 Complete'}
+                              </td>
+                              <td className="py-2.5 px-2 text-center text-xs text-muted-foreground">
+                                {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : '—'}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">No students registered yet</p>
                 )}
               </CardContent>
             </Card>
+
+            {/* Lesson-wise Completion Chart */}
+            {students.length > 0 && (
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="text-base">Lesson Completion Overview</CardTitle>
+                  <CardDescription>How many students completed each lesson</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={curriculum.flatMap(lvl => lvl.lessons).map(lesson => ({
+                        name: `L${lesson.lessonNumber}`,
+                        completed: students.filter((s: any) => (s.completedLessons || []).includes(lesson.id)).length,
+                        title: lesson.title,
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                        <YAxis />
+                        <Tooltip formatter={(value: any, _: any, props: any) => [`${value} students`, props.payload.title]} />
+                        <Bar dataKey="completed" fill="hsl(198, 93%, 60%)" radius={[3, 3, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Completed Lessons Detail */}
+            {students.length > 0 && (
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="text-base">Individual Lesson Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {students.map((s: any, i: number) => {
+                      const completedIds: string[] = s.completedLessons || [];
+                      if (completedIds.length === 0) return null;
+                      const allL = curriculum.flatMap(l => l.lessons);
+                      return (
+                        <div key={i} className="border border-border rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="font-medium text-foreground text-sm">{s.displayName} <span className="text-xs text-muted-foreground">({s.studentId})</span></p>
+                            <Badge variant="outline" className="text-[10px]">{completedIds.length} lessons</Badge>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {allL.map(lesson => {
+                              const done = completedIds.includes(lesson.id);
+                              return (
+                                <span
+                                  key={lesson.id}
+                                  className={`text-[10px] px-2 py-0.5 rounded-full border ${
+                                    done
+                                      ? 'bg-primary/10 border-primary/30 text-primary font-medium'
+                                      : 'bg-muted/30 border-border/50 text-muted-foreground'
+                                  }`}
+                                  title={lesson.title}
+                                >
+                                  L{lesson.lessonNumber}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
 
