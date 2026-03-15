@@ -45,7 +45,7 @@ const FINGER_COLORS: Record<string, string> = {
 const LessonPractice = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
   const navigate = useNavigate();
-  const { profile, completeLesson, isPremium } = useStudent();
+  const { profile, completeLesson, updateStats, isPremium } = useStudent();
   const lesson = lessonId ? getLessonById(lessonId) : undefined;
 
   const [currentIndex, setCurrentIndex] = useState(0);
