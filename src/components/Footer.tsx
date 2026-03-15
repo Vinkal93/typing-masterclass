@@ -10,6 +10,9 @@ const Footer = () => {
       { label: "Typing Practice", path: "/typing-practice" },
       { label: "WPM Calculator", path: "/wpm-calculator" },
       { label: "Accuracy Calculator", path: "/accuracy-calculator" },
+      { label: "Finger Heatmap", path: "/finger-heatmap" },
+      { label: "Error Analysis", path: "/error-analysis" },
+      { label: "Smart Practice", path: "/smart-practice" },
     ],
     tests: [
       { label: "1 Minute Test", path: "/1-minute-typing-test" },
@@ -17,15 +20,29 @@ const Footer = () => {
       { label: "5 Minute Test", path: "/5-minute-typing-test" },
       { label: "Hindi Typing", path: "/hindi-typing-test" },
       { label: "English Typing", path: "/english-typing-test" },
+      { label: "CPCT Mock", path: "/cpct-mock" },
+      { label: "Exam Mode", path: "/exam" },
+      { label: "Sport Mode", path: "/sport-mode" },
+    ],
+    learn: [
+      { label: "Typing Course", path: "/course" },
+      { label: "Lessons", path: "/lessons" },
+      { label: "Fast Track", path: "/fast-track" },
+      { label: "Keyboard Guide", path: "/keyboard-guide" },
+      { label: "Games", path: "/games" },
+      { label: "Achievements", path: "/achievements" },
+      { label: "Leaderboard", path: "/leaderboard" },
     ],
     resources: [
-      { label: "Lessons", path: "/lessons" },
-      { label: "Keyboard Guide", path: "/keyboard-guide" },
       { label: "Blog", path: "/blog" },
-      { label: "CPCT Mock", path: "/cpct-mock" },
+      { label: "Progress", path: "/progress" },
+      { label: "Full History", path: "/full-history" },
+      { label: "Exam History", path: "/exam-history" },
+      { label: "Student Dashboard", path: "/dashboard" },
     ],
     legal: [
       { label: "About", path: "/about" },
+      { label: "About Developer", path: "/about-developer" },
       { label: "Contact", path: "/contact" },
       { label: "Privacy Policy", path: "/privacy-policy" },
       { label: "Terms & Conditions", path: "/terms-and-conditions" },
@@ -35,7 +52,6 @@ const Footer = () => {
 
   return (
     <>
-      {/* Above-Footer Ad */}
       <div className="w-full px-4 my-4">
         <div className="max-w-7xl mx-auto">
           <AdBanner slot="1000000003" format="horizontal" />
@@ -43,7 +59,7 @@ const Footer = () => {
       </div>
       <footer className="border-t border-border bg-card/30 py-8 mt-2 w-full">
         <div className="w-full px-4 md:px-8 lg:px-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6 max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6 max-w-7xl mx-auto">
             <div>
               <h3 className="font-semibold text-foreground mb-3 text-sm">Tools</h3>
               <ul className="space-y-1">
@@ -57,9 +73,21 @@ const Footer = () => {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-foreground mb-3 text-sm">Tests</h3>
+              <h3 className="font-semibold text-foreground mb-3 text-sm">Tests & Exams</h3>
               <ul className="space-y-1">
                 {links.tests.map(l => (
+                  <li key={l.path}>
+                    <button onClick={() => navigate(l.path)} className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                      {l.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-3 text-sm">Learn</h3>
+              <ul className="space-y-1">
+                {links.learn.map(l => (
                   <li key={l.path}>
                     <button onClick={() => navigate(l.path)} className="text-xs text-muted-foreground hover:text-primary transition-colors">
                       {l.label}
@@ -81,7 +109,7 @@ const Footer = () => {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-foreground mb-3 text-sm">Legal</h3>
+              <h3 className="font-semibold text-foreground mb-3 text-sm">Company</h3>
               <ul className="space-y-1">
                 {links.legal.map(l => (
                   <li key={l.path}>

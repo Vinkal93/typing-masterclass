@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area
@@ -16,7 +17,8 @@ import {
   Users, Eye, Monitor, Smartphone, Tablet, Globe, TrendingUp,
   FileText, LogOut, Shield, Activity, MousePointer, ArrowUpRight,
   PenTool, Plus, Save, Trash2, Search, CheckCircle, AlertCircle,
-  GraduationCap
+  GraduationCap, Crown, Ban, UserCheck, DollarSign, Settings,
+  CreditCard, Clock, Mail, Key, RefreshCw
 } from "lucide-react";
 import {
   getAnalyticsData, getLiveVisitors, getTodayVisits,
@@ -24,6 +26,7 @@ import {
 } from "@/lib/analyticsTracker";
 import { blogPosts as defaultBlogPosts, BlogPost } from "@/lib/blogData";
 import { curriculum, getTotalLessons } from "@/lib/curriculumData";
+import { StudentProfile, getProfiles, saveProfile, saveAllProfiles } from "@/contexts/StudentContext";
 
 const COLORS = [
   'hsl(198, 93%, 60%)', 'hsl(24, 95%, 53%)', 'hsl(142, 71%, 45%)',
@@ -31,7 +34,6 @@ const COLORS = [
 ];
 
 const ADMIN_BLOGS_KEY = 'tm_admin_blogs';
-const STUDENTS_KEY = 'tm_student_profiles';
 
 interface AdminBlog {
   slug: string;
@@ -57,13 +59,6 @@ const saveAdminBlogs = (blogs: AdminBlog[]) => {
   localStorage.setItem(ADMIN_BLOGS_KEY, JSON.stringify(blogs));
 };
 
-const getStudents = (): any[] => {
-  try {
-    const data = localStorage.getItem(STUDENTS_KEY);
-    return data ? Object.values(JSON.parse(data)) : [];
-  } catch { return []; }
-};
-
 const AdminDashboard = () => {
   const { user, logout, isAdmin, loading } = useAdmin();
   const navigate = useNavigate();
@@ -71,7 +66,9 @@ const AdminDashboard = () => {
   const [liveVisitors, setLiveVisitors] = useState(0);
   const [todayVisits, setTodayVisits] = useState(0);
   const [adminBlogs, setAdminBlogs] = useState<AdminBlog[]>(getAdminBlogs());
-  const [students, setStudents] = useState<any[]>(getStudents());
+  const [students, setStudents] = useState<StudentProfile[]>([]);
+  const [studentFilter, setStudentFilter] = useState<'all' | 'pending' | 'active' | 'premium' | 'suspended'>('all');
+  const [studentSearch, setStudentSearch] = useState('');
 
   // Blog editor state
   const [editingBlog, setEditingBlog] = useState<AdminBlog | null>(null);
@@ -87,6 +84,11 @@ const AdminDashboard = () => {
   const [seoUrl, setSeoUrl] = useState("");
   const [seoResults, setSeoResults] = useState<{label: string; status: 'good'|'warning'|'error'; message: string}[]>([]);
 
+  const loadStudents = () => {
+    const profiles = getProfiles();
+    setStudents(Object.values(profiles));
+  };
+
   useEffect(() => {
     if (!loading && !isAdmin) {
       navigate("/admin");
@@ -96,7 +98,7 @@ const AdminDashboard = () => {
       setAnalytics(getAnalyticsData());
       setLiveVisitors(getLiveVisitors());
       setTodayVisits(getTodayVisits());
-      setStudents(getStudents());
+      loadStudents();
     };
     loadData();
     const interval = setInterval(loadData, 5000);
@@ -118,6 +120,46 @@ const AdminDashboard = () => {
     navigate("/admin");
   };
 
+  // Student management
+  const updateStudentStatus = (uid: string, status: StudentProfile['status']) => {
+    const profiles = getProfiles();
+    if (profiles[uid]) {
+      profiles[uid].status = status;
+      if (status === 'premium') {
+        profiles[uid].plan = 'premium';
+      }
+      saveAllProfiles(profiles);
+      loadStudents();
+    }
+  };
+
+  const activatePremium = (uid: string, months: number) => {
+    const profiles = getProfiles();
+    if (profiles[uid]) {
+      profiles[uid].status = 'premium';
+      profiles[uid].plan = 'premium';
+      profiles[uid].premiumExpiry = Date.now() + (months * 30 * 24 * 60 * 60 * 1000);
+      saveAllProfiles(profiles);
+      loadStudents();
+    }
+  };
+
+  const deleteStudent = (uid: string) => {
+    const profiles = getProfiles();
+    delete profiles[uid];
+    saveAllProfiles(profiles);
+    loadStudents();
+  };
+
+  const filteredStudents = students.filter(s => {
+    if (studentFilter !== 'all' && s.status !== studentFilter) return false;
+    if (studentSearch) {
+      const q = studentSearch.toLowerCase();
+      return s.displayName.toLowerCase().includes(q) || s.email.toLowerCase().includes(q) || s.studentId.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
   // Blog management
   const startNewBlog = () => {
     setEditingBlog(null);
@@ -136,94 +178,60 @@ const AdminDashboard = () => {
     if (!blogTitle || !blogSlug) return;
     const now = Date.now();
     const blog: AdminBlog = {
-      slug: blogSlug,
-      title: blogTitle,
-      description: blogDesc,
-      content: blogContent,
-      category: blogCategory,
-      keywords: blogKeywords,
-      status: blogStatus,
-      createdAt: editingBlog?.createdAt || now,
-      updatedAt: now,
-      views: editingBlog?.views || 0,
+      slug: blogSlug, title: blogTitle, description: blogDesc,
+      content: blogContent, category: blogCategory, keywords: blogKeywords,
+      status: blogStatus, createdAt: editingBlog?.createdAt || now,
+      updatedAt: now, views: editingBlog?.views || 0,
     };
     const blogs = getAdminBlogs();
     const idx = blogs.findIndex(b => b.slug === editingBlog?.slug);
-    if (idx >= 0) blogs[idx] = blog;
-    else blogs.push(blog);
-    saveAdminBlogs(blogs);
-    setAdminBlogs(blogs);
-    startNewBlog();
+    if (idx >= 0) blogs[idx] = blog; else blogs.push(blog);
+    saveAdminBlogs(blogs); setAdminBlogs(blogs); startNewBlog();
   };
 
   const deleteBlog = (slug: string) => {
     const blogs = getAdminBlogs().filter(b => b.slug !== slug);
-    saveAdminBlogs(blogs);
-    setAdminBlogs(blogs);
+    saveAdminBlogs(blogs); setAdminBlogs(blogs);
   };
 
-  const titleToSlug = (title: string) => {
-    return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  };
+  const titleToSlug = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   // SEO checker
   const runSeoCheck = () => {
     const results: typeof seoResults = [];
     const page = defaultBlogPosts.find(p => p.slug === seoUrl) || adminBlogs.find(b => b.slug === seoUrl);
-    
     if (!page) {
       results.push({ label: "Page Found", status: 'error', message: "Page not found. Enter a valid blog slug." });
-      setSeoResults(results);
-      return;
+      setSeoResults(results); return;
     }
-
-    // Title length
     if (page.title.length >= 30 && page.title.length <= 60) {
       results.push({ label: "Title Length", status: 'good', message: `${page.title.length} chars (30-60 ideal)` });
     } else {
       results.push({ label: "Title Length", status: 'warning', message: `${page.title.length} chars (should be 30-60)` });
     }
-
-    // Description
     if (page.description.length >= 120 && page.description.length <= 160) {
       results.push({ label: "Meta Description", status: 'good', message: `${page.description.length} chars (120-160 ideal)` });
     } else {
       results.push({ label: "Meta Description", status: 'warning', message: `${page.description.length} chars (should be 120-160)` });
     }
-
-    // Content length
     const contentLen = page.content.length;
-    if (contentLen > 2000) {
-      results.push({ label: "Content Length", status: 'good', message: `${contentLen} chars - good length` });
-    } else if (contentLen > 500) {
-      results.push({ label: "Content Length", status: 'warning', message: `${contentLen} chars - consider adding more content` });
-    } else {
-      results.push({ label: "Content Length", status: 'error', message: `${contentLen} chars - too short` });
-    }
-
-    // Headings
+    if (contentLen > 2000) results.push({ label: "Content Length", status: 'good', message: `${contentLen} chars - good length` });
+    else if (contentLen > 500) results.push({ label: "Content Length", status: 'warning', message: `${contentLen} chars - consider adding more` });
+    else results.push({ label: "Content Length", status: 'error', message: `${contentLen} chars - too short` });
     const h2Count = (page.content.match(/^## /gm) || []).length;
-    if (h2Count >= 3) {
-      results.push({ label: "Headings (H2)", status: 'good', message: `${h2Count} headings found` });
-    } else {
-      results.push({ label: "Headings (H2)", status: 'warning', message: `Only ${h2Count} headings - add more` });
-    }
-
-    // Internal links (check for / in content)
+    results.push({ label: "Headings", status: h2Count >= 3 ? 'good' : 'warning', message: `${h2Count} headings found` });
     const linkCount = (page.content.match(/\[.*?\]\(\/.*?\)/g) || []).length;
-    if (linkCount >= 2) {
-      results.push({ label: "Internal Links", status: 'good', message: `${linkCount} internal links` });
-    } else {
-      results.push({ label: "Internal Links", status: 'warning', message: `${linkCount} links - add more internal links` });
-    }
-
+    results.push({ label: "Internal Links", status: linkCount >= 2 ? 'good' : 'warning', message: `${linkCount} links` });
     const score = Math.round((results.filter(r => r.status === 'good').length / results.length) * 100);
     results.unshift({ label: "SEO Score", status: score >= 80 ? 'good' : score >= 50 ? 'warning' : 'error', message: `${score} / 100` });
-
     setSeoResults(results);
   };
 
   const allBlogs = [...defaultBlogPosts.map(b => ({ ...b, status: 'published' as const, createdAt: new Date(b.date).getTime(), updatedAt: new Date(b.date).getTime(), views: 0, keywords: b.keywords.join(', ') })), ...adminBlogs];
+
+  const premiumStudents = students.filter(s => s.plan === 'premium');
+  const pendingStudents = students.filter(s => s.status === 'pending');
+  const activeStudents = students.filter(s => (s.completedLessons?.length || 0) > 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -247,68 +255,34 @@ const AdminDashboard = () => {
 
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <Card className="border-border">
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-green-500" /> Live Visitors
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-foreground">{liveVisitors}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-primary" /> Today's Visits
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-foreground">{todayVisits}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <Users className="h-4 w-4" /> Total Visitors
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-foreground">{analytics?.uniqueVisitors || 0}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <MousePointer className="h-4 w-4" /> Page Views
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-foreground">{analytics?.totalVisits || 0}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-primary" /> Students
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-foreground">{students.length}</p>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {[
+            { icon: Activity, label: 'Live Visitors', value: liveVisitors, color: 'text-[hsl(142,71%,45%)]' },
+            { icon: Eye, label: "Today's Visits", value: todayVisits, color: 'text-primary' },
+            { icon: Users, label: 'Total Students', value: students.length, color: 'text-foreground' },
+            { icon: Clock, label: 'Pending', value: pendingStudents.length, color: 'text-[hsl(45,80%,50%)]' },
+            { icon: Crown, label: 'Premium', value: premiumStudents.length, color: 'text-[hsl(45,80%,50%)]' },
+            { icon: MousePointer, label: 'Page Views', value: analytics?.totalVisits || 0, color: 'text-foreground' },
+          ].map((stat, i) => (
+            <Card key={i} className="border-border">
+              <CardHeader className="pb-2">
+                <CardDescription className="flex items-center gap-2">
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} /> {stat.label}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Main Tabs */}
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid grid-cols-6 w-full max-w-2xl">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="audience">Audience</TabsTrigger>
-            <TabsTrigger value="pages">Pages</TabsTrigger>
-            <TabsTrigger value="blogs">Blogs</TabsTrigger>
-            <TabsTrigger value="seo">SEO</TabsTrigger>
-            <TabsTrigger value="students">Students</TabsTrigger>
+          <TabsList className="flex flex-wrap h-auto gap-1">
+            {['overview', 'students', 'payments', 'blogs', 'seo', 'analytics', 'settings'].map(tab => (
+              <TabsTrigger key={tab} value={tab} className="capitalize">{tab}</TabsTrigger>
+            ))}
           </TabsList>
 
           {/* Overview */}
@@ -330,6 +304,416 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card className="border-border">
+                <CardHeader><CardTitle className="text-base">Top Pages</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {topPages.slice(0, 8).map((p, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <span className="text-sm text-foreground truncate max-w-[60%]">{p.page || '/'}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 bg-primary/20 rounded-full w-16">
+                            <div className="h-2 bg-primary rounded-full" style={{ width: `${topPages.length > 0 ? (p.views / topPages[0].views) * 100 : 0}%` }} />
+                          </div>
+                          <span className="text-sm font-medium text-foreground w-8 text-right">{p.views}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border">
+                <CardHeader><CardTitle className="text-base">Traffic Sources</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {trafficSources.map((t, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <span className="text-sm text-foreground">{t.source}</span>
+                        <span className="text-sm font-medium text-foreground">{t.count}</span>
+                      </div>
+                    ))}
+                    {trafficSources.length === 0 && <p className="text-sm text-muted-foreground">No data yet</p>}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Students Management */}
+          <TabsContent value="students" className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Input 
+                placeholder="Search by name, email, or ID..." 
+                value={studentSearch} 
+                onChange={e => setStudentSearch(e.target.value)} 
+                className="max-w-xs"
+              />
+              {(['all', 'pending', 'active', 'premium', 'suspended'] as const).map(f => (
+                <Button key={f} variant={studentFilter === f ? 'default' : 'outline'} size="sm" onClick={() => setStudentFilter(f)} className="capitalize">
+                  {f} {f === 'all' ? `(${students.length})` : f === 'pending' ? `(${pendingStudents.length})` : f === 'premium' ? `(${premiumStudents.length})` : ''}
+                </Button>
+              ))}
+            </div>
+
+            {/* Student Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{students.length}</p>
+                  <p className="text-xs text-muted-foreground">Total Students</p>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <p className="text-2xl font-bold text-[hsl(45,80%,50%)]">{premiumStudents.length}</p>
+                  <p className="text-xs text-muted-foreground">Premium</p>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{activeStudents.length}</p>
+                  <p className="text-xs text-muted-foreground">Active Learners</p>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">
+                    {students.length > 0 ? Math.round(students.reduce((s, st) => s + (st.completedLessons?.length || 0), 0) / students.length) : 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Avg Lessons/Student</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Student Table */}
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4" /> Student Management
+                </CardTitle>
+                <CardDescription>{filteredStudents.length} students shown</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {filteredStudents.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-2 px-2 font-medium text-muted-foreground">Student</th>
+                          <th className="text-left py-2 px-2 font-medium text-muted-foreground">ID</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Status</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Plan</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Lessons</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Best WPM</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Accuracy</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Practice</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Last Login</th>
+                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredStudents.map((s) => {
+                          const completed = s.completedLessons?.length || 0;
+                          const total = getTotalLessons();
+                          const pct = Math.round((completed / total) * 100);
+                          const allL = curriculum.flatMap(l => l.lessons);
+                          const nextL = allL.find(l => !(s.completedLessons || []).includes(l.id));
+                          const currentLvl = nextL ? curriculum.find(lvl => lvl.lessons.some(l => l.id === nextL.id)) : null;
+
+                          return (
+                            <tr key={s.uid} className="border-b border-border/50 hover:bg-muted/30">
+                              <td className="py-2.5 px-2">
+                                <p className="font-medium text-foreground">{s.displayName}</p>
+                                <p className="text-xs text-muted-foreground">{s.email}</p>
+                              </td>
+                              <td className="py-2.5 px-2">
+                                <span className="font-mono text-xs text-primary">{s.studentId}</span>
+                              </td>
+                              <td className="py-2.5 px-2 text-center">
+                                <Badge variant={s.status === 'active' || s.status === 'premium' ? 'default' : s.status === 'suspended' ? 'destructive' : 'secondary'} className="text-[10px]">
+                                  {s.status}
+                                </Badge>
+                              </td>
+                              <td className="py-2.5 px-2 text-center">
+                                <Badge variant={s.plan === 'premium' ? 'default' : 'secondary'} className={`text-[10px] ${s.plan === 'premium' ? 'bg-gradient-to-r from-[hsl(45,80%,50%)] to-[hsl(30,80%,50%)] text-white border-0' : ''}`}>
+                                  {s.plan === 'premium' ? '⭐ Premium' : 'Free'}
+                                </Badge>
+                                {s.premiumExpiry && (
+                                  <p className="text-[9px] text-muted-foreground mt-0.5">
+                                    Exp: {new Date(s.premiumExpiry).toLocaleDateString()}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="py-2.5 px-2 text-center">
+                                <div className="flex items-center gap-1 justify-center">
+                                  <span className="font-medium text-foreground text-xs">{completed}/{total}</span>
+                                  <div className="h-1.5 bg-muted rounded-full w-12">
+                                    <div className="h-1.5 bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                                  </div>
+                                </div>
+                                <p className="text-[9px] text-muted-foreground">
+                                  {currentLvl ? `${currentLvl.icon} ${currentLvl.title.split('—')[0].trim()}` : '🎉 Done'}
+                                </p>
+                              </td>
+                              <td className="py-2.5 px-2 text-center font-medium text-foreground text-xs">{s.bestWpm || 0}</td>
+                              <td className="py-2.5 px-2 text-center font-medium text-foreground text-xs">{s.bestAccuracy || 0}%</td>
+                              <td className="py-2.5 px-2 text-center text-xs text-muted-foreground">
+                                {Math.round((s.totalPracticeTime || 0) / 60)}m
+                              </td>
+                              <td className="py-2.5 px-2 text-center text-xs text-muted-foreground">
+                                {s.lastLoginAt ? new Date(s.lastLoginAt).toLocaleDateString() : '—'}
+                              </td>
+                              <td className="py-2.5 px-2">
+                                <div className="flex items-center gap-1 justify-center flex-wrap">
+                                  {s.status === 'pending' && (
+                                    <Button variant="outline" size="sm" className="h-6 text-[10px] px-2" onClick={() => updateStudentStatus(s.uid, 'active')}>
+                                      <UserCheck className="h-3 w-3 mr-1" /> Approve
+                                    </Button>
+                                  )}
+                                  {s.status !== 'premium' && s.status !== 'suspended' && (
+                                    <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 border-[hsl(45,70%,60%)]/50 text-[hsl(45,80%,45%)]" onClick={() => activatePremium(s.uid, 1)}>
+                                      <Crown className="h-3 w-3 mr-1" /> 1M
+                                    </Button>
+                                  )}
+                                  {s.status !== 'premium' && s.status !== 'suspended' && (
+                                    <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 border-[hsl(45,70%,60%)]/50 text-[hsl(45,80%,45%)]" onClick={() => activatePremium(s.uid, 12)}>
+                                      <Crown className="h-3 w-3 mr-1" /> 1Y
+                                    </Button>
+                                  )}
+                                  {s.status !== 'suspended' && (
+                                    <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 text-destructive" onClick={() => updateStudentStatus(s.uid, 'suspended')}>
+                                      <Ban className="h-3 w-3" />
+                                    </Button>
+                                  )}
+                                  {s.status === 'suspended' && (
+                                    <Button variant="outline" size="sm" className="h-6 text-[10px] px-2" onClick={() => updateStudentStatus(s.uid, 'active')}>
+                                      <RefreshCw className="h-3 w-3 mr-1" /> Reactivate
+                                    </Button>
+                                  )}
+                                  <Button variant="ghost" size="sm" className="h-6 text-[10px] px-1 text-destructive" onClick={() => deleteStudent(s.uid)}>
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No students found</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Lesson Completion Chart */}
+            {students.length > 0 && (
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="text-base">Lesson Completion Overview</CardTitle>
+                  <CardDescription>How many students completed each lesson</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={curriculum.flatMap(lvl => lvl.lessons).map(lesson => ({
+                        name: `L${lesson.lessonNumber}`,
+                        completed: students.filter(s => (s.completedLessons || []).includes(lesson.id)).length,
+                        title: lesson.title,
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis dataKey="name" tick={{ fontSize: 9 }} />
+                        <YAxis />
+                        <Tooltip formatter={(value: any, _: any, props: any) => [`${value} students`, props.payload.title]} />
+                        <Bar dataKey="completed" fill="hsl(198, 93%, 60%)" radius={[3, 3, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Payments */}
+          <TabsContent value="payments" className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <DollarSign className="h-5 w-5 text-[hsl(142,71%,45%)] mx-auto mb-1" />
+                  <p className="text-2xl font-bold text-foreground">{premiumStudents.length}</p>
+                  <p className="text-xs text-muted-foreground">Active Subscriptions</p>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <CreditCard className="h-5 w-5 text-primary mx-auto mb-1" />
+                  <p className="text-2xl font-bold text-foreground">₹{premiumStudents.length * 499}</p>
+                  <p className="text-xs text-muted-foreground">Estimated Revenue</p>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-4 pb-4 text-center">
+                  <Clock className="h-5 w-5 text-[hsl(45,80%,50%)] mx-auto mb-1" />
+                  <p className="text-2xl font-bold text-foreground">
+                    {premiumStudents.filter(s => s.premiumExpiry && s.premiumExpiry < Date.now() + 7 * 24 * 60 * 60 * 1000).length}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Expiring This Week</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2"><CreditCard className="h-4 w-4" /> Premium Students</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {premiumStudents.length > 0 ? (
+                  <div className="space-y-2">
+                    {premiumStudents.map(s => (
+                      <div key={s.uid} className="flex items-center justify-between border-b border-border pb-2">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{s.displayName}</p>
+                          <p className="text-xs text-muted-foreground">{s.email} • {s.studentId}</p>
+                        </div>
+                        <div className="text-right">
+                          <Badge className="bg-gradient-to-r from-[hsl(45,80%,50%)] to-[hsl(30,80%,50%)] text-white border-0 text-[10px]">Premium</Badge>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            {s.premiumExpiry ? `Expires: ${new Date(s.premiumExpiry).toLocaleDateString()}` : 'Lifetime'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No premium students yet</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Blog Management */}
+          <TabsContent value="blogs" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-foreground">Blog Management</h3>
+              <Button size="sm" onClick={startNewBlog}><Plus className="h-4 w-4 mr-1" /> New Post</Button>
+            </div>
+
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <PenTool className="h-4 w-4" /> {editingBlog ? 'Edit Post' : 'New Post'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Title</Label>
+                    <Input value={blogTitle} onChange={e => { setBlogTitle(e.target.value); if (!editingBlog) setBlogSlug(titleToSlug(e.target.value)); }} placeholder="Blog post title" />
+                  </div>
+                  <div>
+                    <Label>URL Slug</Label>
+                    <Input value={blogSlug} onChange={e => setBlogSlug(e.target.value)} placeholder="url-slug" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Meta Description</Label>
+                  <Input value={blogDesc} onChange={e => setBlogDesc(e.target.value)} placeholder="SEO description (120-160 chars)" />
+                  <span className="text-xs text-muted-foreground">{blogDesc.length}/160</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Category</Label>
+                    <Input value={blogCategory} onChange={e => setBlogCategory(e.target.value)} placeholder="e.g. Tips & Tricks" />
+                  </div>
+                  <div>
+                    <Label>Keywords (comma separated)</Label>
+                    <Input value={blogKeywords} onChange={e => setBlogKeywords(e.target.value)} placeholder="keyword1, keyword2" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Content (Markdown)</Label>
+                  <Textarea value={blogContent} onChange={e => setBlogContent(e.target.value)} placeholder="Write your blog content in markdown..." className="min-h-[300px] font-mono text-sm" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button onClick={() => { setBlogStatus('published'); saveBlog(); }} className="gap-1">
+                    <CheckCircle className="h-4 w-4" /> Publish
+                  </Button>
+                  <Button variant="outline" onClick={() => { setBlogStatus('draft'); saveBlog(); }} className="gap-1">
+                    <Save className="h-4 w-4" /> Save Draft
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base">All Posts ({allBlogs.length})</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {allBlogs.map((b, i) => (
+                    <div key={i} className="flex items-center justify-between border-b border-border pb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{b.title}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <Badge variant={b.status === 'published' ? 'default' : 'secondary'} className="text-[10px]">{b.status}</Badge>
+                          <span className="text-xs text-muted-foreground">{b.category}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        {adminBlogs.find(ab => ab.slug === b.slug) && (
+                          <>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => editBlog(b as AdminBlog)}>
+                              <PenTool className="h-3 w-3" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteBlog(b.slug)}>
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* SEO */}
+          <TabsContent value="seo" className="space-y-4">
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2"><Search className="h-4 w-4" /> SEO Checker</CardTitle>
+                <CardDescription>Enter a blog slug to analyze SEO</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input value={seoUrl} onChange={e => setSeoUrl(e.target.value)} placeholder="e.g. how-to-increase-typing-speed" />
+                  <Button onClick={runSeoCheck}>Analyze</Button>
+                </div>
+                {seoResults.length > 0 && (
+                  <div className="space-y-2">
+                    {seoResults.map((r, i) => (
+                      <div key={i} className="flex items-center justify-between border-b border-border pb-2">
+                        <div className="flex items-center gap-2">
+                          {r.status === 'good' ? <CheckCircle className="h-4 w-4 text-[hsl(142,71%,45%)]" /> :
+                           r.status === 'warning' ? <AlertCircle className="h-4 w-4 text-[hsl(45,80%,50%)]" /> :
+                           <AlertCircle className="h-4 w-4 text-destructive" />}
+                          <span className="text-sm font-medium text-foreground">{r.label}</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">{r.message}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics */}
+          <TabsContent value="analytics" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="border-border">
                 <CardHeader><CardTitle className="text-base flex items-center gap-2"><Monitor className="h-4 w-4" /> Devices</CardTitle></CardHeader>
@@ -365,68 +749,6 @@ const AdminDashboard = () => {
               </Card>
             </div>
 
-            {/* Traffic Sources */}
-            <Card className="border-border">
-              <CardHeader><CardTitle className="text-base">Traffic Sources</CardTitle></CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {trafficSources.map((t, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-sm text-foreground">{t.source}</span>
-                      <span className="text-sm font-medium text-foreground">{t.count}</span>
-                    </div>
-                  ))}
-                  {trafficSources.length === 0 && <p className="text-sm text-muted-foreground">No traffic data yet</p>}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Audience */}
-          <TabsContent value="audience" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card className="border-border">
-                <CardHeader><CardTitle className="text-base">Operating Systems</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="h-[250px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={osData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                          {osData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border">
-                <CardHeader><CardTitle className="text-base">Recent Sessions</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                    {analytics?.sessions.slice(-30).reverse().map((s, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm border-b border-border pb-1">
-                        <div className="flex items-center gap-2">
-                          {s.device === 'Mobile' ? <Smartphone className="h-3 w-3" /> :
-                            s.device === 'Tablet' ? <Tablet className="h-3 w-3" /> :
-                              <Monitor className="h-3 w-3" />}
-                          <span className="text-muted-foreground truncate max-w-[120px]">{s.page}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>{s.browser}</span>
-                          <span>{s.os}</span>
-                          <span>{new Date(s.timestamp).toLocaleTimeString()}</span>
-                        </div>
-                      </div>
-                    ))}
-                    {(!analytics?.sessions.length) && <p className="text-sm text-muted-foreground">No sessions yet</p>}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Hourly Distribution */}
             <Card className="border-border">
               <CardHeader><CardTitle className="text-base">Hourly Traffic</CardTitle></CardHeader>
               <CardContent>
@@ -446,342 +768,66 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
 
-          {/* Pages */}
-          <TabsContent value="pages" className="space-y-4">
             <Card className="border-border">
-              <CardHeader><CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4" /> Top Pages</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">OS Distribution</CardTitle></CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {topPages.map((p, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-sm text-foreground truncate max-w-[60%]">{p.page || '/'}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 bg-primary/20 rounded-full w-24">
-                          <div className="h-2 bg-primary rounded-full" style={{ width: `${topPages.length > 0 ? (p.views / topPages[0].views) * 100 : 0}%` }} />
-                        </div>
-                        <span className="text-sm font-medium text-foreground w-12 text-right">{p.views}</span>
-                      </div>
-                    </div>
-                  ))}
-                  {topPages.length === 0 && <p className="text-sm text-muted-foreground">No page data yet</p>}
+                <div className="h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={osData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                        {osData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Blog Management */}
-          <TabsContent value="blogs" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-foreground">Blog Management</h3>
-              <Button size="sm" onClick={startNewBlog}><Plus className="h-4 w-4 mr-1" /> New Post</Button>
-            </div>
-
-            {/* Blog Editor */}
+          {/* Settings */}
+          <TabsContent value="settings" className="space-y-4">
             <Card className="border-border">
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <PenTool className="h-4 w-4" /> {editingBlog ? 'Edit Post' : 'New Post'}
-                </CardTitle>
+                <CardTitle className="text-base flex items-center gap-2"><Settings className="h-4 w-4" /> Site Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-4">
                   <div>
-                    <Label>Title</Label>
-                    <Input value={blogTitle} onChange={e => { setBlogTitle(e.target.value); if (!editingBlog) setBlogSlug(titleToSlug(e.target.value)); }} placeholder="Blog post title" />
+                    <Label>Site Title</Label>
+                    <Input defaultValue="TypeMaster — Free Typing Test & Practice" />
                   </div>
                   <div>
-                    <Label>URL Slug</Label>
-                    <Input value={blogSlug} onChange={e => setBlogSlug(e.target.value)} placeholder="url-slug" />
-                  </div>
-                </div>
-                <div>
-                  <Label>Meta Description</Label>
-                  <Input value={blogDesc} onChange={e => setBlogDesc(e.target.value)} placeholder="SEO description (120-160 chars)" />
-                  <span className="text-xs text-muted-foreground">{blogDesc.length}/160</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Category</Label>
-                    <Input value={blogCategory} onChange={e => setBlogCategory(e.target.value)} placeholder="e.g. Tips & Tricks" />
+                    <Label>Meta Description</Label>
+                    <Textarea defaultValue="Check your typing speed online with free typing tests. Practice Hindi and English typing with 1 minute, 3 minute and 5 minute tests." />
                   </div>
                   <div>
-                    <Label>Keywords (comma separated)</Label>
-                    <Input value={blogKeywords} onChange={e => setBlogKeywords(e.target.value)} placeholder="keyword1, keyword2" />
+                    <Label>Google Analytics ID</Label>
+                    <Input placeholder="G-XXXXXXXXXX" />
+                  </div>
+                  <div>
+                    <Label>Google Site Verification</Label>
+                    <Input defaultValue="ZIZF8DHa6f8B7MdWnHlDuqt87KaKwymg3zP2ibvG7DU" />
                   </div>
                 </div>
-                <div>
-                  <Label>Content (Markdown)</Label>
-                  <Textarea 
-                    value={blogContent} onChange={e => setBlogContent(e.target.value)} 
-                    placeholder="Write your blog content in markdown..." 
-                    className="min-h-[300px] font-mono text-sm"
-                  />
-                </div>
-                <div className="flex items-center gap-3">
-                  <Button onClick={() => { setBlogStatus('published'); saveBlog(); }} className="gap-1">
-                    <CheckCircle className="h-4 w-4" /> Publish
-                  </Button>
-                  <Button variant="outline" onClick={() => { setBlogStatus('draft'); saveBlog(); }} className="gap-1">
-                    <Save className="h-4 w-4" /> Save Draft
-                  </Button>
-                </div>
+                <Button><Save className="h-4 w-4 mr-2" /> Save Settings</Button>
               </CardContent>
             </Card>
 
-            {/* Blog List */}
-            <Card className="border-border">
-              <CardHeader><CardTitle className="text-base">All Posts ({allBlogs.length})</CardTitle></CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {allBlogs.map((b, i) => (
-                    <div key={i} className="flex items-center justify-between border-b border-border pb-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{b.title}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <Badge variant={b.status === 'published' ? 'default' : 'secondary'} className="text-[10px]">
-                            {b.status}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">{b.category}</span>
-                          <span className="text-xs text-muted-foreground">/{b.slug}</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        {adminBlogs.find(ab => ab.slug === b.slug) && (
-                          <>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => editBlog(b as AdminBlog)}>
-                              <PenTool className="h-3 w-3" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteBlog(b.slug)}>
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* SEO Checker */}
-          <TabsContent value="seo" className="space-y-4">
             <Card className="border-border">
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2"><Search className="h-4 w-4" /> SEO Checker</CardTitle>
-                <CardDescription>Enter a blog slug to analyze SEO</CardDescription>
+                <CardTitle className="text-base">Data Management</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input value={seoUrl} onChange={e => setSeoUrl(e.target.value)} placeholder="e.g. how-to-increase-typing-speed" />
-                  <Button onClick={runSeoCheck}>Analyze</Button>
-                </div>
-                {seoResults.length > 0 && (
-                  <div className="space-y-2">
-                    {seoResults.map((r, i) => (
-                      <div key={i} className="flex items-center justify-between border-b border-border pb-2">
-                        <div className="flex items-center gap-2">
-                          {r.status === 'good' ? <CheckCircle className="h-4 w-4 text-green-500" /> :
-                           r.status === 'warning' ? <AlertCircle className="h-4 w-4 text-yellow-500" /> :
-                           <AlertCircle className="h-4 w-4 text-destructive" />}
-                          <span className="text-sm font-medium text-foreground">{r.label}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{r.message}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <CardContent className="space-y-3">
+                <Button variant="outline" size="sm" onClick={() => { clearAnalytics(); window.location.reload(); }}>
+                  Clear Analytics Data
+                </Button>
+                <p className="text-xs text-muted-foreground">This will reset all traffic and visitor data.</p>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          {/* Students */}
-          <TabsContent value="students" className="space-y-4">
-            {/* Student Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <Card className="border-border">
-                <CardContent className="pt-4 pb-4 text-center">
-                  <p className="text-2xl font-bold text-foreground">{students.length}</p>
-                  <p className="text-xs text-muted-foreground">Total Students</p>
-                </CardContent>
-              </Card>
-              <Card className="border-border">
-                <CardContent className="pt-4 pb-4 text-center">
-                  <p className="text-2xl font-bold text-foreground">{students.filter((s: any) => s.plan === 'premium').length}</p>
-                  <p className="text-xs text-muted-foreground">Premium Students</p>
-                </CardContent>
-              </Card>
-              <Card className="border-border">
-                <CardContent className="pt-4 pb-4 text-center">
-                  <p className="text-2xl font-bold text-foreground">{students.filter((s: any) => (s.completedLessons?.length || 0) > 0).length}</p>
-                  <p className="text-xs text-muted-foreground">Active Learners</p>
-                </CardContent>
-              </Card>
-              <Card className="border-border">
-                <CardContent className="pt-4 pb-4 text-center">
-                  <p className="text-2xl font-bold text-foreground">
-                    {students.length > 0 ? Math.round(students.reduce((s: number, st: any) => s + (st.completedLessons?.length || 0), 0) / students.length) : 0}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Avg Lessons/Student</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Student Progress Table */}
-            <Card className="border-border">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4" /> Student Progress Tracking
-                </CardTitle>
-                <CardDescription>Detailed lesson completion, WPM, and accuracy for each student</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {students.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-border">
-                          <th className="text-left py-2 px-2 font-medium text-muted-foreground">Student</th>
-                          <th className="text-left py-2 px-2 font-medium text-muted-foreground">ID</th>
-                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Plan</th>
-                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Lessons</th>
-                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Progress</th>
-                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Current Level</th>
-                          <th className="text-center py-2 px-2 font-medium text-muted-foreground">Joined</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {students.map((s: any, i: number) => {
-                          const completed = s.completedLessons?.length || 0;
-                          const total = getTotalLessons();
-                          const pct = Math.round((completed / total) * 100);
-                          const allLessons = curriculum.flatMap(l => l.lessons);
-                          const nextLesson = allLessons.find(l => !(s.completedLessons || []).includes(l.id));
-                          const currentLvl = nextLesson ? curriculum.find(lvl => lvl.lessons.some(l => l.id === nextLesson.id)) : null;
-
-                          return (
-                            <tr key={i} className="border-b border-border/50 hover:bg-muted/30">
-                              <td className="py-2.5 px-2">
-                                <p className="font-medium text-foreground">{s.displayName}</p>
-                                <p className="text-xs text-muted-foreground">{s.email}</p>
-                              </td>
-                              <td className="py-2.5 px-2">
-                                <span className="font-mono text-xs text-primary">{s.studentId}</span>
-                              </td>
-                              <td className="py-2.5 px-2 text-center">
-                                <Badge variant={s.plan === 'premium' ? 'default' : 'secondary'} className="text-[10px]">
-                                  {s.plan === 'premium' ? '⭐ Premium' : 'Free'}
-                                </Badge>
-                              </td>
-                              <td className="py-2.5 px-2 text-center font-medium text-foreground">
-                                {completed}/{total}
-                              </td>
-                              <td className="py-2.5 px-2">
-                                <div className="flex items-center gap-2 justify-center">
-                                  <div className="h-2 bg-muted rounded-full w-16">
-                                    <div className="h-2 bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                                  </div>
-                                  <span className="text-xs font-medium text-foreground">{pct}%</span>
-                                </div>
-                              </td>
-                              <td className="py-2.5 px-2 text-center text-xs text-muted-foreground">
-                                {currentLvl ? `${currentLvl.icon} ${currentLvl.title.split('—')[0].trim()}` : '🎉 Complete'}
-                              </td>
-                              <td className="py-2.5 px-2 text-center text-xs text-muted-foreground">
-                                {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : '—'}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No students registered yet</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Lesson-wise Completion Chart */}
-            {students.length > 0 && (
-              <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="text-base">Lesson Completion Overview</CardTitle>
-                  <CardDescription>How many students completed each lesson</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={curriculum.flatMap(lvl => lvl.lessons).map(lesson => ({
-                        name: `L${lesson.lessonNumber}`,
-                        completed: students.filter((s: any) => (s.completedLessons || []).includes(lesson.id)).length,
-                        title: lesson.title,
-                      }))}>
-                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                        <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                        <YAxis />
-                        <Tooltip formatter={(value: any, _: any, props: any) => [`${value} students`, props.payload.title]} />
-                        <Bar dataKey="completed" fill="hsl(198, 93%, 60%)" radius={[3, 3, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Completed Lessons Detail */}
-            {students.length > 0 && (
-              <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="text-base">Individual Lesson Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {students.map((s: any, i: number) => {
-                      const completedIds: string[] = s.completedLessons || [];
-                      if (completedIds.length === 0) return null;
-                      const allL = curriculum.flatMap(l => l.lessons);
-                      return (
-                        <div key={i} className="border border-border rounded-lg p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="font-medium text-foreground text-sm">{s.displayName} <span className="text-xs text-muted-foreground">({s.studentId})</span></p>
-                            <Badge variant="outline" className="text-[10px]">{completedIds.length} lessons</Badge>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {allL.map(lesson => {
-                              const done = completedIds.includes(lesson.id);
-                              return (
-                                <span
-                                  key={lesson.id}
-                                  className={`text-[10px] px-2 py-0.5 rounded-full border ${
-                                    done
-                                      ? 'bg-primary/10 border-primary/30 text-primary font-medium'
-                                      : 'bg-muted/30 border-border/50 text-muted-foreground'
-                                  }`}
-                                  title={lesson.title}
-                                >
-                                  L{lesson.lessonNumber}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
         </Tabs>
-
-        <div className="flex justify-end">
-          <Button variant="outline" size="sm" onClick={() => { clearAnalytics(); window.location.reload(); }}>
-            Clear Analytics Data
-          </Button>
-        </div>
       </main>
     </div>
   );
