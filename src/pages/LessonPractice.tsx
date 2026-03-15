@@ -45,7 +45,7 @@ const FINGER_COLORS: Record<string, string> = {
 const LessonPractice = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
   const navigate = useNavigate();
-  const { profile, completeLesson, isPremium } = useStudent();
+  const { profile, completeLesson, updateStats, isPremium } = useStudent();
   const lesson = lessonId ? getLessonById(lessonId) : undefined;
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -142,8 +142,8 @@ const LessonPractice = () => {
   const nextFinger = nextChar ? FINGER_MAP[nextChar] || FINGER_MAP[nextChar.toLowerCase()] || '' : '';
 
   const handleComplete = () => {
-    if (passed && lesson && profile) {
-      completeLesson(lesson.id);
+    if (lesson && profile) {
+      updateStats(wpm, accuracy, Math.round(elapsed));
       saveTestRecord({
         type: 'lesson',
         wpm,
@@ -153,6 +153,9 @@ const LessonPractice = () => {
         title: lesson.title,
         testName: `Lesson ${lesson.lessonNumber}`,
       });
+      if (passed) {
+        completeLesson(lesson.id);
+      }
     }
   };
 

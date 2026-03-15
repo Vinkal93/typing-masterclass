@@ -8,15 +8,23 @@ import {
   User 
 } from 'firebase/auth';
 
-interface StudentProfile {
+export interface StudentProfile {
   uid: string;
   email: string;
   studentId: string;
   displayName: string;
   createdAt: number;
   plan: 'free' | 'premium';
+  status: 'pending' | 'active' | 'premium' | 'suspended';
+  premiumExpiry?: number;
   completedLessons: string[];
   currentChapter: number;
+  bestWpm: number;
+  bestAccuracy: number;
+  totalPracticeTime: number; // seconds
+  lastLoginAt: number;
+  loginCount: number;
+  sessionExpiry?: number;
 }
 
 interface StudentContextType {
@@ -28,12 +36,15 @@ interface StudentContextType {
   login: (emailOrId: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   completeLesson: (lessonId: string) => void;
+  updateStats: (wpm: number, accuracy: number, timeSpent: number) => void;
   isPremium: boolean;
+  isApproved: boolean;
 }
 
 const StudentContext = createContext<StudentContextType | undefined>(undefined);
 
 const PROFILES_KEY = 'tm_student_profiles';
+const SESSION_DURATION = 12 * 60 * 60 * 1000; // 12 hours
 
 const generateStudentId = (): string => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -44,16 +55,20 @@ const generateStudentId = (): string => {
   return id;
 };
 
-const getProfiles = (): Record<string, StudentProfile> => {
+export const getProfiles = (): Record<string, StudentProfile> => {
   try {
     const data = localStorage.getItem(PROFILES_KEY);
     return data ? JSON.parse(data) : {};
   } catch { return {}; }
 };
 
-const saveProfile = (profile: StudentProfile) => {
+export const saveProfile = (profile: StudentProfile) => {
   const profiles = getProfiles();
   profiles[profile.uid] = profile;
+  localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+};
+
+export const saveAllProfiles = (profiles: Record<string, StudentProfile>) => {
   localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
 };
 
@@ -68,7 +83,20 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({ children })
       if (u) {
         const profiles = getProfiles();
         if (profiles[u.uid]) {
-          setProfile(profiles[u.uid]);
+          const p = profiles[u.uid];
+          // Check session expiry
+          if (p.sessionExpiry && Date.now() > p.sessionExpiry) {
+            signOut(auth);
+            setProfile(null);
+            return;
+          }
+          // Check premium expiry
+          if (p.plan === 'premium' && p.premiumExpiry && Date.now() > p.premiumExpiry) {
+            p.plan = 'free';
+            p.status = 'active';
+            saveProfile(p);
+          }
+          setProfile(p);
         }
       } else {
         setProfile(null);
@@ -77,6 +105,18 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
     return unsubscribe;
   }, []);
+
+  // Session check interval
+  useEffect(() => {
+    if (!profile?.sessionExpiry) return;
+    const interval = setInterval(() => {
+      if (Date.now() > (profile.sessionExpiry || 0)) {
+        signOut(auth);
+        setProfile(null);
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [profile?.sessionExpiry]);
 
   const signup = async (email: string, password: string, name: string) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -87,8 +127,15 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({ children })
       displayName: name,
       createdAt: Date.now(),
       plan: 'free',
+      status: 'pending',
       completedLessons: [],
       currentChapter: 1,
+      bestWpm: 0,
+      bestAccuracy: 0,
+      totalPracticeTime: 0,
+      lastLoginAt: Date.now(),
+      loginCount: 1,
+      sessionExpiry: Date.now() + SESSION_DURATION,
     };
     saveProfile(newProfile);
     setProfile(newProfile);
@@ -96,7 +143,6 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const login = async (emailOrId: string, password: string) => {
     let email = emailOrId;
-    // Check if input is a student ID
     if (emailOrId.startsWith('TM-')) {
       const profiles = getProfiles();
       const found = Object.values(profiles).find(p => p.studentId === emailOrId);
@@ -106,7 +152,16 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({ children })
         throw new Error('Student ID not found');
       }
     }
-    await signInWithEmailAndPassword(auth, email, password);
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    // Update login info
+    const profiles = getProfiles();
+    if (profiles[cred.user.uid]) {
+      profiles[cred.user.uid].lastLoginAt = Date.now();
+      profiles[cred.user.uid].loginCount = (profiles[cred.user.uid].loginCount || 0) + 1;
+      profiles[cred.user.uid].sessionExpiry = Date.now() + SESSION_DURATION;
+      saveAllProfiles(profiles);
+      setProfile(profiles[cred.user.uid]);
+    }
   };
 
   const logout = async () => {
@@ -126,12 +181,29 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
+  const updateStats = (wpm: number, accuracy: number, timeSpent: number) => {
+    if (!profile) return;
+    const updated = {
+      ...profile,
+      bestWpm: Math.max(profile.bestWpm, wpm),
+      bestAccuracy: Math.max(profile.bestAccuracy, accuracy),
+      totalPracticeTime: profile.totalPracticeTime + timeSpent,
+    };
+    saveProfile(updated);
+    setProfile(updated);
+  };
+
+  const isPremiumActive = profile?.plan === 'premium' && profile?.status !== 'suspended' && 
+    (!profile?.premiumExpiry || Date.now() < profile.premiumExpiry);
+  const isApproved = profile?.status === 'active' || profile?.status === 'premium';
+
   return (
     <StudentContext.Provider value={{
       user, profile, loading, 
       isLoggedIn: !!user && !!profile,
-      signup, login, logout, completeLesson,
-      isPremium: profile?.plan === 'premium',
+      signup, login, logout, completeLesson, updateStats,
+      isPremium: !!isPremiumActive,
+      isApproved,
     }}>
       {children}
     </StudentContext.Provider>
