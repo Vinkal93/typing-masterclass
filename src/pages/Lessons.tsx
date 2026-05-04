@@ -264,6 +264,8 @@ const Lessons = () => {
               </Button>
             </CardContent>
           </Card>
+
+          <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-5 mb-8">
               <TabsTrigger value="all">{isHindi ? "सभी" : "All"}</TabsTrigger>
               <TabsTrigger value="key">
