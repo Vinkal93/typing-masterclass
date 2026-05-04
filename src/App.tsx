@@ -54,6 +54,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import CoursePage from "./pages/CoursePage";
 import LessonPractice from "./pages/LessonPractice";
+import AdvancedExamMode from "./pages/AdvancedExamMode";
 
 const queryClient = new QueryClient();
 
@@ -110,6 +111,7 @@ const AppRoutes = () => (
       <Route path="/dashboard" element={<StudentDashboard />} />
       <Route path="/course" element={<CoursePage />} />
       <Route path="/lesson/:lessonId" element={<LessonPractice />} />
+      <Route path="/advanced-exam" element={<AdvancedExamMode />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </>

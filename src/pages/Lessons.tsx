@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Lock, CheckCircle2, Keyboard, FileText, Target, Trophy, Clock, AlertCircle } from "lucide-react";
+import { Lock, CheckCircle2, Keyboard, FileText, Target, Trophy, Clock, AlertCircle, Flame, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
@@ -233,6 +233,37 @@ const Lessons = () => {
                 : "From key drills to paragraphs - improve with every lesson"}
             </p>
           </div>
+
+          {/* Advanced Exam Mode Promo */}
+          <Card
+            className="mb-10 border-0 cursor-pointer overflow-hidden bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 text-white hover:shadow-2xl transition-all hover:scale-[1.01]"
+            onClick={() => navigate("/advanced-exam")}
+          >
+            <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-full bg-white/20 flex items-center justify-center backdrop-blur">
+                  <Flame className="h-7 w-7" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className="bg-white/25 text-white border-0 hover:bg-white/30">🔥 NEW</Badge>
+                    <span className="text-xs uppercase tracking-wider opacity-90">Advanced Exam Mode</span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold">
+                    {isHindi ? "BSF / SSC लेवल — Symbols + Numbers + Stress Mode" : "BSF / SSC Level — Symbols, Numbers & Stress Mode"}
+                  </h3>
+                  <p className="text-sm opacity-90 mt-1">
+                    {isHindi
+                      ? "200+ डायनामिक पैराग्राफ · हर बार नया · 3 difficulty levels"
+                      : "200+ dynamic paragraphs · fresh every time · 3 difficulty levels"}
+                  </p>
+                </div>
+              </div>
+              <Button size="lg" className="bg-white text-red-600 hover:bg-white/90 gap-2 shrink-0">
+                Start Now <ArrowRight className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
 
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-5 mb-8">
