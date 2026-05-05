@@ -545,88 +545,128 @@ const AdminDashboard = () => {
 
           {/* Blog Management */}
           <TabsContent value="blogs" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-foreground">Blog Management</h3>
-              <Button size="sm" onClick={startNewBlog}><Plus className="h-4 w-4 mr-1" /> New Post</Button>
-            </div>
+            {showEditor ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-foreground">{editingBlog ? 'Edit Post' : 'Create New Post'}</h3>
+                  <Button size="sm" variant="outline" onClick={() => { setShowEditor(false); reloadBlogs(); }}>← Back to Posts</Button>
+                </div>
+                <AdvancedBlogEditor
+                  initial={editingBlog}
+                  onSaved={() => { setShowEditor(false); setEditingBlog(null); reloadBlogs(); }}
+                  onCancel={() => { setShowEditor(false); setEditingBlog(null); }}
+                  onPickMedia={(cb) => setMediaPickerCb(() => cb)}
+                />
+                {mediaPickerCb && (
+                  <Card className="border-primary">
+                    <CardHeader><CardTitle className="text-sm">Pick Media</CardTitle></CardHeader>
+                    <CardContent>
+                      <MediaLibrary selectMode onSelect={(url) => { mediaPickerCb(url); setMediaPickerCb(null); }} />
+                      <Button size="sm" variant="outline" className="mt-2" onClick={() => setMediaPickerCb(null)}>Cancel</Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <h3 className="text-lg font-bold text-foreground">Blog Manager</h3>
+                  <Button size="sm" onClick={startNewBlog}><Plus className="h-4 w-4 mr-1" /> New Post</Button>
+                </div>
 
-            <Card className="border-border">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <PenTool className="h-4 w-4" /> {editingBlog ? 'Edit Post' : 'New Post'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Title</Label>
-                    <Input value={blogTitle} onChange={e => { setBlogTitle(e.target.value); if (!editingBlog) setBlogSlug(titleToSlug(e.target.value)); }} placeholder="Blog post title" />
-                  </div>
-                  <div>
-                    <Label>URL Slug</Label>
-                    <Input value={blogSlug} onChange={e => setBlogSlug(e.target.value)} placeholder="url-slug" />
-                  </div>
-                </div>
-                <div>
-                  <Label>Meta Description</Label>
-                  <Input value={blogDesc} onChange={e => setBlogDesc(e.target.value)} placeholder="SEO description (120-160 chars)" />
-                  <span className="text-xs text-muted-foreground">{blogDesc.length}/160</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Category</Label>
-                    <Input value={blogCategory} onChange={e => setBlogCategory(e.target.value)} placeholder="e.g. Tips & Tricks" />
-                  </div>
-                  <div>
-                    <Label>Keywords (comma separated)</Label>
-                    <Input value={blogKeywords} onChange={e => setBlogKeywords(e.target.value)} placeholder="keyword1, keyword2" />
-                  </div>
-                </div>
-                <div>
-                  <Label>Content (Markdown)</Label>
-                  <Textarea value={blogContent} onChange={e => setBlogContent(e.target.value)} placeholder="Write your blog content in markdown..." className="min-h-[300px] font-mono text-sm" />
-                </div>
-                <div className="flex items-center gap-3">
-                  <Button onClick={() => { setBlogStatus('published'); saveBlog(); }} className="gap-1">
-                    <CheckCircle className="h-4 w-4" /> Publish
-                  </Button>
-                  <Button variant="outline" onClick={() => { setBlogStatus('draft'); saveBlog(); }} className="gap-1">
-                    <Save className="h-4 w-4" /> Save Draft
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border">
-              <CardHeader><CardTitle className="text-base">All Posts ({allBlogs.length})</CardTitle></CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {allBlogs.map((b, i) => (
-                    <div key={i} className="flex items-center justify-between border-b border-border pb-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{b.title}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <Badge variant={b.status === 'published' ? 'default' : 'secondary'} className="text-[10px]">{b.status}</Badge>
-                          <span className="text-xs text-muted-foreground">{b.category}</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        {adminBlogs.find(ab => ab.slug === b.slug) && (
-                          <>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => editBlog(b as AdminBlog)}>
-                              <PenTool className="h-3 w-3" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteBlog(b.slug)}>
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {[
+                    { label: 'Total', value: blogStats.total + defaultBlogPosts.length },
+                    { label: 'Published', value: blogStats.published + defaultBlogPosts.length },
+                    { label: 'Drafts', value: blogStats.drafts },
+                    { label: 'Scheduled', value: blogStats.scheduled },
+                    { label: 'Total Views', value: blogStats.totalViews },
+                  ].map((s, i) => (
+                    <Card key={i} className="border-border"><CardContent className="pt-4 pb-3 text-center">
+                      <p className="text-xl font-bold text-foreground">{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase">{s.label}</p>
+                    </CardContent></Card>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+
+                <div className="flex flex-wrap gap-2">
+                  {(['all', 'draft', 'published', 'scheduled'] as const).map(f => (
+                    <Button key={f} size="sm" variant={blogStatusFilter === f ? 'default' : 'outline'} onClick={() => setBlogStatusFilter(f)} className="capitalize">{f}</Button>
+                  ))}
+                </div>
+
+                <Card className="border-border">
+                  <CardHeader><CardTitle className="text-base">Posts ({filteredBlogs.length})</CardTitle></CardHeader>
+                  <CardContent>
+                    {filteredBlogs.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-6 text-center">No posts yet. Click "New Post" to start writing.</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead><tr className="border-b border-border text-left text-muted-foreground text-xs">
+                            <th className="py-2 px-2">Title</th>
+                            <th className="py-2 px-2">Status</th>
+                            <th className="py-2 px-2">SEO</th>
+                            <th className="py-2 px-2">Category</th>
+                            <th className="py-2 px-2 text-center">Views</th>
+                            <th className="py-2 px-2">Updated</th>
+                            <th className="py-2 px-2 text-right">Actions</th>
+                          </tr></thead>
+                          <tbody>
+                            {filteredBlogs.map(b => {
+                              const seo = analyzeSeo(b);
+                              const seoColor = seo.score >= 80 ? 'text-[hsl(142,71%,45%)]' : seo.score >= 50 ? 'text-[hsl(45,80%,50%)]' : 'text-destructive';
+                              return (
+                                <tr key={b.slug} className="border-b border-border/50 hover:bg-muted/30">
+                                  <td className="py-2 px-2">
+                                    <p className="font-medium text-foreground">{b.title || '(untitled)'}</p>
+                                    <p className="text-[10px] text-muted-foreground font-mono">/blog/{b.slug}</p>
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <Badge variant={b.status === 'published' ? 'default' : b.status === 'scheduled' ? 'outline' : 'secondary'} className="text-[10px]">{b.status}</Badge>
+                                  </td>
+                                  <td className={`py-2 px-2 font-bold ${seoColor}`}>{seo.score}</td>
+                                  <td className="py-2 px-2 text-xs text-muted-foreground">{b.category}</td>
+                                  <td className="py-2 px-2 text-center">{b.views || 0}</td>
+                                  <td className="py-2 px-2 text-xs text-muted-foreground">{new Date(b.updatedAt).toLocaleDateString()}</td>
+                                  <td className="py-2 px-2 text-right">
+                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => window.open(`/blog/${b.slug}`, '_blank')} title="View"><Eye className="h-3 w-3" /></Button>
+                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => editBlog(b)} title="Edit"><PenTool className="h-3 w-3" /></Button>
+                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive" onClick={() => removeBlog(b.slug)} title="Delete"><Trash2 className="h-3 w-3" /></Button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border">
+                  <CardHeader><CardTitle className="text-base">Built-in Posts ({defaultBlogPosts.length})</CardTitle><CardDescription>Default content shipped with the app</CardDescription></CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {defaultBlogPosts.map(b => (
+                        <div key={b.slug} className="flex items-center justify-between border-b border-border pb-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{b.title}</p>
+                            <span className="text-xs text-muted-foreground">{b.category}</span>
+                          </div>
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => window.open(`/blog/${b.slug}`, '_blank')}><Eye className="h-3 w-3" /></Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </TabsContent>
+
+          {/* Media Library */}
+          <TabsContent value="media" className="space-y-4">
+            <MediaLibrary />
           </TabsContent>
 
           {/* SEO */}
