@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import SEO from "@/components/SEO";
 import { useStudent } from "@/contexts/StudentContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ const StudentDashboard = () => {
 
   return (
     <div className={`min-h-screen flex flex-col ${isPremiumUI ? 'bg-gradient-to-br from-background via-background to-[hsl(45,30%,95%)]' : 'bg-background'}`}>
+      <SEO title="Student Dashboard — Typing Master Learning Hub" description="Your personalized typing learning dashboard with progress, lessons and achievements." keywords="student dashboard, typing learning" breadcrumbs={[{name:"Home",path:"/"},{name:"Dashboard",path:"/dashboard"}]} />
       <Navbar />
       <AdLayout>
         <main className="container mx-auto px-4 py-8 flex-1">

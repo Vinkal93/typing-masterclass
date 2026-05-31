@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import SEO from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Target, Clock, Award, Trophy, Zap, Flame, Trash2, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -129,6 +130,7 @@ const Progress = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEO title="Typing Progress — Track Your WPM & Accuracy" description="Track typing progress, WPM trends and accuracy over time." keywords="typing progress, typing analytics" breadcrumbs={[{name:"Home",path:"/"},{name:"Progress",path:"/progress"}]} />
       <main className="container mx-auto px-4 py-8 flex-1">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -175,6 +176,7 @@ const SmartPractice = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEO title="Smart Practice — AI Powered Typing Drills" description="Smart Practice with problem-key analytics and custom drill generation." keywords="smart typing practice, ai typing drills" breadcrumbs={[{name:"Home",path:"/"},{name:"Smart Practice",path:"/smart-practice"}]} />
       <Navbar />
 
       <main className="container mx-auto px-4 py-8 flex-1">
