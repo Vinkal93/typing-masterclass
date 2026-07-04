@@ -90,25 +90,40 @@ const applyIncoming = (data: any) => {
   window.dispatchEvent(new Event('tm-access-updated'));
 };
 
+const BROADCAST_TOPIC = 'access_config_broadcast';
+let broadcastChannel: any = null;
+
 export const saveAccessConfig = (cfg: AccessConfig) => {
   cachedConfig = cfg;
   localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
   window.dispatchEvent(new Event('tm-access-updated'));
-  // Push to cloud (fire-and-forget)
+  // Instant broadcast to all subscribed clients (no DB round-trip wait)
+  try {
+    if (broadcastChannel) {
+      broadcastChannel.send({ type: 'broadcast', event: 'cfg', payload: cfg });
+    }
+  } catch (e) { /* noop */ }
+  // Persist to cloud
   (supabase as any)
     .from('access_config')
     .upsert({ id: CLOUD_ROW_ID, data: cfg, updated_at: new Date().toISOString() })
     .then(({ error }: any) => { if (error) console.warn('[accessControl] cloud save failed:', error.message); });
 };
 
-// Initialize: fetch latest config from cloud + subscribe to realtime changes.
+const refetchFromCloud = async () => {
+  try {
+    const { data, error } = await (supabase as any).from('access_config').select('data').eq('id', CLOUD_ROW_ID).maybeSingle();
+    if (!error && data?.data) applyIncoming(data.data);
+  } catch {}
+};
+
+// Initialize: fetch latest config from cloud + subscribe to realtime + broadcast.
 export const initAccessControlSync = async () => {
   try {
     const { data, error } = await (supabase as any).from('access_config').select('data').eq('id', CLOUD_ROW_ID).maybeSingle();
     if (!error && data && data.data && Object.keys(data.data).length > 0) {
       applyIncoming(data.data);
     } else if (!error && (!data || Object.keys(data?.data || {}).length === 0)) {
-      // Seed cloud with current local (or default) config so all devices align
       const seed = readLocal();
       await (supabase as any).from('access_config').upsert({ id: CLOUD_ROW_ID, data: seed, updated_at: new Date().toISOString() });
       applyIncoming(seed);
@@ -117,15 +132,33 @@ export const initAccessControlSync = async () => {
     console.warn('[accessControl] initial cloud fetch failed', e);
   }
 
-  const channel = (supabase as any)
+  // 1) Postgres realtime (authoritative)
+  const pgChannel = (supabase as any)
     .channel('access_config_sync')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'access_config', filter: `id=eq.${CLOUD_ROW_ID}` }, (payload: any) => {
       const next = payload.new?.data;
       if (next) applyIncoming(next);
+      else refetchFromCloud();
     })
     .subscribe();
 
-  return () => { (supabase as any).removeChannel(channel); };
+  // 2) Broadcast channel (instant, sub-second) — every save also emits here
+  broadcastChannel = (supabase as any)
+    .channel(BROADCAST_TOPIC, { config: { broadcast: { self: false, ack: false } } })
+    .on('broadcast', { event: 'cfg' }, (msg: any) => {
+      if (msg?.payload) applyIncoming(msg.payload);
+    })
+    .subscribe();
+
+  // 3) Re-sync whenever tab becomes visible again (covers stale bg tabs)
+  const onVisible = () => { if (document.visibilityState === 'visible') refetchFromCloud(); };
+  document.addEventListener('visibilitychange', onVisible);
+
+  return () => {
+    (supabase as any).removeChannel(pgChannel);
+    if (broadcastChannel) (supabase as any).removeChannel(broadcastChannel);
+    document.removeEventListener('visibilitychange', onVisible);
+  };
 };
 
 // ── Device fingerprint (browser-only pseudo "MAC address") ──
@@ -229,15 +262,26 @@ export const revokeAllGrants = () => {
   saveAccessConfig({ ...cfg, lockVersion: (cfg.lockVersion || 1) + 1 });
 };
 
+// Route matcher: exact match OR prefix match (`/lessons` also gates `/lessons/anything`,
+// and `/lesson` gates `/lesson/:id`). Trailing slash tolerant.
+const routeMatches = (pathname: string, patterns: string[]): boolean => {
+  const p = pathname.replace(/\/+$/, '') || '/';
+  return patterns.some(raw => {
+    const pat = raw.replace(/\/+$/, '') || '/';
+    if (pat === p) return true;
+    return p === pat || p.startsWith(pat + '/');
+  });
+};
+
 // Is the gate required for a specific route based on current config?
 export const isGateRequiredForRoute = (pathname: string): boolean => {
   const cfg = getAccessConfig();
   if (pathname.startsWith('/admin')) return false;
   if (cfg.globalLock) {
-    if (cfg.publicRoutes.includes(pathname)) return false;
+    if (routeMatches(pathname, cfg.publicRoutes)) return false;
     return true;
   }
-  if (cfg.licenseGateEnabled && cfg.gatedRoutes.includes(pathname)) return true;
+  if (cfg.licenseGateEnabled && routeMatches(pathname, cfg.gatedRoutes)) return true;
   return false;
 };
 
