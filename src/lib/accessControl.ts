@@ -50,7 +50,7 @@ const defaultConfig: AccessConfig = {
   globalLock: false,
   lockVersion: 1,
   licenseKeys: ['vinkal9305040597@890'],
-  gatedRoutes: ['/fast-track', '/lessons'],
+  gatedRoutes: ['/fast-track', '/lessons', '/lesson', '/course', '/advanced-exam'],
   publicRoutes: ['/', '/admin', '/admin/dashboard', '/blog', '/about', '/contact', '/privacy-policy', '/terms-and-conditions', '/disclaimer', '/pricing', '/checkout', '/profile', '/seo-status'],
   gateContent: {
     heading: '🔐 Premium Access Required',
