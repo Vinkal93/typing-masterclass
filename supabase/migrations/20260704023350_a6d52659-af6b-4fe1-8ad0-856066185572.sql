@@ -1,0 +1,1 @@
+ALTER TABLE public.access_config REPLICA IDENTITY FULL;
