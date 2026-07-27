@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import SEO from "@/components/SEO";
+import { extendExamText } from "@/lib/examTextExtender";
 
 interface ExamConfig {
   name: string;
@@ -405,6 +406,8 @@ const ExamMode = () => {
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [userName, setUserName] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+  const activeCharRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (started && !finished && timeRemaining > 0) {
@@ -521,7 +524,25 @@ const ExamMode = () => {
     );
   }
 
-  const targetText = isHindi ? exam.textHindi : exam.text;
+  const targetText = useMemo(() => {
+    const base = isHindi ? exam.textHindi : exam.text;
+    return extendExamText(base, isHindi, 1200);
+  }, [exam, isHindi]);
+
+  // Smooth auto-scroll: keep the active character in view without jank.
+  useEffect(() => {
+    if (!started || finished) return;
+    const el = activeCharRef.current;
+    const container = textContainerRef.current;
+    if (!el || !container) return;
+    const elTop = el.offsetTop - container.offsetTop;
+    const target = elTop - container.clientHeight / 2 + el.clientHeight / 2;
+    const max = container.scrollHeight - container.clientHeight;
+    const desired = Math.max(0, Math.min(target, max));
+    if (Math.abs(container.scrollTop - desired) > 4) {
+      container.scrollTo({ top: desired, behavior: "smooth" });
+    }
+  }, [userInput.length, started, finished]);
 
   const calculateStats = () => {
     const correctChars = userInput.split("").filter((char, idx) => char === targetText[idx]).length;
@@ -534,6 +555,12 @@ const ExamMode = () => {
     setErrors(errorCount);
     setAccuracy(acc);
     setWpm(wpmCalc);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!exam.allowBackspace && (e.key === "Backspace" || e.key === "Delete")) {
+      e.preventDefault();
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -664,12 +691,22 @@ const ExamMode = () => {
               </div>
             ) : (
               <>
-                <div 
-                  className="text-xl leading-relaxed font-mono mb-6 select-none break-words p-4 bg-muted/30 rounded-lg"
-                  style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined }}
+                <div
+                  ref={textContainerRef}
+                  className="text-xl leading-relaxed font-mono mb-6 select-none break-words p-4 bg-muted/30 rounded-lg overflow-y-auto scroll-smooth h-56 md:h-64"
+                  style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined, scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
                 >
                   {targetText.split("").map((char, index) => (
-                    <span key={index} className={getCharacterClass(index)}>{char}</span>
+                    <span
+                      key={index}
+                      ref={index === userInput.length ? activeCharRef : undefined}
+                      className={
+                        getCharacterClass(index) +
+                        (index === userInput.length ? " bg-primary/30 rounded-sm" : "")
+                      }
+                    >
+                      {char}
+                    </span>
                   ))}
                 </div>
                 
@@ -677,13 +714,18 @@ const ExamMode = () => {
                   ref={inputRef}
                   value={userInput}
                   onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
                   className="w-full p-4 text-xl font-mono border-2 border-border rounded-lg focus:outline-none focus:border-primary resize-none bg-background"
                   placeholder={isHindi ? "यहां टाइप करें..." : "Type here..."}
                   rows={5}
                   disabled={finished}
                   spellCheck={false}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
                   style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined }}
                 />
+
 
                 <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
                   <span>{userInput.length} / {targetText.length} {isHindi ? "अक्षर" : "characters"}</span>
