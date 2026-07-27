@@ -691,12 +691,22 @@ const ExamMode = () => {
               </div>
             ) : (
               <>
-                <div 
-                  className="text-xl leading-relaxed font-mono mb-6 select-none break-words p-4 bg-muted/30 rounded-lg"
+                <div
+                  ref={textContainerRef}
+                  className="text-xl leading-relaxed font-mono mb-6 select-none break-words p-4 bg-muted/30 rounded-lg overflow-y-auto scroll-smooth h-56 md:h-64 scrollbar-hide"
                   style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined }}
                 >
                   {targetText.split("").map((char, index) => (
-                    <span key={index} className={getCharacterClass(index)}>{char}</span>
+                    <span
+                      key={index}
+                      ref={index === userInput.length ? activeCharRef : undefined}
+                      className={
+                        getCharacterClass(index) +
+                        (index === userInput.length ? " bg-primary/30 rounded-sm" : "")
+                      }
+                    >
+                      {char}
+                    </span>
                   ))}
                 </div>
                 
@@ -704,13 +714,18 @@ const ExamMode = () => {
                   ref={inputRef}
                   value={userInput}
                   onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
                   className="w-full p-4 text-xl font-mono border-2 border-border rounded-lg focus:outline-none focus:border-primary resize-none bg-background"
                   placeholder={isHindi ? "यहां टाइप करें..." : "Type here..."}
                   rows={5}
                   disabled={finished}
                   spellCheck={false}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
                   style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined }}
                 />
+
 
                 <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
                   <span>{userInput.length} / {targetText.length} {isHindi ? "अक्षर" : "characters"}</span>
