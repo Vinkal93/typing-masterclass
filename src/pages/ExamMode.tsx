@@ -693,8 +693,8 @@ const ExamMode = () => {
               <>
                 <div
                   ref={textContainerRef}
-                  className="text-xl leading-relaxed font-mono mb-6 select-none break-words p-4 bg-muted/30 rounded-lg overflow-y-auto scroll-smooth h-56 md:h-64 scrollbar-hide"
-                  style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined }}
+                  className="text-xl leading-relaxed font-mono mb-6 select-none break-words p-4 bg-muted/30 rounded-lg overflow-y-auto scroll-smooth h-56 md:h-64"
+                  style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined, scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
                 >
                   {targetText.split("").map((char, index) => (
                     <span
