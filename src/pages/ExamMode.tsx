@@ -406,6 +406,8 @@ const ExamMode = () => {
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [userName, setUserName] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+  const activeCharRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (started && !finished && timeRemaining > 0) {
