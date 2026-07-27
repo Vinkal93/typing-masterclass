@@ -524,7 +524,25 @@ const ExamMode = () => {
     );
   }
 
-  const targetText = isHindi ? exam.textHindi : exam.text;
+  const targetText = useMemo(() => {
+    const base = isHindi ? exam.textHindi : exam.text;
+    return extendExamText(base, isHindi, 1200);
+  }, [exam, isHindi]);
+
+  // Smooth auto-scroll: keep the active character in view without jank.
+  useEffect(() => {
+    if (!started || finished) return;
+    const el = activeCharRef.current;
+    const container = textContainerRef.current;
+    if (!el || !container) return;
+    const elTop = el.offsetTop - container.offsetTop;
+    const target = elTop - container.clientHeight / 2 + el.clientHeight / 2;
+    const max = container.scrollHeight - container.clientHeight;
+    const desired = Math.max(0, Math.min(target, max));
+    if (Math.abs(container.scrollTop - desired) > 4) {
+      container.scrollTo({ top: desired, behavior: "smooth" });
+    }
+  }, [userInput.length, started, finished]);
 
   const calculateStats = () => {
     const correctChars = userInput.split("").filter((char, idx) => char === targetText[idx]).length;
@@ -537,6 +555,12 @@ const ExamMode = () => {
     setErrors(errorCount);
     setAccuracy(acc);
     setWpm(wpmCalc);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!exam.allowBackspace && (e.key === "Backspace" || e.key === "Delete")) {
+      e.preventDefault();
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
