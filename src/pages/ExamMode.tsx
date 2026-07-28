@@ -429,6 +429,26 @@ const ExamMode = () => {
       inputRef.current.focus();
     }
   }, [started]);
+  const targetText = useMemo(() => {
+    if (!exam) return "";
+    const base = isHindi ? exam.textHindi : exam.text;
+    return extendExamText(base, isHindi, 1200);
+  }, [exam, isHindi]);
+
+  // Smooth auto-scroll: keep the active character in view without jank.
+  useEffect(() => {
+    if (!started || finished) return;
+    const el = activeCharRef.current;
+    const container = textContainerRef.current;
+    if (!el || !container) return;
+    const elTop = el.offsetTop - container.offsetTop;
+    const target = elTop - container.clientHeight / 2 + el.clientHeight / 2;
+    const max = container.scrollHeight - container.clientHeight;
+    const desired = Math.max(0, Math.min(target, max));
+    if (Math.abs(container.scrollTop - desired) > 4) {
+      container.scrollTo({ top: desired, behavior: "smooth" });
+    }
+  }, [userInput.length, started, finished]);
 
   // If no exam selected, show selection page
   if (!examId || !exam) {
@@ -524,25 +544,6 @@ const ExamMode = () => {
     );
   }
 
-  const targetText = useMemo(() => {
-    const base = isHindi ? exam.textHindi : exam.text;
-    return extendExamText(base, isHindi, 1200);
-  }, [exam, isHindi]);
-
-  // Smooth auto-scroll: keep the active character in view without jank.
-  useEffect(() => {
-    if (!started || finished) return;
-    const el = activeCharRef.current;
-    const container = textContainerRef.current;
-    if (!el || !container) return;
-    const elTop = el.offsetTop - container.offsetTop;
-    const target = elTop - container.clientHeight / 2 + el.clientHeight / 2;
-    const max = container.scrollHeight - container.clientHeight;
-    const desired = Math.max(0, Math.min(target, max));
-    if (Math.abs(container.scrollTop - desired) > 4) {
-      container.scrollTo({ top: desired, behavior: "smooth" });
-    }
-  }, [userInput.length, started, finished]);
 
   const calculateStats = () => {
     const correctChars = userInput.split("").filter((char, idx) => char === targetText[idx]).length;
