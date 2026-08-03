@@ -61,6 +61,7 @@ import SeoStatus from "./pages/SeoStatus";
 import Pricing from "./pages/Pricing";
 import Checkout from "./pages/Checkout";
 import StudentProfile from "./pages/StudentProfile";
+import AdvancedLab from "./pages/AdvancedLab";
 
 const queryClient = new QueryClient();
 
@@ -125,6 +126,7 @@ const AppRoutes = () => {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/profile" element={<StudentProfile />} />
+        <Route path="/advanced-lab" element={<AdvancedLab />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </GlobalAccessGuard>

@@ -200,3 +200,20 @@ All colors MUST be HSL.
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
+/* ===== Advanced Typing Lab ===== */
+:root {
+  --lab-paper: 0 0% 100%;
+  --lab-paper-foreground: 222 47% 11%;
+}
+.dark {
+  --lab-paper: 222 30% 13%;
+  --lab-paper-foreground: 210 40% 96%;
+}
+.lab-editor { caret-color: hsl(var(--primary)); }
+.lab-caret-thin { caret-color: hsl(var(--primary)); }
+.lab-caret-underline { caret-color: hsl(var(--primary)); text-underline-offset: 4px; }
+.lab-caret-block { caret-color: transparent; background-image: none; }
+.lab-caret-block::selection { background: hsl(var(--primary) / 0.3); }
+.lab-caret-animated { caret-color: hsl(var(--primary)); animation: lab-caret-pulse 1.1s ease-in-out infinite; }
+@keyframes lab-caret-pulse { 0%,100% { caret-color: hsl(var(--primary)); } 50% { caret-color: hsl(var(--primary) / 0.25); } }
