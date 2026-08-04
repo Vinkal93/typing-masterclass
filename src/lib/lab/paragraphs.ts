@@ -72,3 +72,22 @@ export function randomParagraph(category: string, avoid: string[] = []): string 
   const list = fresh.length ? fresh : pool;
   return list[Math.floor(Math.random() * list.length)];
 }
+
+/** Build a practice text of approximately `targetWords` words by chaining paragraphs. */
+export function buildParagraph(category: string, targetWords = 100, avoid: string[] = []): string {
+  const pool = PARAGRAPH_BANK[category] || PARAGRAPH_BANK.Medium;
+  const count = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
+  const parts: string[] = [];
+  let words = 0;
+  let last = "";
+  let guard = 0;
+  while (words < targetWords && guard++ < 400) {
+    const candidates = pool.filter((p) => p !== last && (parts.length ? true : !avoid.includes(p)));
+    const list = candidates.length ? candidates : pool;
+    const pick = list[Math.floor(Math.random() * list.length)];
+    parts.push(pick);
+    last = pick;
+    words += count(pick);
+  }
+  return parts.join("\n\n");
+}

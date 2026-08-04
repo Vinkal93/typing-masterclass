@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { FileDown, FileSpreadsheet, Award, Printer, FlaskConical } from "lucide-react";
+import { FileDown, FileSpreadsheet, Award, Printer, FlaskConical, BookOpenCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import LabToolbar from "@/components/lab/LabToolbar";
@@ -44,7 +44,7 @@ import {
   rhythmFrom,
   type LiveStats,
 } from "@/lib/lab/stats";
-import { aiAnalyze, aiCoach } from "@/lib/lab/aiClient";
+import { aiAnalyze, aiCoach, aiPaperCheck } from "@/lib/lab/aiClient";
 import { exportCertificate, exportCsv, exportExcel, exportPdfReport, printReport } from "@/lib/lab/exporters";
 import { saveSession } from "@/lib/lab/records";
 import { randomParagraph } from "@/lib/lab/paragraphs";
@@ -90,7 +90,17 @@ export default function AdvancedLab() {
   const typedRef = useRef("");
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
 
+  // Paper mode: no on-screen reference — user types from a printed page, AI grades spelling/grammar.
+  const paperMode = layout.panel === "hidden";
+  const [paperAccuracy, setPaperAccuracy] = useState<number | null>(null);
+  const [paperChecking, setPaperChecking] = useState(false);
+  const paperModeRef = useRef(paperMode);
+  const paperAccuracyRef = useRef<number | null>(null);
+  paperModeRef.current = paperMode;
+  paperAccuracyRef.current = paperAccuracy;
+
   typedRef.current = typed;
+
 
   useEffect(() => saveSettings(settings), [settings]);
   useEffect(() => saveLayout(layout), [layout]);
@@ -129,8 +139,11 @@ export default function AdvancedLab() {
     const ca = charAccuracy(reference, typedRef.current);
     const cw = compareWords(reference, typedRef.current);
     const struct = countStructures(typedRef.current);
-    const wpm = minutes > 0 ? Math.round(cw.correctWords / minutes) : 0;
-    const cpm = minutes > 0 ? Math.round(ca.correct / minutes) : 0;
+    const paper = paperModeRef.current;
+    const paperAcc = paperAccuracyRef.current;
+    const typedWords = typedRef.current.trim().split(/\s+/).filter(Boolean).length;
+    const wpm = minutes > 0 ? Math.round((paper ? typedWords : cw.correctWords) / minutes) : 0;
+    const cpm = minutes > 0 ? Math.round((paper ? chars : ca.correct) / minutes) : 0;
     const total = settings.durationMin * 60;
     const wpmSamples = samples.map((s) => s.wpm).concat(wpm);
     return {
@@ -138,11 +151,11 @@ export default function AdvancedLab() {
       remaining: settings.timerMode === "countdown" ? Math.max(0, total - elapsed) : 0,
       wpm,
       cpm,
-      accuracy: ca.accuracy,
+      accuracy: paper ? (paperAcc ?? 100) : ca.accuracy,
       charsTyped: chars,
-      correctChars: ca.correct,
-      wrongChars: ca.wrong,
-      wordsTyped: cw.totalTypedWords,
+      correctChars: paper ? chars : ca.correct,
+      wrongChars: paper ? 0 : ca.wrong,
+      wordsTyped: paper ? typedWords : cw.totalTypedWords,
       sentences: struct.sentences,
       paragraphs: struct.paragraphs,
       backspaces: backspacesRef.current,
@@ -152,6 +165,7 @@ export default function AdvancedLab() {
       rhythm: rhythmFrom(intervalsRef.current),
     } as LiveStats;
   }, [reference, samples, settings.durationMin, settings.timerMode]);
+
 
   // Ticker
   useEffect(() => {
@@ -175,17 +189,38 @@ export default function AdvancedLab() {
       saveSession(s, mode, studentName || "Guest");
       setSessionKey((k) => k + 1);
       toast.success(`Session complete — ${s.wpm} WPM at ${Math.round(s.accuracy)}% accuracy`);
-      if (settings.aiAnalysis && typedRef.current.trim().length > 30) {
+      if (!(settings.aiAnalysis && typedRef.current.trim().length > 30)) return;
+
+      if (paperModeRef.current) {
+        // No reference on screen — grade purely on spelling/grammar quality.
+        setPaperChecking(true);
         setAnalyzing(true);
-        aiAnalyze(reference, typedRef.current).then(({ data, error }) => {
+        aiPaperCheck(typedRef.current).then(({ data, error }) => {
+          setPaperChecking(false);
           setAnalyzing(false);
-          if (error) {
-            toast.error(error.includes("429") ? "AI rate limit reached" : error.includes("402") ? "AI credits exhausted" : "AI analysis failed");
+          if (error || !data) {
+            toast.error(error?.includes("429") ? "AI rate limit reached" : error?.includes("402") ? "AI credits exhausted" : "AI paper check failed");
             return;
           }
-          setErrors(data?.errors || []);
+          setErrors(data.errors || []);
+          const acc = Math.max(0, Math.min(100, Number(data.accuracy) || 0));
+          setPaperAccuracy(acc);
+          paperAccuracyRef.current = acc;
+          setStats((prev) => ({ ...prev, accuracy: acc, wrongChars: 0 }));
+          toast.success(`AI paper accuracy: ${acc.toFixed(1)}% (${data.wrongWords ?? 0} issues)`);
         });
+        return;
       }
+
+      setAnalyzing(true);
+      aiAnalyze(reference, typedRef.current).then(({ data, error }) => {
+        setAnalyzing(false);
+        if (error) {
+          toast.error(error.includes("429") ? "AI rate limit reached" : error.includes("402") ? "AI credits exhausted" : "AI analysis failed");
+          return;
+        }
+        setErrors(data?.errors || []);
+      });
     },
     [mode, recompute, reference, settings.aiAnalysis, studentName]
   );
@@ -200,6 +235,8 @@ export default function AdvancedLab() {
     setRunning(false);
     setPaused(false);
     setFinished(false);
+    setPaperAccuracy(null);
+    paperAccuracyRef.current = null;
     startRef.current = null;
     pausedMsRef.current = 0;
     pauseStartRef.current = null;
@@ -209,6 +246,7 @@ export default function AdvancedLab() {
     keystrokesRef.current = 0;
     editorRef.current?.focus();
   };
+
 
   const setPagesAndReset = (p: string[], name: string) => {
     setPages(p);
@@ -343,8 +381,10 @@ export default function AdvancedLab() {
       const total = settings.durationMin * 60;
       return Math.min(100, (stats.elapsed / total) * 100);
     }
+    if (paperMode) return Math.min(100, (typed.trim().split(/\s+/).filter(Boolean).length / 300) * 100);
     return reference ? Math.min(100, (typed.length / reference.length) * 100) : 0;
-  }, [settings, stats.elapsed, typed.length, reference]);
+  }, [settings, stats.elapsed, typed, reference, paperMode]);
+
 
   const timerLabel = settings.timerEnabled
     ? settings.timerMode === "countdown"
@@ -435,6 +475,26 @@ export default function AdvancedLab() {
               placeholder="Your name (for reports)"
               className="h-8 w-[190px]"
             />
+            <Button
+              size="sm"
+              variant={paperMode ? "default" : "outline"}
+              className="h-8"
+              onClick={() => setLayout((l) => ({ ...l, panel: l.panel === "hidden" ? "right" : "hidden" }))}
+              title="Hide the reference panel to type from a printed page — AI grades spelling & grammar"
+            >
+              <BookOpenCheck className="mr-1 h-3 w-3" />
+              {paperMode ? "Paper Mode ON" : "Paper Mode"}
+            </Button>
+            {paperMode && (
+              <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                {paperChecking
+                  ? "AI checking..."
+                  : paperAccuracy !== null
+                    ? `AI accuracy ${paperAccuracy.toFixed(1)}%`
+                    : "AI spell & grammar accuracy on finish"}
+              </span>
+            )}
+
             <div className="ml-auto flex flex-wrap gap-1">
               <Button size="sm" variant="outline" onClick={() => exportPdfReport(stats, errors, report, studentName || "Guest")}>
                 <FileDown className="mr-1 h-3 w-3" /> PDF

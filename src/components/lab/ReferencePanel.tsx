@@ -19,7 +19,10 @@ import {
   GripVertical,
   Loader2,
 } from "lucide-react";
-import { PARAGRAPH_CATEGORIES, randomParagraph } from "@/lib/lab/paragraphs";
+import { PARAGRAPH_CATEGORIES, buildParagraph } from "@/lib/lab/paragraphs";
+
+const LENGTH_OPTIONS = [50, 100, 150, 200, 300, 500, 750, 1000, 1500, 2000];
+
 import { importDocx, importImageOcr, importPdf, importTxt, splitPages } from "@/lib/lab/importers";
 import { aiGenerateParagraph } from "@/lib/lab/aiClient";
 import { toast } from "sonner";
@@ -50,6 +53,8 @@ export default function ReferencePanel({
   onDragStart,
 }: Props) {
   const [category, setCategory] = useState<string>("Medium");
+  const [length, setLength] = useState<number>(150);
+
   const [custom, setCustom] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
@@ -93,13 +98,14 @@ export default function ReferencePanel({
 
   const generateAi = async () => {
     setBusy("Generating with AI...");
-    const { data, error } = await aiGenerateParagraph(category, category === "Hindi" ? "Hindi" : "English", 150);
+    const { data, error } = await aiGenerateParagraph(category, category === "Hindi" ? "Hindi" : "English", length);
     setBusy(null);
     if (error || !data?.text) {
       toast.error(error?.includes("429") ? "AI rate limit — try again shortly" : error?.includes("402") ? "AI credits exhausted" : "AI generation failed");
       return;
     }
-    onSetPages(splitPages(data.text), "AI Generated");
+    onSetPages(splitPages(data.text), `AI Generated · ${length} words`);
+
   };
 
   return (
@@ -163,17 +169,31 @@ export default function ReferencePanel({
                   ))}
                 </SelectContent>
               </Select>
-              <Button
-                variant="outline"
-                onClick={() => onSetPages(splitPages(randomParagraph(category, pages)), `${category} paragraph`)}
-              >
-                <Shuffle className="mr-1 h-4 w-4" /> Random
-              </Button>
+              <Select value={String(length)} onValueChange={(v) => setLength(Number(v))}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="z-50 bg-popover">
+                  {LENGTH_OPTIONS.map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n} words
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => onSetPages(splitPages(buildParagraph(category, length, pages)), `${category} · ${length} words`)}
+            >
+              <Shuffle className="mr-1 h-4 w-4" /> Random paragraph
+            </Button>
             <Button className="w-full" onClick={generateAi} disabled={!!busy}>
-              <Sparkles className="mr-1 h-4 w-4" /> AI Generate ({category})
+              <Sparkles className="mr-1 h-4 w-4" /> AI Generate ({category}, {length}w)
             </Button>
           </div>
+
 
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase text-muted-foreground">Custom / paste text</label>
