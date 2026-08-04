@@ -381,8 +381,10 @@ export default function AdvancedLab() {
       const total = settings.durationMin * 60;
       return Math.min(100, (stats.elapsed / total) * 100);
     }
+    if (paperMode) return Math.min(100, (typed.trim().split(/\s+/).filter(Boolean).length / 300) * 100);
     return reference ? Math.min(100, (typed.length / reference.length) * 100) : 0;
-  }, [settings, stats.elapsed, typed.length, reference]);
+  }, [settings, stats.elapsed, typed, reference, paperMode]);
+
 
   const timerLabel = settings.timerEnabled
     ? settings.timerMode === "countdown"
