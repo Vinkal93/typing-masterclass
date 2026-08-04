@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { FileDown, FileSpreadsheet, Award, Printer, FlaskConical } from "lucide-react";
+import { FileDown, FileSpreadsheet, Award, Printer, FlaskConical, BookOpenCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import LabToolbar from "@/components/lab/LabToolbar";
