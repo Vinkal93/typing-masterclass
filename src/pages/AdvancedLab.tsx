@@ -90,7 +90,17 @@ export default function AdvancedLab() {
   const typedRef = useRef("");
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
 
+  // Paper mode: no on-screen reference — user types from a printed page, AI grades spelling/grammar.
+  const paperMode = layout.panel === "hidden";
+  const [paperAccuracy, setPaperAccuracy] = useState<number | null>(null);
+  const [paperChecking, setPaperChecking] = useState(false);
+  const paperModeRef = useRef(paperMode);
+  const paperAccuracyRef = useRef<number | null>(null);
+  paperModeRef.current = paperMode;
+  paperAccuracyRef.current = paperAccuracy;
+
   typedRef.current = typed;
+
 
   useEffect(() => saveSettings(settings), [settings]);
   useEffect(() => saveLayout(layout), [layout]);
