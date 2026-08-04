@@ -98,13 +98,14 @@ export default function ReferencePanel({
 
   const generateAi = async () => {
     setBusy("Generating with AI...");
-    const { data, error } = await aiGenerateParagraph(category, category === "Hindi" ? "Hindi" : "English", 150);
+    const { data, error } = await aiGenerateParagraph(category, category === "Hindi" ? "Hindi" : "English", length);
     setBusy(null);
     if (error || !data?.text) {
       toast.error(error?.includes("429") ? "AI rate limit — try again shortly" : error?.includes("402") ? "AI credits exhausted" : "AI generation failed");
       return;
     }
-    onSetPages(splitPages(data.text), "AI Generated");
+    onSetPages(splitPages(data.text), `AI Generated · ${length} words`);
+
   };
 
   return (
