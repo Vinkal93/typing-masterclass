@@ -129,8 +129,11 @@ export default function AdvancedLab() {
     const ca = charAccuracy(reference, typedRef.current);
     const cw = compareWords(reference, typedRef.current);
     const struct = countStructures(typedRef.current);
-    const wpm = minutes > 0 ? Math.round(cw.correctWords / minutes) : 0;
-    const cpm = minutes > 0 ? Math.round(ca.correct / minutes) : 0;
+    const paper = paperModeRef.current;
+    const paperAcc = paperAccuracyRef.current;
+    const typedWords = typedRef.current.trim().split(/\s+/).filter(Boolean).length;
+    const wpm = minutes > 0 ? Math.round((paper ? typedWords : cw.correctWords) / minutes) : 0;
+    const cpm = minutes > 0 ? Math.round((paper ? chars : ca.correct) / minutes) : 0;
     const total = settings.durationMin * 60;
     const wpmSamples = samples.map((s) => s.wpm).concat(wpm);
     return {
@@ -138,11 +141,11 @@ export default function AdvancedLab() {
       remaining: settings.timerMode === "countdown" ? Math.max(0, total - elapsed) : 0,
       wpm,
       cpm,
-      accuracy: ca.accuracy,
+      accuracy: paper ? (paperAcc ?? 100) : ca.accuracy,
       charsTyped: chars,
-      correctChars: ca.correct,
-      wrongChars: ca.wrong,
-      wordsTyped: cw.totalTypedWords,
+      correctChars: paper ? chars : ca.correct,
+      wrongChars: paper ? 0 : ca.wrong,
+      wordsTyped: paper ? typedWords : cw.totalTypedWords,
       sentences: struct.sentences,
       paragraphs: struct.paragraphs,
       backspaces: backspacesRef.current,
@@ -152,6 +155,7 @@ export default function AdvancedLab() {
       rhythm: rhythmFrom(intervalsRef.current),
     } as LiveStats;
   }, [reference, samples, settings.durationMin, settings.timerMode]);
+
 
   // Ticker
   useEffect(() => {
