@@ -53,6 +53,8 @@ export default function ReferencePanel({
   onDragStart,
 }: Props) {
   const [category, setCategory] = useState<string>("Medium");
+  const [length, setLength] = useState<number>(150);
+
   const [custom, setCustom] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
