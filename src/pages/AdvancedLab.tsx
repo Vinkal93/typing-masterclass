@@ -44,7 +44,7 @@ import {
   rhythmFrom,
   type LiveStats,
 } from "@/lib/lab/stats";
-import { aiAnalyze, aiCoach } from "@/lib/lab/aiClient";
+import { aiAnalyze, aiCoach, aiPaperCheck } from "@/lib/lab/aiClient";
 import { exportCertificate, exportCsv, exportExcel, exportPdfReport, printReport } from "@/lib/lab/exporters";
 import { saveSession } from "@/lib/lab/records";
 import { randomParagraph } from "@/lib/lab/paragraphs";
