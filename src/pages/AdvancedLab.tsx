@@ -189,17 +189,38 @@ export default function AdvancedLab() {
       saveSession(s, mode, studentName || "Guest");
       setSessionKey((k) => k + 1);
       toast.success(`Session complete — ${s.wpm} WPM at ${Math.round(s.accuracy)}% accuracy`);
-      if (settings.aiAnalysis && typedRef.current.trim().length > 30) {
+      if (!(settings.aiAnalysis && typedRef.current.trim().length > 30)) return;
+
+      if (paperModeRef.current) {
+        // No reference on screen — grade purely on spelling/grammar quality.
+        setPaperChecking(true);
         setAnalyzing(true);
-        aiAnalyze(reference, typedRef.current).then(({ data, error }) => {
+        aiPaperCheck(typedRef.current).then(({ data, error }) => {
+          setPaperChecking(false);
           setAnalyzing(false);
-          if (error) {
-            toast.error(error.includes("429") ? "AI rate limit reached" : error.includes("402") ? "AI credits exhausted" : "AI analysis failed");
+          if (error || !data) {
+            toast.error(error?.includes("429") ? "AI rate limit reached" : error?.includes("402") ? "AI credits exhausted" : "AI paper check failed");
             return;
           }
-          setErrors(data?.errors || []);
+          setErrors(data.errors || []);
+          const acc = Math.max(0, Math.min(100, Number(data.accuracy) || 0));
+          setPaperAccuracy(acc);
+          paperAccuracyRef.current = acc;
+          setStats((prev) => ({ ...prev, accuracy: acc, wrongChars: 0 }));
+          toast.success(`AI paper accuracy: ${acc.toFixed(1)}% (${data.wrongWords ?? 0} issues)`);
         });
+        return;
       }
+
+      setAnalyzing(true);
+      aiAnalyze(reference, typedRef.current).then(({ data, error }) => {
+        setAnalyzing(false);
+        if (error) {
+          toast.error(error.includes("429") ? "AI rate limit reached" : error.includes("402") ? "AI credits exhausted" : "AI analysis failed");
+          return;
+        }
+        setErrors(data?.errors || []);
+      });
     },
     [mode, recompute, reference, settings.aiAnalysis, studentName]
   );
@@ -214,6 +235,8 @@ export default function AdvancedLab() {
     setRunning(false);
     setPaused(false);
     setFinished(false);
+    setPaperAccuracy(null);
+    paperAccuracyRef.current = null;
     startRef.current = null;
     pausedMsRef.current = 0;
     pauseStartRef.current = null;
@@ -223,6 +246,7 @@ export default function AdvancedLab() {
     keystrokesRef.current = 0;
     editorRef.current?.focus();
   };
+
 
   const setPagesAndReset = (p: string[], name: string) => {
     setPages(p);
