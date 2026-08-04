@@ -163,17 +163,31 @@ export default function ReferencePanel({
                   ))}
                 </SelectContent>
               </Select>
-              <Button
-                variant="outline"
-                onClick={() => onSetPages(splitPages(randomParagraph(category, pages)), `${category} paragraph`)}
-              >
-                <Shuffle className="mr-1 h-4 w-4" /> Random
-              </Button>
+              <Select value={String(length)} onValueChange={(v) => setLength(Number(v))}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="z-50 bg-popover">
+                  {LENGTH_OPTIONS.map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n} words
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => onSetPages(splitPages(buildParagraph(category, length, pages)), `${category} · ${length} words`)}
+            >
+              <Shuffle className="mr-1 h-4 w-4" /> Random paragraph
+            </Button>
             <Button className="w-full" onClick={generateAi} disabled={!!busy}>
-              <Sparkles className="mr-1 h-4 w-4" /> AI Generate ({category})
+              <Sparkles className="mr-1 h-4 w-4" /> AI Generate ({category}, {length}w)
             </Button>
           </div>
+
 
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase text-muted-foreground">Custom / paste text</label>
