@@ -475,6 +475,26 @@ export default function AdvancedLab() {
               placeholder="Your name (for reports)"
               className="h-8 w-[190px]"
             />
+            <Button
+              size="sm"
+              variant={paperMode ? "default" : "outline"}
+              className="h-8"
+              onClick={() => setLayout((l) => ({ ...l, panel: l.panel === "hidden" ? "right" : "hidden" }))}
+              title="Hide the reference panel to type from a printed page — AI grades spelling & grammar"
+            >
+              <BookOpenCheck className="mr-1 h-3 w-3" />
+              {paperMode ? "Paper Mode ON" : "Paper Mode"}
+            </Button>
+            {paperMode && (
+              <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                {paperChecking
+                  ? "AI checking..."
+                  : paperAccuracy !== null
+                    ? `AI accuracy ${paperAccuracy.toFixed(1)}%`
+                    : "AI spell & grammar accuracy on finish"}
+              </span>
+            )}
+
             <div className="ml-auto flex flex-wrap gap-1">
               <Button size="sm" variant="outline" onClick={() => exportPdfReport(stats, errors, report, studentName || "Guest")}>
                 <FileDown className="mr-1 h-3 w-3" /> PDF
