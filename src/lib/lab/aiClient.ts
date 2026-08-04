@@ -20,3 +20,11 @@ export const aiAnalyze = (reference: string, typed: string) =>
 
 export const aiCoach = (stats: LiveStats, errors: LabError[], weakKeys: string[]) =>
   invoke<CoachReport>({ action: "coach", stats, errors, weakKeys });
+
+/** Paper mode: no reference text — AI judges spelling/grammar quality of what was typed. */
+export const aiPaperCheck = (typed: string) =>
+  invoke<{ accuracy: number; totalWords: number; wrongWords: number; errors: LabError[] }>({
+    action: "paper",
+    typed,
+  });
+
