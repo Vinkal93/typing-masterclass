@@ -12,8 +12,12 @@ async function invoke<T>(body: Record<string, unknown>): Promise<{ data?: T; err
   return { data: data as T };
 }
 
-export const aiGenerateParagraph = (category: string, language: string, words: number) =>
-  invoke<{ text: string }>({ action: "generate", category, language, words });
+export const aiGenerateParagraph = (
+  category: string,
+  language: string,
+  words: number,
+  style?: string
+) => invoke<{ text: string }>({ action: "generate", category, language, words, style, seed: Math.random().toString(36).slice(2, 8) });
 
 export const aiAnalyze = (reference: string, typed: string) =>
   invoke<{ errors: LabError[] }>({ action: "analyze", reference, typed });
@@ -22,9 +26,11 @@ export const aiCoach = (stats: LiveStats, errors: LabError[], weakKeys: string[]
   invoke<CoachReport>({ action: "coach", stats, errors, weakKeys });
 
 /** Paper mode: no reference text — AI judges spelling/grammar quality of what was typed. */
-export const aiPaperCheck = (typed: string) =>
-  invoke<{ accuracy: number; totalWords: number; wrongWords: number; errors: LabError[] }>({
-    action: "paper",
-    typed,
-  });
-
+export const aiPaperCheck = (typed: string, language = "English", wantCorrected = true) =>
+  invoke<{
+    accuracy: number;
+    totalWords: number;
+    wrongWords: number;
+    corrected?: string;
+    errors: LabError[];
+  }>({ action: "paper", typed, language, corrected: wantCorrected });
