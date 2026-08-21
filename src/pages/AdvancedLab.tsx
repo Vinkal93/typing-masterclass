@@ -238,6 +238,7 @@ export default function AdvancedLab() {
     setRunning(false);
     setPaused(false);
     setFinished(false);
+    setResultOpen(false);
     setPaperAccuracy(null);
     paperAccuracyRef.current = null;
     startRef.current = null;
