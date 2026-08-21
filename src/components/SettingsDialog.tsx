@@ -36,6 +36,8 @@ export function SettingsDialog() {
   const [highlightMode, setHighlightMode] = useState(() => localStorage.getItem('highlightMode') || 'off');
   const [stopOnError, setStopOnError] = useState(() => localStorage.getItem('stopOnError') === 'true');
   const [soundPack, setSoundPack] = useState<SoundPack>(() => soundManager.getPack());
+  const [fiveInOne, setFiveInOne] = useFiveInOne();
+
   
   const handleToggle = (key: string, value: boolean, setter: (v: boolean) => void) => {
     setter(value);
