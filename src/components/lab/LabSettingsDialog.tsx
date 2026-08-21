@@ -23,7 +23,9 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 );
 
 export default function LabSettingsDialog({ open, onOpenChange, settings, onChange, panel, onPanelChange }: Props) {
+  const [fiveInOne, setFiveInOne] = useFiveInOne();
   return (
+
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
