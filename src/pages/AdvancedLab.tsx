@@ -188,6 +188,7 @@ export default function AdvancedLab() {
       setStats(s);
       setRunning(false);
       setFinished(true);
+      setResultOpen(true);
       saveSession(s, mode, studentName || "Guest");
       setSessionKey((k) => k + 1);
       toast.success(`Session complete — ${s.wpm} WPM at ${Math.round(s.accuracy)}% accuracy`);
