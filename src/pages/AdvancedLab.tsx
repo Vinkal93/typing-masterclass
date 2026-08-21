@@ -607,7 +607,22 @@ export default function AdvancedLab() {
         onPanelChange={(p: PanelPosition) => setLayout((l) => ({ ...l, panel: p }))}
       />
 
+      <ResultDialog
+        open={resultOpen}
+        onOpenChange={setResultOpen}
+        stats={stats}
+        errors={errors}
+        keyMap={keyMap}
+        paperMode={paperMode}
+        analyzing={analyzing || paperChecking}
+        studentName={studentName}
+        mode={mode}
+        onExportPdf={() => exportPdfReport(stats, errors, report, studentName || "Guest")}
+        onCertificate={() => exportCertificate(stats, studentName || "Guest")}
+      />
+
       {!settings.focusMode && <Footer />}
+
     </div>
   );
 }
