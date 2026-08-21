@@ -5,6 +5,8 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FONT_OPTIONS, type LabSettings, type PanelPosition } from "@/lib/lab/settings";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useFiveInOne } from "@/lib/lab/wordCount";
+
 
 interface Props {
   open: boolean;
