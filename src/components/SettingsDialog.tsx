@@ -224,6 +224,18 @@ export function SettingsDialog() {
                   </div>
                   <Switch checked={stopOnError} onCheckedChange={(v) => handleToggle('stopOnError', v, setStopOnError)} />
                 </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{isHindi ? "5-इन-1 वर्ड काउंट" : "5-in-1 Word Count"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isHindi
+                        ? "परीक्षा शैली: 5 अक्षर = 1 शब्द, बचे अक्षर आगे जुड़ते हैं"
+                        : "Exam style: 5 characters = 1 word, remaining characters carried forward"}
+                    </p>
+                  </div>
+                  <Switch checked={fiveInOne} onCheckedChange={setFiveInOne} />
+                </div>
+
               </div>
             </div>
 
