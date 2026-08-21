@@ -18,6 +18,7 @@ import LabStatsPanel from "@/components/lab/LabStatsPanel";
 import ErrorPanel from "@/components/lab/ErrorPanel";
 import CoachPanel from "@/components/lab/CoachPanel";
 import TeacherPanel from "@/components/lab/TeacherPanel";
+import ResultDialog, { ResultBody } from "@/components/lab/ResultDialog";
 
 import {
   DEFAULT_LAYOUT,
@@ -77,6 +78,7 @@ export default function AdvancedLab() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [sessionKey, setSessionKey] = useState(0);
+  const [resultOpen, setResultOpen] = useState(false);
 
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const startRef = useRef<number | null>(null);
