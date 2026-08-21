@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import type { LiveStats } from "@/lib/lab/stats";
 import { keyStats } from "@/lib/lab/stats";
+import { fiveInOneWords, useFiveInOne } from "@/lib/lab/wordCount";
 
 interface Props {
   stats: LiveStats;
