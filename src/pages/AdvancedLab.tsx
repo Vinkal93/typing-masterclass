@@ -18,6 +18,7 @@ import LabStatsPanel from "@/components/lab/LabStatsPanel";
 import ErrorPanel from "@/components/lab/ErrorPanel";
 import CoachPanel from "@/components/lab/CoachPanel";
 import TeacherPanel from "@/components/lab/TeacherPanel";
+import ResultDialog, { ResultBody } from "@/components/lab/ResultDialog";
 
 import {
   DEFAULT_LAYOUT,
@@ -77,6 +78,7 @@ export default function AdvancedLab() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [sessionKey, setSessionKey] = useState(0);
+  const [resultOpen, setResultOpen] = useState(false);
 
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const startRef = useRef<number | null>(null);
@@ -186,6 +188,7 @@ export default function AdvancedLab() {
       setStats(s);
       setRunning(false);
       setFinished(true);
+      setResultOpen(true);
       saveSession(s, mode, studentName || "Guest");
       setSessionKey((k) => k + 1);
       toast.success(`Session complete — ${s.wpm} WPM at ${Math.round(s.accuracy)}% accuracy`);
@@ -235,6 +238,7 @@ export default function AdvancedLab() {
     setRunning(false);
     setPaused(false);
     setFinished(false);
+    setResultOpen(false);
     setPaperAccuracy(null);
     paperAccuracyRef.current = null;
     startRef.current = null;
@@ -550,7 +554,23 @@ export default function AdvancedLab() {
 
         {!settings.focusMode && (
           <section className="container mx-auto px-3 pb-10">
+            {finished && (
+              <Card className="mb-6 border-primary/30 p-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-base font-semibold">Session report</h3>
+                  <Button size="sm" variant="outline" onClick={() => setResultOpen(true)}>Open full report</Button>
+                </div>
+                <ResultBody
+                  stats={stats}
+                  errors={errors}
+                  keyMap={keyMap}
+                  paperMode={paperMode}
+                  analyzing={analyzing || paperChecking}
+                />
+              </Card>
+            )}
             <Tabs defaultValue="stats">
+
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="stats">Statistics</TabsTrigger>
                 <TabsTrigger value="errors">Errors</TabsTrigger>
@@ -587,7 +607,22 @@ export default function AdvancedLab() {
         onPanelChange={(p: PanelPosition) => setLayout((l) => ({ ...l, panel: p }))}
       />
 
+      <ResultDialog
+        open={resultOpen}
+        onOpenChange={setResultOpen}
+        stats={stats}
+        errors={errors}
+        keyMap={keyMap}
+        paperMode={paperMode}
+        analyzing={analyzing || paperChecking}
+        studentName={studentName}
+        mode={mode}
+        onExportPdf={() => exportPdfReport(stats, errors, report, studentName || "Guest")}
+        onCertificate={() => exportCertificate(stats, studentName || "Guest")}
+      />
+
       {!settings.focusMode && <Footer />}
+
     </div>
   );
 }

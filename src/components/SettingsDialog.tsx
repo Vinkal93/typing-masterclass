@@ -16,6 +16,8 @@ import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 import { soundManager, type SoundPack } from "@/lib/soundManager";
+import { useFiveInOne } from "@/lib/lab/wordCount";
+
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -36,6 +38,8 @@ export function SettingsDialog() {
   const [highlightMode, setHighlightMode] = useState(() => localStorage.getItem('highlightMode') || 'off');
   const [stopOnError, setStopOnError] = useState(() => localStorage.getItem('stopOnError') === 'true');
   const [soundPack, setSoundPack] = useState<SoundPack>(() => soundManager.getPack());
+  const [fiveInOne, setFiveInOne] = useFiveInOne();
+
   
   const handleToggle = (key: string, value: boolean, setter: (v: boolean) => void) => {
     setter(value);
@@ -224,6 +228,18 @@ export function SettingsDialog() {
                   </div>
                   <Switch checked={stopOnError} onCheckedChange={(v) => handleToggle('stopOnError', v, setStopOnError)} />
                 </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{isHindi ? "5-इन-1 वर्ड काउंट" : "5-in-1 Word Count"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isHindi
+                        ? "परीक्षा शैली: 5 अक्षर = 1 शब्द, बचे अक्षर आगे जुड़ते हैं"
+                        : "Exam style: 5 characters = 1 word, remaining characters carried forward"}
+                    </p>
+                  </div>
+                  <Switch checked={fiveInOne} onCheckedChange={setFiveInOne} />
+                </div>
+
               </div>
             </div>
 

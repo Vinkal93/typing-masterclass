@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import type { LiveStats } from "@/lib/lab/stats";
 import { keyStats } from "@/lib/lab/stats";
+import { fiveInOneWords, useFiveInOne } from "@/lib/lab/wordCount";
 
 interface Props {
   stats: LiveStats;
@@ -19,6 +20,8 @@ const Metric = ({ label, value }: { label: string; value: string | number }) => 
 );
 
 export default function LabStatsPanel({ stats, samples, keyMap }: Props) {
+  const [fiveInOne] = useFiveInOne();
+  const five = fiveInOneWords(stats.charsTyped);
   const { weak, strong } = keyStats(keyMap);
   const heat = (k: string) => {
     const v = keyMap[k];
@@ -50,6 +53,19 @@ export default function LabStatsPanel({ stats, samples, keyMap }: Props) {
         <Metric label="Consistency" value={`${stats.consistency}%`} />
         <Metric label="Rhythm" value={`${stats.rhythm}%`} />
       </div>
+
+      {fiveInOne && (
+        <Card className="p-3">
+          <h4 className="mb-2 text-sm font-semibold">Exam word count (5-in-1)</h4>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <Metric label="Words (5 chars = 1)" value={five.words} />
+            <Metric label="Remaining chars" value={five.remainder} />
+            <Metric label="Exam WPM" value={stats.elapsed > 0 ? Math.round(five.exact / (stats.elapsed / 60)) : 0} />
+          </div>
+        </Card>
+      )}
+
+
 
       <Card className="p-3">
         <h4 className="mb-2 text-sm font-semibold">Typing speed & mistake trend</h4>
