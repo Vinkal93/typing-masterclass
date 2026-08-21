@@ -134,6 +134,13 @@ export default function LabSettingsDialog({ open, onOpenChange, settings, onChan
             </div>
 
             <div className="py-2">
+              <Row label="5-in-1 Word Count (exam style)">
+                <Switch checked={fiveInOne} onCheckedChange={setFiveInOne} />
+              </Row>
+              <p className="pb-2 text-xs text-muted-foreground">
+                5 typed characters = 1 word, remaining characters carried forward (10 chars = 2 words, 13 chars = 2 words + 3 chars).
+                Normal word count stays unchanged when off.
+              </p>
               <Row label="Focus mode">
                 <Switch checked={settings.focusMode} onCheckedChange={(v) => onChange({ focusMode: v })} />
               </Row>
@@ -147,6 +154,7 @@ export default function LabSettingsDialog({ open, onOpenChange, settings, onChan
                 <Switch checked={settings.autoBackup} onCheckedChange={(v) => onChange({ autoBackup: v })} />
               </Row>
             </div>
+
           </div>
         </ScrollArea>
       </DialogContent>
