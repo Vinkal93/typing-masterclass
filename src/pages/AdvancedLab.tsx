@@ -554,7 +554,23 @@ export default function AdvancedLab() {
 
         {!settings.focusMode && (
           <section className="container mx-auto px-3 pb-10">
+            {finished && (
+              <Card className="mb-6 border-primary/30 p-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-base font-semibold">Session report</h3>
+                  <Button size="sm" variant="outline" onClick={() => setResultOpen(true)}>Open full report</Button>
+                </div>
+                <ResultBody
+                  stats={stats}
+                  errors={errors}
+                  keyMap={keyMap}
+                  paperMode={paperMode}
+                  analyzing={analyzing || paperChecking}
+                />
+              </Card>
+            )}
             <Tabs defaultValue="stats">
+
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="stats">Statistics</TabsTrigger>
                 <TabsTrigger value="errors">Errors</TabsTrigger>
