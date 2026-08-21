@@ -19,6 +19,8 @@ const Metric = ({ label, value }: { label: string; value: string | number }) => 
 );
 
 export default function LabStatsPanel({ stats, samples, keyMap }: Props) {
+  const [fiveInOne] = useFiveInOne();
+  const five = fiveInOneWords(stats.charsTyped);
   const { weak, strong } = keyStats(keyMap);
   const heat = (k: string) => {
     const v = keyMap[k];

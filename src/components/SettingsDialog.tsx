@@ -16,6 +16,8 @@ import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 import { soundManager, type SoundPack } from "@/lib/soundManager";
+import { useFiveInOne } from "@/lib/lab/wordCount";
+
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
