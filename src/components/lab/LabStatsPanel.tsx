@@ -54,6 +54,19 @@ export default function LabStatsPanel({ stats, samples, keyMap }: Props) {
         <Metric label="Rhythm" value={`${stats.rhythm}%`} />
       </div>
 
+      {fiveInOne && (
+        <Card className="p-3">
+          <h4 className="mb-2 text-sm font-semibold">Exam word count (5-in-1)</h4>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <Metric label="Words (5 chars = 1)" value={five.words} />
+            <Metric label="Remaining chars" value={five.remainder} />
+            <Metric label="Exam WPM" value={stats.elapsed > 0 ? Math.round(five.exact / (stats.elapsed / 60)) : 0} />
+          </div>
+        </Card>
+      )}
+
+
+
       <Card className="p-3">
         <h4 className="mb-2 text-sm font-semibold">Typing speed & mistake trend</h4>
         <div className="h-48">
