@@ -3,11 +3,13 @@ import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianG
 import type { LiveStats } from "@/lib/lab/stats";
 import { keyStats } from "@/lib/lab/stats";
 import { fiveInOneWords, useFiveInOne } from "@/lib/lab/wordCount";
+import type { EvaluationBreakdown } from "@/lib/lab/evaluation";
 
 interface Props {
   stats: LiveStats;
   samples: { t: number; wpm: number; errors: number }[];
   keyMap: Record<string, { hit: number; miss: number }>;
+  breakdown?: EvaluationBreakdown;
 }
 
 const ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
@@ -19,7 +21,7 @@ const Metric = ({ label, value }: { label: string; value: string | number }) => 
   </div>
 );
 
-export default function LabStatsPanel({ stats, samples, keyMap }: Props) {
+export default function LabStatsPanel({ stats, samples, keyMap, breakdown }: Props) {
   const [fiveInOne] = useFiveInOne();
   const five = fiveInOneWords(stats.charsTyped);
   const { weak, strong } = keyStats(keyMap);
@@ -53,6 +55,18 @@ export default function LabStatsPanel({ stats, samples, keyMap }: Props) {
         <Metric label="Consistency" value={`${stats.consistency}%`} />
         <Metric label="Rhythm" value={`${stats.rhythm}%`} />
       </div>
+
+      {breakdown && (
+        <Card className="p-3" aria-label="Live error breakdown">
+          <h4 className="mb-2 text-sm font-semibold">Word-level accuracy</h4>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <Metric label="Correct words" value={breakdown.correctWords} />
+            <Metric label="Spelling" value={breakdown.spellingErrors} />
+            <Metric label="Extra spaces" value={breakdown.extraSpaces} />
+            <Metric label="Missing chars" value={breakdown.missingCharacters} />
+          </div>
+        </Card>
+      )}
 
       {fiveInOne && (
         <Card className="p-3">

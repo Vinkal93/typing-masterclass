@@ -534,27 +534,27 @@ const KeyboardGuide = () => {
     : 0;
 
   const fingerColors: Record<string, string> = {
-    leftPinky: "bg-red-500",
-    leftRing: "bg-orange-500",
-    leftMiddle: "bg-yellow-400",
-    leftIndex: "bg-green-500",
-    rightIndex: "bg-blue-500",
-    rightMiddle: "bg-indigo-500",
-    rightRing: "bg-purple-500",
-    rightPinky: "bg-pink-400",
-    thumb: "bg-gray-400",
+    leftPinky: "bg-destructive/80",
+    leftRing: "bg-warning/80",
+    leftMiddle: "bg-accent",
+    leftIndex: "bg-success/80",
+    rightIndex: "bg-primary/80",
+    rightMiddle: "bg-secondary",
+    rightRing: "bg-primary/60",
+    rightPinky: "bg-destructive/60",
+    thumb: "bg-muted",
   };
 
   const fingerColorsBorder: Record<string, string> = {
-    leftPinky: "border-red-600",
-    leftRing: "border-orange-600",
-    leftMiddle: "border-yellow-500",
-    leftIndex: "border-green-600",
-    rightIndex: "border-blue-600",
-    rightMiddle: "border-indigo-600",
-    rightRing: "border-purple-600",
-    rightPinky: "border-pink-500",
-    thumb: "border-gray-500",
+    leftPinky: "border-destructive",
+    leftRing: "border-warning",
+    leftMiddle: "border-accent-foreground/40",
+    leftIndex: "border-success",
+    rightIndex: "border-primary",
+    rightMiddle: "border-secondary-foreground/40",
+    rightRing: "border-primary/70",
+    rightPinky: "border-destructive/70",
+    thumb: "border-muted-foreground/50",
   };
 
   // Keyboard layout with rows
@@ -650,7 +650,7 @@ const KeyboardGuide = () => {
     return (
       <div
         className={`${baseWidth} h-12 m-0.5 rounded border-2 ${fingerColors[keyData.finger]} ${fingerColorsBorder[keyData.finger]} 
-        flex items-center justify-center text-xs font-bold text-white shadow-md hover:scale-105 transition-transform cursor-pointer`}
+        flex items-center justify-center text-xs font-bold text-foreground shadow-md hover:scale-105 transition-transform cursor-pointer`}
         onMouseEnter={() =>
       setActiveKey(keyData.char)}
         onMouseLeave={() => setActiveKey("")}
@@ -767,14 +767,24 @@ const KeyboardGuide = () => {
                 </div>
 
                 {/* Keyboard Layout */}
-                <div ref={keyboardRef} className="bg-muted/30 p-6 rounded-xl border-2 border-border max-w-4xl mx-auto" style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined }}>
-                  {keyboardRows.map((row, rowIndex) => (
-                    <div key={rowIndex} className="flex justify-center mb-1">
-                      {row.map((keyData, keyIndex) => (
-                        <KeyCap key={`${rowIndex}-${keyIndex}`} keyData={keyData} showHindi={isHindi} layout={hindiKeyboardLayout} />
+                <div className="max-w-full overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <div ref={keyboardRef} className="mx-auto min-w-[900px] max-w-5xl rounded-lg border-2 border-border bg-muted/30 p-4" style={{ fontFamily: isHindi ? hindiKeyboardFont : undefined }} aria-label="Full desktop keyboard finger guide">
+                    <div className="mb-3 flex gap-1" aria-label="Function keys">
+                      {["Esc", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "PrtSc", "Home", "End"].map((key) => (
+                        <div key={key} className="flex h-8 min-w-10 flex-1 items-center justify-center rounded border border-border bg-card text-[10px] font-semibold text-muted-foreground shadow-sm">{key}</div>
                       ))}
                     </div>
-                  ))}
+                    {keyboardRows.map((row, rowIndex) => (
+                      <div key={rowIndex} className="flex justify-center mb-1">
+                        {row.map((keyData, keyIndex) => (
+                          <KeyCap key={`${rowIndex}-${keyIndex}`} keyData={keyData} showHindi={isHindi} layout={hindiKeyboardLayout} />
+                        ))}
+                      </div>
+                    ))}
+                    <div className="mt-2 flex justify-end gap-1" aria-label="Arrow keys">
+                      {["←", "↑", "↓", "→"].map((key) => <div key={key} className="flex h-9 w-12 items-center justify-center rounded border border-border bg-card text-sm font-bold shadow-sm">{key}</div>)}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Color Legend */}
