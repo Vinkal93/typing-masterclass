@@ -1,7 +1,8 @@
 import type { LabError } from "./settings";
 import { countSpacingErrors, emptyBreakdown, type TypingEvaluation } from "./evaluation";
 
-let checkerPromise: Promise<import("nspell").NSpell> | null = null;
+type SpellChecker = { correct: (word: string) => boolean; suggest: (word: string) => string[] };
+let checkerPromise: Promise<SpellChecker> | null = null;
 
 async function getChecker() {
   if (!checkerPromise) {

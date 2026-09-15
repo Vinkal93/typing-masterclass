@@ -38,6 +38,7 @@ interface Props {
   onClose: () => void;
   floating?: boolean;
   onDragStart?: (e: React.PointerEvent) => void;
+  typed?: string;
 }
 
 export default function ReferencePanel({
@@ -51,6 +52,7 @@ export default function ReferencePanel({
   onClose,
   floating,
   onDragStart,
+  typed = "",
 }: Props) {
   const [category, setCategory] = useState<string>("Medium");
   const [length, setLength] = useState<number>(150);
@@ -144,7 +146,14 @@ export default function ReferencePanel({
               className="whitespace-pre-wrap break-words leading-relaxed text-foreground/90"
               style={{ fontSize: `${zoom / 100}rem` }}
             >
-              {pages[pageIndex]}
+              {pages[pageIndex].split(/(\s+)/).map((part, index) => {
+                if (/^\s+$/.test(part)) return part;
+                const typedWords = typed.trim().split(/\s+/).filter(Boolean);
+                const wordIndex = pages[pageIndex].slice(0, pages[pageIndex].split(/(\s+)/).slice(0, index).join("").length).trim().split(/\s+/).filter(Boolean).length;
+                const entered = typedWords[wordIndex];
+                const state = entered == null ? "" : entered.toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu, "") === part.toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu, "") ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive underline decoration-destructive/50";
+                return <span key={index} className={state} aria-current={wordIndex === typedWords.length ? "true" : undefined}>{part}</span>;
+              })}
             </p>
           ) : (
             <p className="py-10 text-center text-sm text-muted-foreground">

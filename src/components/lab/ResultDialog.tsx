@@ -6,6 +6,7 @@ import type { LiveStats } from "@/lib/lab/stats";
 import { keyStats } from "@/lib/lab/stats";
 import type { LabError } from "@/lib/lab/settings";
 import { fiveInOneWords, useFiveInOne } from "@/lib/lab/wordCount";
+import type { EvaluationBreakdown } from "@/lib/lab/evaluation";
 
 interface Props {
   open: boolean;
@@ -19,6 +20,7 @@ interface Props {
   mode: string;
   onExportPdf: () => void;
   onCertificate: () => void;
+  breakdown?: EvaluationBreakdown;
 }
 
 const Stat = ({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) => (
@@ -28,7 +30,7 @@ const Stat = ({ label, value, accent }: { label: string; value: string | number;
   </div>
 );
 
-export function ResultBody({ stats, errors, keyMap, paperMode, analyzing }: Omit<Props, "open" | "onOpenChange" | "studentName" | "mode" | "onExportPdf" | "onCertificate">) {
+export function ResultBody({ stats, errors, keyMap, paperMode, analyzing, breakdown }: Omit<Props, "open" | "onOpenChange" | "studentName" | "mode" | "onExportPdf" | "onCertificate">) {
   const [fiveInOne] = useFiveInOne();
   const five = fiveInOneWords(stats.charsTyped);
   const { weak, strong } = keyStats(keyMap);
@@ -79,6 +81,21 @@ export function ResultBody({ stats, errors, keyMap, paperMode, analyzing }: Omit
         </p>
       </div>
 
+      {breakdown && (
+        <div className="rounded-lg border p-3" aria-label="Accuracy breakdown">
+          <p className="mb-2 text-sm font-semibold">Accuracy breakdown</p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <Stat label="Correct words" value={breakdown.correctWords} accent />
+            <Stat label="Spelling" value={breakdown.spellingErrors} />
+            <Stat label="Extra spaces" value={breakdown.extraSpaces} />
+            <Stat label="Missing chars" value={breakdown.missingCharacters} />
+            <Stat label="Extra chars" value={breakdown.extraCharacters} />
+            <Stat label="Missing words" value={breakdown.omittedWords} />
+            <Stat label="Extra words" value={breakdown.extraWords} />
+          </div>
+        </div>
+      )}
+
       <div className="rounded-lg border p-3">
         <p className="mb-1 text-sm font-semibold">Keyboard heatmap summary</p>
         <p className="text-xs text-destructive">
@@ -103,6 +120,7 @@ export function ResultBody({ stats, errors, keyMap, paperMode, analyzing }: Omit
                 <span className="font-semibold text-destructive">{e.word}</span>
                 {e.expected && <span className="text-muted-foreground"> → {e.expected}</span>}
                 {e.reason && <span className="block text-muted-foreground">{e.reason}</span>}
+                {e.suggestion && <span className="block text-success">Suggestion: {e.suggestion}</span>}
               </li>
             ))}
             {errors.length > 12 && <li className="text-muted-foreground">+ {errors.length - 12} more in the Errors tab below</li>}
