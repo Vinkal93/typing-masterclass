@@ -37,7 +37,6 @@ import {
 } from "@/lib/lab/settings";
 import {
   EMPTY_STATS,
-  charAccuracy,
   compareWords,
   consistencyFrom,
   countStructures,
@@ -163,7 +162,6 @@ export default function AdvancedLab() {
     const elapsed = start ? (now - start - pausedMsRef.current) / 1000 : 0;
     const minutes = elapsed / 60;
     const chars = typedRef.current.length;
-    const ca = charAccuracy(reference, typedRef.current);
     const cw = compareWords(reference, typedRef.current);
     const evaluation = evaluationRef.current;
     const struct = countStructures(typedRef.current);
