@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FONT_OPTIONS, type LabSettings, type PanelPosition } from "@/lib/lab/settings";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFiveInOne } from "@/lib/lab/wordCount";
+import { Textarea } from "@/components/ui/textarea";
 
 
 interface Props {
@@ -59,6 +60,24 @@ export default function LabSettingsDialog({ open, onOpenChange, settings, onChan
                   </SelectContent>
                 </Select>
               </Row>
+            </div>
+
+            <div className="py-2">
+              <Row label="Spelling suggestions">
+                <Switch checked={settings.spellingSuggestions} onCheckedChange={(v) => onChange({ spellingSuggestions: v })} />
+              </Row>
+              <div className="space-y-2 py-2">
+                <Label htmlFor="custom-dictionary" className="text-sm">Custom dictionary</Label>
+                <Textarea
+                  id="custom-dictionary"
+                  value={settings.customDictionary.join("\n")}
+                  onChange={(e) => onChange({ customDictionary: e.target.value.split(/[\n,]/).map((word) => word.trim()).filter(Boolean).slice(0, 500) })}
+                  placeholder="One valid name or technical term per line"
+                  className="min-h-24 resize-y"
+                  spellCheck={false}
+                />
+                <p className="text-xs text-muted-foreground">Names and technical words listed here count as correct.</p>
+              </div>
             </div>
 
             <div className="py-2">

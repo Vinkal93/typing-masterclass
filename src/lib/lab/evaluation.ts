@@ -29,8 +29,8 @@ const words = (text: string): Token[] =>
   }));
 
 export const countSpacingErrors = (text: string) => {
-  const duplicate = text.match(/ {2,}|\t+/g) || [];
-  return duplicate.reduce((total, run) => total + Math.max(1, run.length - 1), 0);
+  const duplicate: string[] = text.match(/ {2,}|\t+/g) ?? [];
+  return duplicate.reduce<number>((total, run) => total + Math.max(1, run.length - 1), 0);
 };
 
 function editDistance(a: string, b: string) {

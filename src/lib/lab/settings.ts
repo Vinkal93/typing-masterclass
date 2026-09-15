@@ -20,6 +20,8 @@ export interface LabSettings {
   autoSave: boolean;
   autoBackup: boolean;
   aiAnalysis: boolean;
+  spellingSuggestions: boolean;
+  customDictionary: string[];
 }
 
 export interface LabLayout {
@@ -68,6 +70,8 @@ export const DEFAULT_SETTINGS: LabSettings = {
   autoSave: true,
   autoBackup: true,
   aiAnalysis: true,
+  spellingSuggestions: true,
+  customDictionary: [],
 };
 
 export const DEFAULT_LAYOUT: LabLayout = {
