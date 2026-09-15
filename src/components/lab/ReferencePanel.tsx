@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -62,6 +62,9 @@ export default function ReferencePanel({
   const [progress, setProgress] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLInputElement>(null);
+  const referenceParts = useMemo(() => (pages[pageIndex] || "").split(/(\s+)/), [pages, pageIndex]);
+  const typedWords = useMemo(() => typed.trim().split(/\s+/).filter(Boolean), [typed]);
+  let renderedWordIndex = 0;
 
   const handleFile = async (file: File) => {
     const ext = file.name.split(".").pop()?.toLowerCase();
@@ -146,10 +149,9 @@ export default function ReferencePanel({
               className="whitespace-pre-wrap break-words leading-relaxed text-foreground/90"
               style={{ fontSize: `${zoom / 100}rem` }}
             >
-              {pages[pageIndex].split(/(\s+)/).map((part, index) => {
+              {referenceParts.map((part, index) => {
                 if (/^\s+$/.test(part)) return part;
-                const typedWords = typed.trim().split(/\s+/).filter(Boolean);
-                const wordIndex = pages[pageIndex].slice(0, pages[pageIndex].split(/(\s+)/).slice(0, index).join("").length).trim().split(/\s+/).filter(Boolean).length;
+                const wordIndex = renderedWordIndex++;
                 const entered = typedWords[wordIndex];
                 const state = entered == null ? "" : entered.toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu, "") === part.toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu, "") ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive underline decoration-destructive/50";
                 return <span key={index} className={state} aria-current={wordIndex === typedWords.length ? "true" : undefined}>{part}</span>;

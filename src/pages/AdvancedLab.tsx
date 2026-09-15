@@ -50,6 +50,8 @@ import { exportCertificate, exportCsv, exportExcel, exportPdfReport, printReport
 import { saveSession } from "@/lib/lab/records";
 import { randomParagraph } from "@/lib/lab/paragraphs";
 import { splitPages } from "@/lib/lab/importers";
+import { emptyBreakdown, evaluateReference, type EvaluationBreakdown, type TypingEvaluation } from "@/lib/lab/evaluation";
+import { evaluatePaperSpelling } from "@/lib/lab/spellCheck";
 
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
@@ -79,6 +81,7 @@ export default function AdvancedLab() {
   const [fullscreen, setFullscreen] = useState(false);
   const [sessionKey, setSessionKey] = useState(0);
   const [resultOpen, setResultOpen] = useState(false);
+  const [breakdown, setBreakdown] = useState<EvaluationBreakdown>(() => emptyBreakdown());
 
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const startRef = useRef<number | null>(null);
@@ -90,6 +93,7 @@ export default function AdvancedLab() {
   const backspacesRef = useRef(0);
   const keystrokesRef = useRef(0);
   const typedRef = useRef("");
+  const evaluationRef = useRef<TypingEvaluation>({ accuracy: 100, correctCharacters: 0, wrongCharacters: 0, errors: [], breakdown: emptyBreakdown() });
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
 
   // Paper mode: no on-screen reference — user types from a printed page, AI grades spelling/grammar.
@@ -107,6 +111,27 @@ export default function AdvancedLab() {
   useEffect(() => saveSettings(settings), [settings]);
   useEffect(() => saveLayout(layout), [layout]);
   useEffect(() => localStorage.setItem("lab.student", studentName), [studentName]);
+
+  // Word-level evaluation is debounced so long papers stay smooth while typing.
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      if (paperMode) {
+        evaluatePaperSpelling(typed, settings.customDictionary, settings.spellingSuggestions).then((evaluation) => {
+          evaluationRef.current = evaluation;
+          setBreakdown(evaluation.breakdown);
+          setErrors(evaluation.errors);
+          setPaperAccuracy(evaluation.accuracy);
+          paperAccuracyRef.current = evaluation.accuracy;
+        });
+      } else {
+        const evaluation = evaluateReference(reference, typed);
+        evaluationRef.current = evaluation;
+        setBreakdown(evaluation.breakdown);
+        setErrors(evaluation.errors);
+      }
+    }, paperMode ? 350 : 120);
+    return () => window.clearTimeout(id);
+  }, [paperMode, reference, settings.customDictionary, settings.spellingSuggestions, typed]);
 
   const patch = (p: Partial<LabSettings>) => setSettings((s) => ({ ...s, ...p }));
 
@@ -140,12 +165,13 @@ export default function AdvancedLab() {
     const chars = typedRef.current.length;
     const ca = charAccuracy(reference, typedRef.current);
     const cw = compareWords(reference, typedRef.current);
+    const evaluation = evaluationRef.current;
     const struct = countStructures(typedRef.current);
     const paper = paperModeRef.current;
     const paperAcc = paperAccuracyRef.current;
     const typedWords = typedRef.current.trim().split(/\s+/).filter(Boolean).length;
-    const wpm = minutes > 0 ? Math.round((paper ? typedWords : cw.correctWords) / minutes) : 0;
-    const cpm = minutes > 0 ? Math.round((paper ? chars : ca.correct) / minutes) : 0;
+    const wpm = minutes > 0 ? Math.round((paper ? evaluation.breakdown.correctWords : cw.correctWords) / minutes) : 0;
+    const cpm = minutes > 0 ? Math.round((paper ? evaluation.correctCharacters : ca.correct) / minutes) : 0;
     const total = settings.durationMin * 60;
     const wpmSamples = samples.map((s) => s.wpm).concat(wpm);
     return {
@@ -153,10 +179,10 @@ export default function AdvancedLab() {
       remaining: settings.timerMode === "countdown" ? Math.max(0, total - elapsed) : 0,
       wpm,
       cpm,
-      accuracy: paper ? (paperAcc ?? 100) : ca.accuracy,
+      accuracy: paper ? (paperAcc ?? evaluation.accuracy) : evaluation.accuracy,
       charsTyped: chars,
-      correctChars: paper ? chars : ca.correct,
-      wrongChars: paper ? 0 : ca.wrong,
+      correctChars: paper ? evaluation.correctCharacters : evaluation.correctCharacters,
+      wrongChars: paper ? evaluation.wrongCharacters : evaluation.wrongCharacters,
       wordsTyped: paper ? typedWords : cw.totalTypedWords,
       sentences: struct.sentences,
       paragraphs: struct.paragraphs,
@@ -205,8 +231,12 @@ export default function AdvancedLab() {
             toast.error(error?.includes("429") ? "AI rate limit reached" : error?.includes("402") ? "AI credits exhausted" : "AI paper check failed");
             return;
           }
-          setErrors(data.errors || []);
-          const acc = Math.max(0, Math.min(100, Number(data.accuracy) || 0));
+          const local = evaluationRef.current;
+          const aiErrors = data.errors || [];
+          const merged = [...local.errors, ...aiErrors.filter((item) => !local.errors.some((localItem) => localItem.word === item.word && localItem.type === item.type))];
+          setErrors(merged);
+          const aiAccuracy = Math.max(0, Math.min(100, Number(data.accuracy) || 0));
+          const acc = Math.round((local.accuracy * 0.7 + aiAccuracy * 0.3) * 10) / 10;
           setPaperAccuracy(acc);
           paperAccuracyRef.current = acc;
           setStats((prev) => ({ ...prev, accuracy: acc, wrongChars: 0 }));
@@ -240,6 +270,8 @@ export default function AdvancedLab() {
     setFinished(false);
     setResultOpen(false);
     setPaperAccuracy(null);
+    setBreakdown(emptyBreakdown());
+    evaluationRef.current = { accuracy: 100, correctCharacters: 0, wrongCharacters: 0, errors: [], breakdown: emptyBreakdown() };
     paperAccuracyRef.current = null;
     startRef.current = null;
     pausedMsRef.current = 0;
@@ -399,12 +431,13 @@ export default function AdvancedLab() {
   const startFloatDrag = (e: React.PointerEvent) => {
     dragRef.current = { dx: e.clientX - layout.floatPos.x, dy: e.clientY - layout.floatPos.y };
     const move = (ev: PointerEvent) => {
-      if (!dragRef.current) return;
+      const drag = dragRef.current;
+      if (!drag) return;
       setLayout((l) => ({
         ...l,
         floatPos: {
-          x: Math.max(0, Math.min(window.innerWidth - 320, ev.clientX - dragRef.current!.dx)),
-          y: Math.max(0, Math.min(window.innerHeight - 120, ev.clientY - dragRef.current!.dy)),
+          x: Math.max(0, Math.min(window.innerWidth - 320, ev.clientX - drag.dx)),
+          y: Math.max(0, Math.min(window.innerHeight - 120, ev.clientY - drag.dy)),
         },
       }));
     };
@@ -429,6 +462,7 @@ export default function AdvancedLab() {
       onClose={() => setLayout((l) => ({ ...l, panel: "hidden" }))}
       floating={layout.panel === "floating"}
       onDragStart={startFloatDrag}
+      typed={typed}
     />
   );
 
@@ -566,6 +600,7 @@ export default function AdvancedLab() {
                   keyMap={keyMap}
                   paperMode={paperMode}
                   analyzing={analyzing || paperChecking}
+                  breakdown={breakdown}
                 />
               </Card>
             )}
@@ -578,7 +613,7 @@ export default function AdvancedLab() {
                 <TabsTrigger value="teacher">Teacher</TabsTrigger>
               </TabsList>
               <TabsContent value="stats" className="mt-4">
-                <LabStatsPanel stats={stats} samples={samples} keyMap={keyMap} />
+                <LabStatsPanel stats={stats} samples={samples} keyMap={keyMap} breakdown={breakdown} />
               </TabsContent>
               <TabsContent value="errors" className="mt-4">
                 <ErrorPanel errors={errors} analyzing={analyzing} />
@@ -617,6 +652,7 @@ export default function AdvancedLab() {
         analyzing={analyzing || paperChecking}
         studentName={studentName}
         mode={mode}
+        breakdown={breakdown}
         onExportPdf={() => exportPdfReport(stats, errors, report, studentName || "Guest")}
         onCertificate={() => exportCertificate(stats, studentName || "Guest")}
       />
