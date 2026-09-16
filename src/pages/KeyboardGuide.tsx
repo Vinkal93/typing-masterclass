@@ -535,7 +535,7 @@ const KeyboardGuide = () => {
 
   const fingerColors: Record<string, string> = {
     leftPinky: "bg-destructive/80",
-    leftRing: "bg-warning/80",
+    leftRing: "bg-accent/80",
     leftMiddle: "bg-accent",
     leftIndex: "bg-success/80",
     rightIndex: "bg-primary/80",
@@ -547,7 +547,7 @@ const KeyboardGuide = () => {
 
   const fingerColorsBorder: Record<string, string> = {
     leftPinky: "border-destructive",
-    leftRing: "border-warning",
+    leftRing: "border-accent-foreground/50",
     leftMiddle: "border-accent-foreground/40",
     leftIndex: "border-success",
     rightIndex: "border-primary",
