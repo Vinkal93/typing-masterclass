@@ -5,8 +5,14 @@ import type { LiveStats } from "./stats";
 async function invoke<T>(body: Record<string, unknown>): Promise<{ data?: T; error?: string }> {
   const { data, error } = await supabase.functions.invoke("typing-lab-ai", { body });
   if (error) {
-    const msg = error.message || "AI request failed";
-    return { error: msg };
+    const status = (error as { context?: { status?: number } }).context?.status;
+    if (status === 402) {
+      return { error: "AI credits are exhausted. Please add credits to continue using AI checks." };
+    }
+    if (status === 429) {
+      return { error: "AI is busy right now. Please try again in a few moments." };
+    }
+    return { error: error.message || "AI request failed" };
   }
   if (data && (data as { error?: string }).error) return { error: (data as { error: string }).error };
   return { data: data as T };
