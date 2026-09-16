@@ -169,7 +169,7 @@ export default function AdvancedLab() {
     const paperAcc = paperAccuracyRef.current;
     const typedWords = typedRef.current.trim().split(/\s+/).filter(Boolean).length;
     const wpm = minutes > 0 ? Math.round((paper ? evaluation.breakdown.correctWords : cw.correctWords) / minutes) : 0;
-    const cpm = minutes > 0 ? Math.round((paper ? evaluation.correctCharacters : ca.correct) / minutes) : 0;
+    const cpm = minutes > 0 ? Math.round(evaluation.correctCharacters / minutes) : 0;
     const total = settings.durationMin * 60;
     const wpmSamples = samples.map((s) => s.wpm).concat(wpm);
     return {

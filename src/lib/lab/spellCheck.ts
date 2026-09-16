@@ -22,7 +22,7 @@ function shouldSkip(word: string, position: number, custom: Set<string>) {
     /\d/.test(word) ||
     /^(?:https?|www)\b/i.test(word) ||
     (/^[A-Z]{2,8}$/.test(word) && word.length > 1) ||
-    (position > 0 && /^\p{Lu}[\p{L}\p{M}'’-]+$/u.test(word)) ||
+    /^\p{Lu}[\p{L}\p{M}'’-]+$/u.test(word) ||
     word.length === 1
   );
 }
