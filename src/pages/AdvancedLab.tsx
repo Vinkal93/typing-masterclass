@@ -560,6 +560,7 @@ export default function AdvancedLab() {
               settings={settings}
               blind={mode === "Blind Typing"}
               disabled={finished}
+              issueCount={errors.length}
             />
           </div>
 
