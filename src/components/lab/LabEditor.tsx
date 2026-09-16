@@ -8,6 +8,7 @@ interface Props {
   settings: LabSettings;
   blind?: boolean;
   disabled?: boolean;
+  issueCount?: number;
 }
 
 const paperWidth: Record<string, string> = {
@@ -24,7 +25,7 @@ const caretClass: Record<string, string> = {
 };
 
 const LabEditor = forwardRef<HTMLTextAreaElement, Props>(
-  ({ value, onChange, onKeyDown, settings, blind, disabled }, ref) => {
+  ({ value, onChange, onKeyDown, settings, blind, disabled, issueCount = 0 }, ref) => {
     return (
       <div className="flex justify-center px-2 py-6 sm:px-6">
         <div
@@ -44,6 +45,8 @@ const LabEditor = forwardRef<HTMLTextAreaElement, Props>(
             data-gramm="false"
             data-gramm_editor="false"
             data-enable-grammarly="false"
+            aria-describedby="lab-live-spelling-status"
+            aria-invalid={issueCount > 0 || undefined}
             className={`lab-editor ${caretClass[settings.cursor]} w-full resize-none bg-transparent px-8 py-10 sm:px-14 sm:py-16 outline-none placeholder:text-muted-foreground/50 ${
               blind ? "text-transparent selection:bg-transparent" : ""
             }`}
@@ -55,6 +58,9 @@ const LabEditor = forwardRef<HTMLTextAreaElement, Props>(
               caretColor: settings.cursor === "block" ? "transparent" : undefined,
             }}
           />
+          <div id="lab-live-spelling-status" role="status" aria-live="polite" className="border-t border-border/60 px-8 py-2 text-xs text-muted-foreground sm:px-14">
+            {issueCount > 0 ? `${issueCount} possible spelling or spacing issue${issueCount === 1 ? "" : "s"}` : value ? "No spelling issues detected" : "Dictionary check is ready"}
+          </div>
         </div>
       </div>
     );

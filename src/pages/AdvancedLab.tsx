@@ -121,6 +121,7 @@ export default function AdvancedLab() {
           setErrors(evaluation.errors);
           setPaperAccuracy(evaluation.accuracy);
           paperAccuracyRef.current = evaluation.accuracy;
+          setStats((current) => running ? { ...current, accuracy: evaluation.accuracy, correctChars: evaluation.correctCharacters, wrongChars: evaluation.wrongCharacters } : current);
         });
       } else {
         const evaluation = evaluateReference(reference, typed);
@@ -168,8 +169,8 @@ export default function AdvancedLab() {
     const paper = paperModeRef.current;
     const paperAcc = paperAccuracyRef.current;
     const typedWords = typedRef.current.trim().split(/\s+/).filter(Boolean).length;
-    const wpm = minutes > 0 ? Math.round((paper ? evaluation.breakdown.correctWords : cw.correctWords) / minutes) : 0;
-    const cpm = minutes > 0 ? Math.round((paper ? evaluation.correctCharacters : ca.correct) / minutes) : 0;
+    const wpm = minutes > 0 ? Math.round((paper ? evaluation.correctCharacters / 5 : cw.correctWords) / minutes) : 0;
+    const cpm = minutes > 0 ? Math.round(evaluation.correctCharacters / minutes) : 0;
     const total = settings.durationMin * 60;
     const wpmSamples = samples.map((s) => s.wpm).concat(wpm);
     return {
@@ -559,6 +560,7 @@ export default function AdvancedLab() {
               settings={settings}
               blind={mode === "Blind Typing"}
               disabled={finished}
+              issueCount={errors.length}
             />
           </div>
 
