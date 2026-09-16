@@ -6,8 +6,12 @@ let checkerPromise: Promise<SpellChecker> | null = null;
 
 async function getChecker() {
   if (!checkerPromise) {
-    checkerPromise = Promise.all([import("nspell"), import("dictionary-en")]).then(([nspellModule, dictionaryModule]) =>
-      nspellModule.default(dictionaryModule.default)
+    checkerPromise = Promise.all([
+      import("nspell"),
+      import("dictionary-en/index.aff?raw"),
+      import("dictionary-en/index.dic?raw"),
+    ]).then(([nspellModule, aff, dic]) =>
+      nspellModule.default({ aff: aff.default, dic: dic.default })
     );
   }
   return checkerPromise;
