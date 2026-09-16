@@ -4,10 +4,28 @@ import { countSpacingErrors, emptyBreakdown, type TypingEvaluation } from "./eva
 type SpellChecker = { correct: (word: string) => boolean; suggest: (word: string) => string[] };
 let checkerPromise: Promise<SpellChecker> | null = null;
 
+type DictionaryLoader = () => Promise<{ aff: string; dic: string }>;
+
+const fetchDictionary: DictionaryLoader = async () => {
+  const [aff, dic] = await Promise.all([
+    fetch("/dictionaries/en.aff").then((r) => r.text()),
+    fetch("/dictionaries/en.dic").then((r) => r.text()),
+  ]);
+  return { aff, dic };
+};
+
+let dictionaryLoader: DictionaryLoader = fetchDictionary;
+
+/** Allows non-browser environments (tests) to supply the dictionary files. */
+export function setDictionaryLoader(loader: DictionaryLoader) {
+  dictionaryLoader = loader;
+  checkerPromise = null;
+}
+
 async function getChecker() {
   if (!checkerPromise) {
-    checkerPromise = Promise.all([import("nspell"), import("dictionary-en")]).then(([nspellModule, dictionaryModule]) =>
-      nspellModule.default(dictionaryModule.default)
+    checkerPromise = Promise.all([import("nspell"), dictionaryLoader()]).then(([nspellModule, dictionary]) =>
+      nspellModule.default(dictionary)
     );
   }
   return checkerPromise;

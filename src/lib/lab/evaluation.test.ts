@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { evaluateReference } from "./evaluation";
-import { evaluatePaperSpelling } from "./spellCheck";
+import { evaluatePaperSpelling, setDictionaryLoader } from "./spellCheck";
+import { readFile } from "node:fs/promises";
+
+setDictionaryLoader(async () => ({
+  aff: await readFile("node_modules/dictionary-en/index.aff", "utf8"),
+  dic: await readFile("node_modules/dictionary-en/index.dic", "utf8"),
+}));
 
 describe("word-level typing evaluation", () => {
   it("resynchronizes after one typo", () => {
