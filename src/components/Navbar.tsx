@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Keyboard, Sparkles } from "lucide-react";
+import { Keyboard, Languages, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Switch } from "@/components/ui/switch";
@@ -40,6 +40,12 @@ const Navbar = () => {
             className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:opacity-90 text-white border-0 hidden sm:inline-flex"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1" /> Pricing
+          </Button>
+          <Button asChild size="sm" variant="outline" aria-label="Learn Hindi Typing">
+            <a href="https://typingmaster10.vercel.app/" target="_blank" rel="noopener noreferrer" title="Learn Hindi Typing">
+              <Languages className="h-4 w-4" />
+              <span className="hidden sm:inline">Learn Hindi Typing</span>
+            </a>
           </Button>
           <StudentAuthDialog />
           <SettingsDialog />
